@@ -175,7 +175,7 @@ Antes de instalar y ejecutar Dorja, asegúrate de tener instalado:
 ### 1. Clonar el Repositorio
 
 ```bash
-git clone https://github.com/zara-te05/Dorja-MVC-2.git
+git clone https://github.com/DorjaTeam/Dorja.git
 cd Dorja-MVC-2
 ```
 
@@ -403,9 +403,9 @@ Este proyecto está bajo la Licencia MIT. Ver el archivo `LICENSE` para más det
 
 ## 👥 Autores
 
-*   **Equipo Dorja** - [@zara-te05](https://github.com/zara-te05)
-
-*   **Luis Castillo** - Desarrollador Full-Stack - https://github.com/LuisCastilloMartinez
+*   **Equipo Dorja**
+  
+*   **Luis Castillo** - Lider de Proyecto y Desarrollador Full-Stack - https://github.com/LuisCastilloMartinez
 *   **Diego Zarate** - Desarrollador Backend - https://github.com/zara-te05
 *   **Diana Reyes** - Desarrollador Frontend y Tester- https://github.com/dianareyeshdz10-gif
 *   **Manuel Andrade** - Desarrollador Backend - https://github.com/Manuelandrade27
@@ -423,7 +423,7 @@ Este proyecto está bajo la Licencia MIT. Ver el archivo `LICENSE` para más det
 
 Si tienes preguntas o necesitas ayuda:
 
-- Abre un [Issue](https://github.com/zara-te05/Dorja-MVC-2/issues) en GitHub
+- Abre un [Issue](https://github.com/DorjaTeam/Dorja/issues) en GitHub
 - Revisa la documentación en `QUICK_START.md` y `STARTUP_GUIDE.md`
 
 ---
