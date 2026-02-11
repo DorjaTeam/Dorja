@@ -1,6 +1,6 @@
 {
   "name": "dorja-desktop",
-  "version": "1.0.1",
+  "version": "1.0.0",
   "description": "Dorja Educational Platform Desktop Application",
   "main": "main.js",
   "scripts": {
@@ -23,7 +23,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/zara-te05/Dorja-MVC-2.git"
+    "url": "https://github.com/DorjaTeam/Dorja.git"
   },
   "build": {
     "appId": "com.dorja.app",
@@ -31,8 +31,8 @@
     "publish": [
       {
         "provider": "github",
-        "owner": "zara-te05",
-        "repo": "Dorja-MVC-2"
+        "owner": "DorjaTeam",
+        "repo": "Dorja"
       }
     ],
     "directories": {
