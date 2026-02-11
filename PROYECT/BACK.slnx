@@ -1,0 +1,6 @@
+<Solution>
+  <Project Path="BACK/BACK.csproj" />
+  <Project Path="Clases/DorjaModelado.csproj" />
+  <Project Path="FRONT/FRONT.csproj" />
+  <Project Path="ModelsData/DorjaData.csproj" />
+</Solution>

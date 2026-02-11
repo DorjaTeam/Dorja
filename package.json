@@ -1,0 +1,72 @@
+{
+  "name": "dorja-desktop",
+  "version": "1.0.1",
+  "description": "Dorja Educational Platform Desktop Application",
+  "main": "main.js",
+  "scripts": {
+    "start": "electron .",
+    "dev": "electron . --dev",
+    "build": "npm run build:backend && electron-builder",
+    "build:backend": "dotnet publish PROYECT/BACK/BACK.csproj -c Release -o backend-dist",
+    "publish": "npm run build:backend && electron-builder --publish always"
+  },
+  "keywords": [
+    "education",
+    "learning",
+    "desktop"
+  ],
+  "author": "",
+  "license": "MIT",
+  "devDependencies": {
+    "electron": "^28.3.3",
+    "electron-builder": "^24.9.1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/zara-te05/Dorja-MVC-2.git"
+  },
+  "build": {
+    "appId": "com.dorja.app",
+    "productName": "Dorja",
+    "publish": [
+      {
+        "provider": "github",
+        "owner": "zara-te05",
+        "repo": "Dorja-MVC-2"
+      }
+    ],
+    "directories": {
+      "output": "dist"
+    },
+    "files": [
+      "main.js",
+      "PROYECT/FRONT/wwwroot/**/*",
+      "PROYECT/FRONT/wwwroot/**/*"
+    ],
+    "extraResources": [
+      {
+        "from": "backend-dist",
+        "to": "backend",
+        "filter": [
+          "**/*"
+        ]
+      }
+    ],
+    "win": {
+      "target": "nsis",
+      "icon": "assets/icon.ico"
+    },
+    "mac": {
+      "target": "dmg",
+      "icon": "assets/icon.icns"
+    },
+    "linux": {
+      "target": "AppImage",
+      "icon": "assets/icon.png"
+    }
+  },
+  "dependencies": {
+    "electron-log": "^5.4.3",
+    "electron-updater": "^6.7.3"
+  }
+}

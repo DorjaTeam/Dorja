@@ -1,0 +1,109 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Asegurar que el html y body permitan scroll cuando sea necesario */
+html {
+  height: 100%;
+  overflow-y: auto !important;
+  overflow-x: hidden !important;
+}
+
+body {
+  position: relative;
+  min-height: 100%;
+  overflow-y: auto !important;
+  overflow-x: hidden !important;
+}
+
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  background: radial-gradient(600px circle at var(--mouse-x, 50%) var(--mouse-y, 50%),
+      rgba(93, 144, 238, 0.15),
+      transparent 30%);
+}
+
+body::after {
+  content: '';
+  position: fixed;
+  inset: -100px;
+  z-index: -2;
+  animation: drift-aurora 30s ease-in-out infinite;
+}
+
+/*MODO OSCURO*/
+.dark body::before {
+  background: radial-gradient(600px circle at var(--mouse-x, 50%) var(--mouse-y, 50%),
+      rgba(99, 101, 241, 0.13),
+      transparent 45%);
+}
+
+.dark body::after {
+  background: radial-gradient(1200px circle at 50% 50%,
+      rgba(169, 85, 247, 0.178),
+      transparent 40%);
+}
+
+
+@keyframes drift-aurora {
+  0% {
+    transform: translate(20%, -20%) rotate(0deg);
+  }
+
+  25% {
+    transform: translate(-20%, 20%) rotate(90deg);
+  }
+
+  50% {
+    transform: translate(20%, 20%) rotate(180deg);
+  }
+
+  75% {
+    transform: translate(-20%, -20%) rotate(270deg);
+  }
+
+  100% {
+    transform: translate(20%, -20%) rotate(360deg);
+  }
+}
+
+/* Scrollbars */
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(156, 163, 175, 0.5);
+  border-radius: 5px;
+  transition: background 0.3s ease;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(156, 163, 175, 0.8);
+}
+
+/* Modo oscuro - scrollbars */
+.dark ::-webkit-scrollbar-thumb {
+  background: rgba(71, 85, 105, 0.5);
+}
+
+.dark ::-webkit-scrollbar-thumb:hover {
+  background: rgba(71, 85, 105, 0.8);
+}
+
+* {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(156, 163, 175, 0.5) transparent;
+}
+
+.dark * {
+  scrollbar-color: rgba(71, 85, 105, 0.5) transparent;
+}

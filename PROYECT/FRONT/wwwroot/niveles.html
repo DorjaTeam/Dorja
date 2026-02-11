@@ -1,0 +1,3256 @@
+<!DOCTYPE html>
+<html lang="es" class="scroll-smooth">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Niveles - Dorja</title>
+    <link href="css/output.css" rel="stylesheet" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+    <style>
+        .tema-card:hover {
+            transform: translateY(-4px);
+        }
+
+        code {
+            white-space: pre-wrap;
+            word-wrap: break-word;
+        }
+
+        /* Roadmap Line Animations */
+        .roadmap-line {
+            background: linear-gradient(to bottom,
+                    rgba(99, 102, 241, 0.3),
+                    rgba(168, 85, 247, 0.4),
+                    rgba(236, 72, 153, 0.3),
+                    rgba(99, 102, 241, 0.3));
+            background-size: 100% 200%;
+            animation: gradient-flow 8s ease infinite;
+            box-shadow: 0 0 20px rgba(99, 102, 241, 0.3);
+        }
+
+        @keyframes gradient-flow {
+
+            0%,
+            100% {
+                background-position: 0% 0%;
+            }
+
+            50% {
+                background-position: 0% 100%;
+            }
+        }
+
+        /* Roadmap Node Animations */
+        .roadmap-node {
+            position: relative;
+            z-index: 10;
+        }
+
+        .roadmap-node::before {
+            content: '';
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            background: inherit;
+            opacity: 0.3;
+            animation: pulse-ring 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+        }
+
+        .roadmap-node::after {
+            content: '';
+            position: absolute;
+            width: 120%;
+            height: 120%;
+            border-radius: 50%;
+            border: 2px solid;
+            border-color: inherit;
+            opacity: 0.2;
+            animation: pulse-ring-out 3s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+            top: -10%;
+            left: -10%;
+        }
+
+        @keyframes pulse-ring {
+
+            0%,
+            100% {
+                transform: scale(1);
+                opacity: 0.3;
+            }
+
+            50% {
+                transform: scale(1.4);
+                opacity: 0;
+            }
+        }
+
+        @keyframes pulse-ring-out {
+
+            0%,
+            100% {
+                transform: scale(1);
+                opacity: 0.2;
+            }
+
+            50% {
+                transform: scale(1.5);
+                opacity: 0;
+            }
+        }
+
+        /* Level Card Animations */
+        .level-card {
+            opacity: 0;
+            transform: translateY(30px);
+            animation: fadeInUp 0.6s ease forwards;
+        }
+
+        .level-card:nth-child(1) {
+            animation-delay: 0.1s;
+        }
+
+        .level-card:nth-child(2) {
+            animation-delay: 0.2s;
+        }
+
+        .level-card:nth-child(3) {
+            animation-delay: 0.3s;
+        }
+
+        .level-card:nth-child(4) {
+            animation-delay: 0.4s;
+        }
+
+        .level-card:nth-child(5) {
+            animation-delay: 0.5s;
+        }
+
+        .level-card:nth-child(6) {
+            animation-delay: 0.6s;
+        }
+
+        @keyframes fadeInUp {
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* Glassmorphism Effect */
+        .glass-card {
+            background: rgba(255, 255, 255, 0.7);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+        }
+
+        .dark .glass-card {
+            background: rgba(15, 23, 42, 0.7);
+            border: 1px solid rgba(148, 163, 184, 0.2);
+        }
+
+        /* Progress Bar Animation */
+        .progress-bar {
+            position: relative;
+            overflow: hidden;
+        }
+
+        .progress-bar::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg,
+                    transparent,
+                    rgba(255, 255, 255, 0.3),
+                    transparent);
+            animation: shimmer 2s infinite;
+        }
+
+        @keyframes shimmer {
+            0% {
+                left: -100%;
+            }
+
+            100% {
+                left: 100%;
+            }
+        }
+
+        /* Hover Effects */
+        .level-card {
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .level-card:hover {
+            transform: translateY(-8px) scale(1.02);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
+        }
+
+        .dark .level-card:hover {
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
+        }
+
+        /* Active Level Glow */
+        .active-level {
+            box-shadow: 0 0 30px rgba(99, 102, 241, 0.4),
+                0 0 60px rgba(168, 85, 247, 0.2);
+        }
+
+        /* Completed Level Glow */
+        .completed-level {
+            box-shadow: 0 0 20px rgba(34, 197, 94, 0.3);
+        }
+
+        /* Scroll Reveal */
+        .reveal {
+            opacity: 0;
+            transform: translateY(50px);
+            transition: all 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .reveal.active {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        /* Theme Map Enhancements */
+        .theme-node {
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .theme-node:hover {
+            transform: scale(1.1) translateY(-5px);
+        }
+
+        /* Connection Line Animation */
+        .connection-line {
+            position: relative;
+            overflow: hidden;
+        }
+
+        .connection-line::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg,
+                    transparent,
+                    rgba(99, 102, 241, 0.5),
+                    transparent);
+            animation: flow 3s infinite;
+        }
+
+        @keyframes flow {
+            0% {
+                left: -100%;
+            }
+
+            100% {
+                left: 100%;
+            }
+        }
+
+        /* Floating Particles Background */
+        .particle {
+            position: fixed;
+            border-radius: 50%;
+            pointer-events: none;
+            opacity: 0.3;
+            animation: float 20s infinite ease-in-out;
+        }
+
+        @keyframes float {
+
+            0%,
+            100% {
+                transform: translateY(0) translateX(0) rotate(0deg);
+            }
+
+            25% {
+                transform: translateY(-100px) translateX(50px) rotate(90deg);
+            }
+
+            50% {
+                transform: translateY(-200px) translateX(-50px) rotate(180deg);
+            }
+
+            75% {
+                transform: translateY(-100px) translateX(100px) rotate(270deg);
+            }
+        }
+
+        /* Stats Panel */
+        .stats-panel {
+            background: linear-gradient(135deg, rgba(99, 102, 241, 0.1), rgba(168, 85, 247, 0.1));
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(99, 102, 241, 0.2);
+        }
+
+        .dark .stats-panel {
+            background: linear-gradient(135deg, rgba(99, 102, 241, 0.15), rgba(168, 85, 247, 0.15));
+            border: 1px solid rgba(99, 102, 241, 0.3);
+        }
+
+        /* Search and Filter */
+        .search-input {
+            transition: all 0.3s ease;
+        }
+
+        .search-input:focus {
+            transform: scale(1.02);
+            box-shadow: 0 0 20px rgba(99, 102, 241, 0.3);
+        }
+
+        /* Filter Buttons */
+        .filter-btn {
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .filter-btn.active {
+            transform: scale(1.05);
+            box-shadow: 0 4px 12px rgba(99, 102, 241, 0.4);
+        }
+
+        /* Quick View Modal */
+        .modal-overlay {
+            backdrop-filter: blur(4px);
+            animation: fadeIn 0.3s ease;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+            }
+
+            to {
+                opacity: 1;
+            }
+        }
+
+        .modal-content {
+            animation: slideUp 0.3s ease;
+        }
+
+        @keyframes slideUp {
+            from {
+                transform: translateY(50px);
+                opacity: 0;
+            }
+
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+        /* Scroll to Top Button */
+        .scroll-to-top {
+            position: fixed;
+            bottom: 2rem;
+            right: 2rem;
+            z-index: 50;
+            opacity: 0;
+            transform: translateY(20px);
+            transition: all 0.3s ease;
+        }
+
+        .scroll-to-top.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        /* Level Counter Badge */
+        .level-counter {
+            animation: bounce 2s infinite;
+        }
+
+        @keyframes bounce {
+
+            0%,
+            100% {
+                transform: translateY(0);
+            }
+
+            50% {
+                transform: translateY(-5px);
+            }
+        }
+
+        /* Progress Ring */
+        .progress-ring {
+            transform: rotate(-90deg);
+        }
+
+        .progress-ring-circle {
+            transition: stroke-dashoffset 0.5s ease;
+        }
+
+        /* Hover Card Effect */
+        .hover-lift {
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .hover-lift:hover {
+            transform: translateY(-8px) scale(1.02);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+        }
+
+        .dark .hover-lift:hover {
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+        }
+
+        /* Pulse Animation for Active Items */
+        .pulse-glow {
+            animation: pulse-glow 2s ease-in-out infinite;
+        }
+
+        @keyframes pulse-glow {
+
+            0%,
+            100% {
+                box-shadow: 0 0 20px rgba(99, 102, 241, 0.4);
+            }
+
+            50% {
+                box-shadow: 0 0 40px rgba(99, 102, 241, 0.8);
+            }
+        }
+    </style>
+</head>
+
+<body
+    class="bg-gray-50 dark:bg-slate-900 text-gray-800 dark:text-gray-200 font-sans transition-colors duration-300 antialiased overflow-y-auto scroll-smooth">
+    <!-- NAVBAR -->
+    <nav
+        class="bg-white/80 dark:bg-slate-900/80 backdrop-blur-sm border-b border-gray-200 dark:border-slate-700 shadow sticky top-0 z-40">
+        <div class="container mx-auto px-6 sm:px-8 lg:px-10 py-4 flex items-center justify-between gap-4 sm:gap-6">
+            <div class="flex items-center gap-3">
+                <a href="home.html" class="flex items-center gap-3">
+                    <div
+                        class="w-11 h-11 bg-gradient-to-br from-indigo-600 to-purple-600 rounded-lg flex items-center justify-center shadow-md hover:shadow-lg transition-all">
+                        <i class="fas fa-code text-white text-lg"></i>
+                    </div>
+                    <div>
+                        <h1 class="text-lg sm:text-2xl font-extrabold text-gray-900 dark:text-white leading-tight">Dorja
+                        </h1>
+                        <p class="text-xs text-gray-500 dark:text-gray-400">Aprende. Practica. Crece.</p>
+                    </div>
+                </a>
+            </div>
+
+            <div class="flex items-center gap-4">
+                <a href="home.html"
+                    class="hidden sm:flex items-center gap-2 text-indigo-600 dark:text-indigo-400 hover:text-indigo-700 dark:hover:text-indigo-300 transition-colors">
+                    <i class="fas fa-home"></i>
+                    <span>Inicio</span>
+                </a>
+                <div class="relative">
+                    <button id="user-menu-button"
+                        class="flex items-center gap-3 p-1 rounded-full hover:bg-gray-100 dark:hover:bg-slate-800 transition">
+                        <div class="h-9 w-9 rounded-full bg-indigo-500 flex items-center justify-center shadow-sm">
+                            <img id="profile-photo" src="" alt="Foto de perfil"
+                                class="w-full h-full rounded-full object-cover">
+                        </div>
+                        <div class="hidden sm:block text-left">
+                            <div id="username-display" class="font-medium text-sm text-gray-700 dark:text-gray-300">
+                                Cargando...</div>
+                            <div class="text-xs text-gray-400">Nivel <span id="user-level">-</span></div>
+                        </div>
+                        <i class="fas fa-chevron-down text-gray-400 hidden sm:block"></i>
+                    </button>
+
+                    <!-- MENU -->
+                    <div id="user-menu"
+                        class="hidden absolute right-0 mt-2 w-56 bg-white dark:bg-slate-800 rounded-xl shadow-lg z-30 border border-gray-200 dark:border-slate-700 overflow-hidden">
+                        <a href="profile.html"
+                            class="flex items-center gap-3 px-4 py-3 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-slate-700">
+                            <i class="fas fa-user text-gray-500 w-5"></i>
+                            Perfil
+                        </a>
+                        <a href="home.html"
+                            class="flex items-center gap-3 px-4 py-3 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-slate-700">
+                            <i class="fas fa-chart-line text-gray-500 w-5"></i>
+                            Mi Avance
+                        </a>
+                        <div class="border-t border-gray-100 dark:border-slate-700"></div>
+                        <button id="theme-toggle-btn"
+                            class="w-full flex items-center gap-3 px-4 py-3 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-slate-700">
+                            <i id="theme-icon" class="fas fa-moon text-gray-500 w-5"></i>
+                            <span id="theme-text">Modo Oscuro</span>
+                        </button>
+                        <div class="border-t border-gray-100 dark:border-slate-700"></div>
+                        <a href="#" id="logout-button"
+                            class="flex items-center gap-3 px-4 py-3 text-sm text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-500/10">
+                            <i class="fas fa-sign-out-alt w-5"></i>
+                            Cerrar Sesión
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <main class="container mx-auto mt-12 sm:mt-16 lg:mt-20 px-4 sm:px-6 lg:px-8 xl:px-12 pb-40 sm:pb-48 min-h-screen">
+        <!-- HEADER -->
+        <div class="mb-16 sm:mb-20 lg:mb-24 text-center">
+            <div class="inline-block mb-6 sm:mb-8 transform transition-all duration-300 hover:scale-110 hover:rotate-6">
+                <div
+                    class="bg-gradient-to-br from-indigo-500 via-purple-500 to-pink-500 rounded-2xl p-5 sm:p-6 w-18 h-18 sm:w-24 sm:h-24 mx-auto flex items-center justify-center shadow-2xl relative overflow-hidden">
+                    <div class="absolute inset-0 bg-white/20 animate-pulse"></div>
+                    <i class="fas fa-route text-white text-3xl sm:text-4xl relative z-10"></i>
+                    <div
+                        class="absolute -inset-1 bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 rounded-2xl blur opacity-50 animate-pulse">
+                    </div>
+                </div>
+            </div>
+            <h1
+                class="text-3xl sm:text-4xl lg:text-5xl xl:text-6xl font-extrabold bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 bg-clip-text text-transparent mb-4 sm:mb-6 px-4 leading-tight">
+                Roadmap de Niveles
+            </h1>
+            <p
+                class="text-sm sm:text-base lg:text-lg text-gray-600 dark:text-gray-400 max-w-2xl mx-auto px-4 leading-relaxed">
+                Explora tu camino de aprendizaje, descubre teoría y ejemplos interactivos
+            </p>
+            <div
+                class="mt-6 flex items-center justify-center gap-2 text-xs sm:text-sm text-gray-500 dark:text-gray-400">
+                <i class="fas fa-info-circle"></i>
+                <span>Navega por los niveles y completa tu ruta de aprendizaje</span>
+            </div>
+        </div>
+
+        <!-- STATS PANEL -->
+        <div id="stats-panel" class="mb-6 stats-panel rounded-2xl p-6 sm:p-8 shadow-lg">
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
+                <div
+                    class="bg-white/50 dark:bg-slate-800/50 rounded-xl p-4 sm:p-5 border border-indigo-200 dark:border-indigo-800 hover-lift">
+                    <div class="flex items-center justify-between mb-2">
+                        <div>
+                            <i class="fas fa-layer-group text-white text-lg"></i>
+                        </div>
+                        <span id="total-levels"
+                            class="text-2xl sm:text-3xl font-bold text-indigo-600 dark:text-indigo-400">-</span>
+                    </div>
+                    <p class="text-sm font-semibold text-gray-700 dark:text-gray-300">Niveles Totales</p>
+                    <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">En el roadmap</p>
+                </div>
+
+                <div
+                    class="bg-white/50 dark:bg-slate-800/50 rounded-xl p-4 sm:p-5 border border-green-200 dark:border-green-800 hover-lift">
+                    <div class="flex items-center justify-between mb-2">
+                        <div
+                            class="w-12 h-12 rounded-lg bg-gradient-to-br from-green-500 to-emerald-600 flex items-center justify-center">
+                            <i class="fas fa-check-circle text-white text-lg"></i>
+                        </div>
+                        <span id="completed-levels"
+                            class="text-2xl sm:text-3xl font-bold text-green-600 dark:text-green-400">-</span>
+                    </div>
+                    <p class="text-sm font-semibold text-gray-700 dark:text-gray-300">Completados</p>
+                    <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">Niveles finalizados</p>
+                </div>
+
+                <div
+                    class="bg-white/50 dark:bg-slate-800/50 rounded-xl p-4 sm:p-5 border border-yellow-200 dark:border-yellow-800 hover-lift">
+                    <div class="flex items-center justify-between mb-2">
+                        <div
+                            class="w-12 h-12 rounded-lg bg-gradient-to-br from-yellow-500 to-orange-600 flex items-center justify-center">
+                            <i class="fas fa-rocket text-white text-lg"></i>
+                        </div>
+                        <span id="current-level-num"
+                            class="text-2xl sm:text-3xl font-bold text-yellow-600 dark:text-yellow-400">-</span>
+                    </div>
+                    <p class="text-sm font-semibold text-gray-700 dark:text-gray-300">Nivel Actual</p>
+                    <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">En progreso</p>
+                </div>
+
+                <div
+                    class="bg-white/50 dark:bg-slate-800/50 rounded-xl p-4 sm:p-5 border border-blue-200 dark:border-blue-800 hover-lift">
+                    <div class="flex items-center justify-between mb-2">
+                        <div
+                            class="w-12 h-12 rounded-lg bg-gradient-to-br from-blue-500 to-cyan-600 flex items-center justify-center">
+                            <i class="fas fa-percentage text-white text-lg"></i>
+                        </div>
+                        <span id="overall-progress"
+                            class="text-2xl sm:text-3xl font-bold text-blue-600 dark:text-blue-400">-</span>
+                    </div>
+                    <p class="text-sm font-semibold text-gray-700 dark:text-gray-300">Progreso Total</p>
+                    <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">Del roadmap</p>
+                    <!-- Barra de progreso visual -->
+                    <div class="mt-3 w-full bg-gray-200 dark:bg-slate-700 rounded-full h-2 overflow-hidden">
+                        <div id="overall-progress-bar" class="bg-gradient-to-r from-blue-500 to-cyan-500 h-full rounded-full transition-all duration-500 ease-out" style="width: 0%"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- SEARCH AND FILTERS -->
+        <div class="mb-6 space-y-4">
+            <div class="flex flex-col sm:flex-row gap-4 items-center justify-between">
+                <!-- Search Bar -->
+                <div class="relative flex-1 w-full sm:max-w-md">
+                    <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                    </div>
+                    <input type="text" id="search-input" placeholder="Buscar niveles o temas..."
+                        class="search-input w-full pl-11 pr-4 py-3 rounded-xl border-2 border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-gray-900 dark:text-white focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 dark:focus:ring-indigo-800 outline-none transition-all" />
+                    <button id="clear-search"
+                        class="hidden absolute inset-y-0 right-0 pr-4 flex items-center text-gray-400 hover:text-gray-600 dark:hover:text-gray-300">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+
+                <!-- Filter Buttons -->
+                <div class="flex gap-2 sm:gap-3 flex-wrap justify-center">
+                    <button
+                        class="filter-btn active px-4 py-2 rounded-lg bg-indigo-600 text-white font-medium text-sm hover:bg-indigo-700 transition-all"
+                        data-filter="all">
+                        <i class="fas fa-list mr-2"></i>Todos
+                    </button>
+                    <button
+                        class="filter-btn px-4 py-2 rounded-lg bg-white dark:bg-slate-800 text-gray-700 dark:text-gray-300 border-2 border-gray-200 dark:border-slate-700 font-medium text-sm hover:bg-gray-50 dark:hover:bg-slate-700 transition-all"
+                        data-filter="current">
+                        En Curso
+                    </button>
+                    <button
+                        class="filter-btn px-4 py-2 rounded-lg bg-white dark:bg-slate-800 text-gray-700 dark:text-gray-300 border-2 border-gray-200 dark:border-slate-700 font-medium text-sm hover:bg-gray-50 dark:hover:bg-slate-700 transition-all"
+                        data-filter="completed">
+                        Completados
+                    </button>
+                    <button
+                        class="filter-btn px-4 py-2 rounded-lg bg-white dark:bg-slate-800 text-gray-700 dark:text-gray-300 border-2 border-gray-200 dark:border-slate-700 font-medium text-sm hover:bg-gray-50 dark:hover:bg-slate-700 transition-all"
+                        data-filter="locked">
+                        Bloqueados
+                    </button>
+                </div>
+            </div>
+
+            <!-- Quick Navigation -->
+            <div class="flex items-center justify-center gap-2 text-sm text-gray-600 dark:text-gray-400">
+                <i class="fas fa-bolt"></i>
+                <span>Navegación rápida:</span>
+                <button id="scroll-to-current"
+                    class="px-3 py-1 rounded-lg bg-indigo-100 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-400 font-medium hover:bg-indigo-200 dark:hover:bg-indigo-900/50 transition-all">
+                    <i class="fas fa-arrow-down mr-1"></i>Ir al nivel actual
+                </button>
+            </div>
+        </div>
+
+        <!-- ROADMAP -->
+        <div id="roadmap-container" class="space-y-16 sm:space-y-20 lg:space-y-24 xl:space-y-28">
+            <div class="flex items-center justify-center py-12">
+                <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600"></div>
+            </div>
+        </div>
+
+        <!-- Scroll to Top Button -->
+        <button id="scroll-to-top"
+            class="scroll-to-top w-12 h-12 rounded-full bg-gradient-to-br from-indigo-600 to-purple-600 text-white shadow-lg hover:shadow-xl flex items-center justify-center transition-all hover:scale-110">
+            <i class="fas fa-arrow-up"></i>
+        </button>
+    </main>
+
+    <!-- SCRIPTS -->
+    <script src="./api.js"></script>
+    <script src="./js/dropdown.js"></script>
+    <script src="./js/renderer.js"></script>
+    <script src="./js/profile.js"></script>
+    <script>
+        // Theme toggle
+        document.addEventListener('DOMContentLoaded', () => {
+            const themeToggleBtn = document.getElementById('theme-toggle-btn');
+            const themeIcon = document.getElementById('theme-icon');
+            const themeText = document.getElementById('theme-text');
+
+            const applyTheme = (isDark) => {
+                document.documentElement.classList.toggle('dark', isDark);
+                localStorage.setItem('theme', isDark ? 'dark' : 'light');
+                if (themeIcon && themeText) {
+                    if (isDark) {
+                        themeIcon.classList.remove('fa-moon');
+                        themeIcon.classList.add('fa-sun');
+                        themeText.textContent = 'Modo Claro';
+                    } else {
+                        themeIcon.classList.remove('fa-sun');
+                        themeIcon.classList.add('fa-moon');
+                        themeText.textContent = 'Modo Oscuro';
+                    }
+                }
+            };
+
+            const savedTheme = localStorage.getItem('theme');
+            // Por defecto, aplicar tema oscuro si no hay preferencia guardada
+            const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+            // Si no hay tema guardado, usar oscuro por defecto, sino usar el guardado
+            const shouldApplyDark = savedTheme ? savedTheme === 'dark' : true;
+            applyTheme(shouldApplyDark);
+
+            if (themeToggleBtn) {
+                themeToggleBtn.addEventListener('click', () => {
+                    applyTheme(!document.documentElement.classList.contains('dark'));
+                });
+            }
+
+            // Load roadmap
+            loadRoadmap().catch(error => {
+                console.error('Error crítico al cargar roadmap:', error);
+                // Intentar establecer valores mínimos incluso si falla
+                setTimeout(() => {
+                    updateStatsPanel([], 1, 0, null);
+                }, 1000);
+            });
+
+            // Verificación final después de que todo esté cargado
+            window.addEventListener('load', () => {
+                console.log('🌐 Página completamente cargada, verificando paneles...');
+                setTimeout(() => {
+                    const totalLevelsEl = document.getElementById('total-levels');
+                    const completedLevelsEl = document.getElementById('completed-levels');
+                    const currentLevelNumEl = document.getElementById('current-level-num');
+                    const overallProgressEl = document.getElementById('overall-progress');
+                    
+                    console.log('🔍 Estado final de los elementos del panel:', {
+                        totalLevels: totalLevelsEl ? {
+                            textContent: totalLevelsEl.textContent,
+                            visible: totalLevelsEl.offsetParent !== null,
+                            style: window.getComputedStyle(totalLevelsEl).display
+                        } : 'NO ENCONTRADO',
+                        completedLevels: completedLevelsEl ? {
+                            textContent: completedLevelsEl.textContent,
+                            visible: completedLevelsEl.offsetParent !== null,
+                            style: window.getComputedStyle(completedLevelsEl).display
+                        } : 'NO ENCONTRADO',
+                        currentLevel: currentLevelNumEl ? {
+                            textContent: currentLevelNumEl.textContent,
+                            visible: currentLevelNumEl.offsetParent !== null,
+                            style: window.getComputedStyle(currentLevelNumEl).display
+                        } : 'NO ENCONTRADO',
+                        overallProgress: overallProgressEl ? {
+                            textContent: overallProgressEl.textContent,
+                            visible: overallProgressEl.offsetParent !== null,
+                            style: window.getComputedStyle(overallProgressEl).display
+                        } : 'NO ENCONTRADO'
+                    });
+                }, 2000);
+            });
+
+            // Initialize search and filters
+            initializeSearchAndFilters();
+
+            // Initialize scroll to top button
+            initializeScrollToTop();
+
+            // Create floating particles
+            createFloatingParticles();
+        });
+
+        function createFloatingParticles() {
+            const particleCount = 20;
+            const colors = ['rgba(99, 102, 241, 0.3)', 'rgba(168, 85, 247, 0.3)', 'rgba(236, 72, 153, 0.3)'];
+
+            for (let i = 0; i < particleCount; i++) {
+                const particle = document.createElement('div');
+                particle.className = 'particle';
+                const size = Math.random() * 4 + 2;
+                particle.style.width = `${size}px`;
+                particle.style.height = `${size}px`;
+                particle.style.background = colors[Math.floor(Math.random() * colors.length)];
+                particle.style.left = `${Math.random() * 100}%`;
+                particle.style.top = `${Math.random() * 100}%`;
+                particle.style.animationDelay = `${Math.random() * 20}s`;
+                particle.style.animationDuration = `${15 + Math.random() * 10}s`;
+                document.body.appendChild(particle);
+            }
+        }
+
+        // Global variables for filtering
+        let allNivelesData = [];
+        let currentFilter = 'all';
+        let currentSearch = '';
+
+        function initializeSearchAndFilters() {
+            const searchInput = document.getElementById('search-input');
+            const clearSearch = document.getElementById('clear-search');
+            const filterButtons = document.querySelectorAll('.filter-btn');
+            const scrollToCurrentBtn = document.getElementById('scroll-to-current');
+
+            // Search functionality
+            if (searchInput) {
+                searchInput.addEventListener('input', (e) => {
+                    currentSearch = e.target.value.toLowerCase();
+                    if (currentSearch) {
+                        clearSearch?.classList.remove('hidden');
+                    } else {
+                        clearSearch?.classList.add('hidden');
+                    }
+                    filterRoadmap();
+                });
+            }
+
+            // Clear search
+            if (clearSearch) {
+                clearSearch.addEventListener('click', () => {
+                    searchInput.value = '';
+                    currentSearch = '';
+                    clearSearch.classList.add('hidden');
+                    filterRoadmap();
+                });
+            }
+
+            // Filter buttons
+            filterButtons.forEach(btn => {
+                btn.addEventListener('click', () => {
+                    filterButtons.forEach(b => {
+                        b.classList.remove('active', 'bg-indigo-600', 'text-white');
+                        b.classList.add('bg-white', 'dark:bg-slate-800', 'text-gray-700', 'dark:text-gray-300', 'border-2');
+                    });
+                    btn.classList.add('active', 'bg-indigo-600', 'text-white');
+                    btn.classList.remove('bg-white', 'dark:bg-slate-800', 'text-gray-700', 'dark:text-gray-300', 'border-2');
+                    currentFilter = btn.dataset.filter;
+                    filterRoadmap();
+                });
+            });
+
+            // Scroll to current level
+            if (scrollToCurrentBtn) {
+                scrollToCurrentBtn.addEventListener('click', () => {
+                    const currentLevelCard = document.querySelector('.active-level')?.closest('.reveal');
+                    if (currentLevelCard) {
+                        currentLevelCard.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                        // Highlight effect
+                        currentLevelCard.style.animation = 'pulse-glow 1s ease-in-out';
+                        setTimeout(() => {
+                            currentLevelCard.style.animation = '';
+                        }, 1000);
+                    }
+                });
+            }
+        }
+
+        function filterRoadmap() {
+            const container = document.getElementById('roadmap-container');
+            const levelCards = container.querySelectorAll('.reveal');
+
+            let visibleCount = 0;
+
+            levelCards.forEach(card => {
+                const levelText = card.textContent.toLowerCase();
+                const levelName = card.getAttribute('data-level-name') || '';
+                const status = card.getAttribute('data-status') || '';
+
+                let shouldShow = true;
+
+                // Apply search filter
+                if (currentSearch) {
+                    const searchLower = currentSearch.toLowerCase();
+                    if (!levelText.includes(searchLower) && !levelName.includes(searchLower)) {
+                        shouldShow = false;
+                    }
+                }
+
+                // Apply status filter
+                if (currentFilter === 'current' && status !== 'current') {
+                    shouldShow = false;
+                } else if (currentFilter === 'completed' && status !== 'completed') {
+                    shouldShow = false;
+                } else if (currentFilter === 'locked' && status !== 'locked') {
+                    shouldShow = false;
+                }
+
+                // Show/hide with animation
+                if (shouldShow) {
+                    visibleCount++;
+                    if (card.style.display === 'none') {
+                        card.style.display = '';
+                    }
+                    card.style.opacity = '0';
+                    card.style.transform = 'translateY(20px)';
+                    setTimeout(() => {
+                        card.style.transition = 'opacity 0.3s ease, transform 0.3s ease';
+                        card.style.opacity = '1';
+                        card.style.transform = 'translateY(0)';
+                    }, 10);
+                } else {
+                    card.style.transition = 'opacity 0.3s ease, transform 0.3s ease';
+                    card.style.opacity = '0';
+                    card.style.transform = 'translateY(-20px)';
+                    setTimeout(() => {
+                        card.style.display = 'none';
+                    }, 300);
+                }
+            });
+
+            // Show message if no results
+            const noResultsMsg = document.getElementById('no-results-message');
+            if (visibleCount === 0 && levelCards.length > 0) {
+                if (!noResultsMsg) {
+                    const msg = document.createElement('div');
+                    msg.id = 'no-results-message';
+                    msg.className = 'text-center py-12 px-4';
+                    msg.innerHTML = `
+                        <div class="inline-block p-6 bg-gray-100 dark:bg-slate-800 rounded-2xl">
+                            <i class="fas fa-search text-4xl text-gray-400 dark:text-gray-500 mb-4"></i>
+                            <p class="text-gray-600 dark:text-gray-400 font-medium">No se encontraron niveles</p>
+                            <p class="text-sm text-gray-500 dark:text-gray-500 mt-2">Intenta con otros términos de búsqueda o filtros</p>
+                        </div>
+                    `;
+                    container.appendChild(msg);
+                }
+            } else if (noResultsMsg) {
+                noResultsMsg.remove();
+            }
+        }
+
+        function initializeScrollToTop() {
+            const scrollBtn = document.getElementById('scroll-to-top');
+
+            window.addEventListener('scroll', () => {
+                if (window.scrollY > 300) {
+                    scrollBtn?.classList.add('visible');
+                } else {
+                    scrollBtn?.classList.remove('visible');
+                }
+            });
+
+            scrollBtn?.addEventListener('click', () => {
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            });
+        }
+
+        // Función para calcular progreso detallado
+        function calculateDetailedProgress(niveles, temas, allProblemas, userProgress, currentLevel) {
+            let totalProblemas = 0;
+            let problemasCompletados = 0;
+            let totalTemas = 0;
+            let temasCompletados = 0;
+            const temaProgress = {}; // Progreso por tema
+            const nivelProgress = {}; // Progreso por nivel
+
+            // Calcular progreso por tema y nivel
+            niveles.forEach(nivel => {
+                const nivelId = nivel.IdNiveles || nivel.id;
+                const nivelOrden = nivel.orden || nivel.IdNiveles || 0;
+                const nivelTemas = temas.filter(t =>
+                    t.IdNivel === nivelId ||
+                    t.IdNivel === nivel.IdNiveles ||
+                    t.IdNivel === nivel.id
+                );
+
+                let nivelProblemas = 0;
+                let nivelProblemasCompletados = 0;
+
+                nivelTemas.forEach(tema => {
+                    const temaId = tema.IdTemas || tema.id;
+                    // Mejorar el filtro para manejar diferentes formatos de IDs
+                    const temaProblemas = allProblemas.filter(p => {
+                        const probTemaId = p.TemaId || p.temaId || p.tema_id;
+                        // Normalizar a números para comparación más robusta
+                        const temaIdNum = temaId != null ? parseInt(temaId) : null;
+                        const probTemaIdNum = probTemaId != null ? parseInt(probTemaId) : null;
+                        
+                        // Comparar tanto como números como strings
+                        return (temaIdNum !== null && probTemaIdNum !== null && temaIdNum === probTemaIdNum) ||
+                               (probTemaId === temaId);
+                    });
+
+                    totalProblemas += temaProblemas.length;
+                    nivelProblemas += temaProblemas.length;
+                    totalTemas++;
+                    
+                    // Log de diagnóstico para el primer tema
+                    if (totalTemas === 1) {
+                        console.log('🔍 DEBUG FILTRADO DE PROBLEMAS POR TEMA:', {
+                            temaId,
+                            temaIdType: typeof temaId,
+                            temaNombre: tema.Titulo || tema.Titulo,
+                            problemasEncontrados: temaProblemas.length,
+                            problemasIds: temaProblemas.slice(0, 3).map(p => ({
+                                Id: p.Id || p.id,
+                                TemaId: p.TemaId,
+                                temaId: p.temaId,
+                                tema_id: p.tema_id
+                            })),
+                            totalProblemasEnBD: allProblemas.length,
+                            muestraProblemasBD: allProblemas.slice(0, 3).map(p => ({
+                                Id: p.Id || p.id,
+                                TemaId: p.TemaId,
+                                temaId: p.temaId,
+                                tema_id: p.tema_id
+                            }))
+                        });
+                    }
+
+                    // Problemas completados de este tema
+                    // MEJORAR COMPARACIÓN DE IDs - normalizar a números para evitar problemas de tipo
+                    const problemasCompletadosParaTema = userProgress.filter(p => {
+                        const problemaId = p.ProblemaId || p.problemaId || p.problema_id;
+                        const completado = p.Completado || p.completado;
+                        
+                        if (!completado) return false; // Solo considerar si está completado
+                        
+                        // Normalizar IDs a números para comparación
+                        const problemaIdNum = problemaId != null ? parseInt(problemaId) : null;
+                        if (problemaIdNum === null || isNaN(problemaIdNum)) return false;
+                        
+                        const encontrado = temaProblemas.some(prob => {
+                            const probId = prob.Id || prob.id || prob.IdProblema;
+                            if (probId == null) return false;
+                            
+                            // Normalizar ambos IDs
+                            const probIdNum = parseInt(probId);
+                            const problemaIdStr = problemaId.toString();
+                            const probIdStr = probId.toString();
+                            
+                            // Comparar de múltiples formas para asegurar coincidencia
+                            return (probIdNum === problemaIdNum) || 
+                                   (probIdStr === problemaIdStr) ||
+                                   (probId == problemaId) ||
+                                   (parseInt(probId) === parseInt(problemaId));
+                        });
+                        
+                        return encontrado;
+                    });
+                    
+                    const completados = problemasCompletadosParaTema.length;
+                    
+                    // Log detallado para TODOS los temas para diagnóstico completo
+                    if (temaProblemas.length > 0) {
+                        console.log(`🔍 DEBUG TEMA "${tema.Titulo || tema.Titulo}":`, {
+                            temaId,
+                            temaProblemasCount: temaProblemas.length,
+                            temaProblemasIds: temaProblemas.map(p => ({
+                                Id: p.Id,
+                                id: p.id,
+                                IdProblema: p.IdProblema,
+                                allKeys: Object.keys(p)
+                            })),
+                            userProgressCompletados: userProgress.filter(p => p.Completado || p.completado).map(p => ({
+                                ProblemaId: p.ProblemaId,
+                                problemaId: p.problemaId,
+                                problema_id: p.problema_id,
+                                Completado: p.Completado,
+                                completado: p.completado,
+                                allKeys: Object.keys(p)
+                            })),
+                            problemasCompletadosParaTema: problemasCompletadosParaTema.length,
+                            completados,
+                            matchesFound: problemasCompletadosParaTema.map(p => ({
+                                problemaId: p.ProblemaId || p.problemaId || p.problema_id,
+                                completado: p.Completado || p.completado
+                            }))
+                        });
+                    }
+
+                    // Asegurar que se sumen correctamente
+                    problemasCompletados += completados;
+                    nivelProblemasCompletados += completados;
+                    
+                    // Log para debug si hay problemas completados pero no se están sumando
+                    if (completados > 0) {
+                        console.log(`✅ TEMA "${tema.Titulo || tema.Titulo}": ${completados} problemas completados de ${temaProblemas.length} totales`);
+                    }
+
+                    // Calcular progreso del tema
+                    const temaProgressPercent = temaProblemas.length > 0
+                        ? Math.round((completados / temaProblemas.length) * 100)
+                        : 0;
+
+                    temaProgress[temaId] = {
+                        completados,
+                        total: temaProblemas.length,
+                        porcentaje: temaProgressPercent,
+                        completado: temaProgressPercent === 100 && temaProblemas.length > 0
+                    };
+
+                    // Si el tema está 100% completo, contar como tema completado
+                    if (temaProgressPercent === 100 && temaProblemas.length > 0) {
+                        temasCompletados++;
+                    }
+                });
+
+                // Calcular progreso del nivel
+                const nivelProgressPercent = nivelProblemas > 0
+                    ? Math.round((nivelProblemasCompletados / nivelProblemas) * 100)
+                    : 0;
+
+                nivelProgress[nivelId] = {
+                    completados: nivelProblemasCompletados,
+                    total: nivelProblemas,
+                    porcentaje: nivelProgressPercent,
+                    completado: nivelProgressPercent === 100 && nivelProblemas > 0,
+                    orden: nivelOrden
+                };
+            });
+
+            // Calcular progreso general
+            const problemasProgress = totalProblemas > 0
+                ? Math.round((problemasCompletados / totalProblemas) * 100)
+                : 0;
+
+            const temasProgress = totalTemas > 0
+                ? Math.round((temasCompletados / totalTemas) * 100)
+                : 0;
+
+            // Progreso general combinado (60% problemas, 40% temas)
+            const overallProgress = Math.round((problemasProgress * 0.6 + temasProgress * 0.4));
+
+            // Calcular niveles completados basados en progreso real
+            let nivelesCompletados = 0;
+            const nivelesCompletadosDetalle = [];
+            
+            Object.values(nivelProgress).forEach((nivel, index) => {
+                if (nivel.completado && nivel.total > 0) {
+                    nivelesCompletados++;
+                    nivelesCompletadosDetalle.push({
+                        nivelIndex: index,
+                        completados: nivel.completados,
+                        total: nivel.total,
+                        porcentaje: nivel.porcentaje
+                    });
+                }
+            });
+            
+            // Log para debug
+            if (nivelesCompletados === 0 && Object.keys(nivelProgress).length > 0) {
+                console.log('⚠️ ADVERTENCIA: No se encontraron niveles completados aunque hay progreso:', {
+                    nivelProgressKeys: Object.keys(nivelProgress),
+                    nivelProgressValues: Object.values(nivelProgress).map(n => ({
+                        completados: n.completados,
+                        total: n.total,
+                        porcentaje: n.porcentaje,
+                        completado: n.completado
+                    })),
+                    totalProblemasCompletados: problemasCompletados,
+                    totalProblemas: totalProblemas
+                });
+            } else if (nivelesCompletados > 0) {
+                console.log('✅ Niveles completados encontrados:', nivelesCompletados, nivelesCompletadosDetalle);
+            }
+
+            // Asegurar que todos los valores sean números válidos
+            const result = {
+                totalProblemas: totalProblemas || 0,
+                problemasCompletados: problemasCompletados || 0,
+                problemasProgress: problemasProgress || 0,
+                totalTemas: totalTemas || 0,
+                temasCompletados: temasCompletados || 0,
+                temasProgress: temasProgress || 0,
+                overallProgress: overallProgress || 0,
+                temaProgress,
+                nivelProgress,
+                nivelesCompletados: nivelesCompletados || 0
+            };
+
+            console.log('📊 Resultado del cálculo de progreso:', result);
+            
+            // ADVERTENCIA si hay problemas pero no se contaron
+            if (userProgress.length > 0 && problemasCompletados === 0) {
+                console.warn('⚠️ ADVERTENCIA: Hay progreso del usuario pero problemasCompletados es 0', {
+                    userProgressLength: userProgress.length,
+                    userProgressCompletados: userProgress.filter(p => p.Completado || p.completado).length,
+                    totalProblemas,
+                    problemasCompletados,
+                    nivelProgressSummary: Object.values(nivelProgress).map(n => ({
+                        completados: n.completados,
+                        total: n.total,
+                        porcentaje: n.porcentaje
+                    }))
+                });
+            }
+            
+            return result;
+        }
+
+        // Función para animar el cambio de un número
+        function animateNumber(element, newValue, duration = 500) {
+            if (!element) return;
+
+            const isPercentage = typeof newValue === 'string' && newValue.includes('%');
+            const targetValue = isPercentage ? parseInt(newValue) : parseInt(newValue);
+            const currentText = element.textContent.trim();
+            
+            // Manejar caso inicial cuando el texto es "-"
+            const startValue = (currentText === '-' || currentText === '') ? 0 : (parseInt(currentText) || 0);
+            
+            const increment = targetValue > startValue ? 1 : -1;
+            const steps = Math.abs(targetValue - startValue);
+            const stepDuration = Math.max(10, duration / Math.max(steps, 1));
+
+            if (steps === 0) {
+                element.textContent = isPercentage ? `${targetValue}%` : targetValue;
+                return;
+            }
+
+            let currentStep = 0;
+            const timer = setInterval(() => {
+                currentStep++;
+                const newVal = Math.round(startValue + (increment * currentStep));
+                
+                if ((increment > 0 && newVal >= targetValue) || (increment < 0 && newVal <= targetValue)) {
+                    element.textContent = isPercentage ? `${targetValue}%` : targetValue;
+                    clearInterval(timer);
+                    // Efecto de pulso al finalizar
+                    element.style.transform = 'scale(1.2)';
+                    element.style.transition = 'transform 0.3s ease';
+                    setTimeout(() => {
+                        element.style.transform = 'scale(1)';
+                    }, 300);
+                } else {
+                    element.textContent = isPercentage ? `${newVal}%` : newVal;
+                }
+            }, stepDuration);
+        }
+
+        function updateStatsPanel(niveles, currentLevel, totalPoints, progressData = null) {
+            console.log('🔄 ACTUALIZANDO PANELES DE ESTADÍSTICAS...', { 
+                nivelesCount: niveles?.length || 0, 
+                currentLevel, 
+                totalPoints,
+                hasProgressData: !!progressData,
+                nivelesCompletados: progressData?.nivelesCompletados,
+                overallProgress: progressData?.overallProgress
+            });
+            
+            // Obtener elementos PRIMERO, antes de cualquier validación
+            const totalLevelsEl = document.getElementById('total-levels');
+            const completedLevelsEl = document.getElementById('completed-levels');
+            const currentLevelNumEl = document.getElementById('current-level-num');
+            const overallProgressEl = document.getElementById('overall-progress');
+
+            // Verificar que los elementos existen
+            if (!totalLevelsEl || !completedLevelsEl || !currentLevelNumEl || !overallProgressEl) {
+                console.error('❌ ERROR CRÍTICO: No se encontraron todos los elementos del panel:', {
+                    totalLevelsEl: !!totalLevelsEl,
+                    completedLevelsEl: !!completedLevelsEl,
+                    currentLevelNumEl: !!currentLevelNumEl,
+                    overallProgressEl: !!overallProgressEl
+                });
+                // Intentar buscar los elementos de nuevo después de un breve delay
+                setTimeout(() => {
+                    console.log('🔄 Reintentando buscar elementos...');
+                    updateStatsPanel(niveles, currentLevel, totalPoints, progressData);
+                }, 500);
+                return;
+            }
+
+            // Calcular valores
+            const totalLevels = Array.isArray(niveles) ? niveles.length : 0;
+            
+            let completedLevels = 0;
+            let overallProgress = 0;
+
+            if (progressData && typeof progressData.nivelesCompletados === 'number') {
+                completedLevels = progressData.nivelesCompletados;
+                overallProgress = progressData.overallProgress || 0;
+                
+                // LOG PARA DEBUG
+                console.log('📊 Valores de progressData:', {
+                    nivelesCompletados: progressData.nivelesCompletados,
+                    overallProgress: progressData.overallProgress,
+                    problemasCompletados: progressData.problemasCompletados,
+                    totalProblemas: progressData.totalProblemas
+                });
+            } else {
+                // Fallback: usar nivel actual - 1 como aproximación
+                completedLevels = Math.max(0, (currentLevel || 1) - 1);
+                overallProgress = totalLevels > 0 ? Math.round((completedLevels / totalLevels) * 100) : 0;
+                console.warn('⚠️ No hay progressData, usando valores por defecto');
+            }
+
+            console.log('📊 Valores calculados:', {
+                totalLevels,
+                completedLevels,
+                currentLevel: currentLevel || 1,
+                overallProgress
+            });
+
+            // ACTUALIZAR VALORES DIRECTAMENTE - FORZAR ACTUALIZACIÓN VISUAL
+            console.log('🔄 ACTUALIZANDO TODOS LOS ELEMENTOS DEL PANEL...', {
+                totalLevels,
+                completedLevels,
+                currentLevel: currentLevel || 1,
+                overallProgress,
+                elementosEncontrados: {
+                    totalLevelsEl: !!totalLevelsEl,
+                    completedLevelsEl: !!completedLevelsEl,
+                    currentLevelNumEl: !!currentLevelNumEl,
+                    overallProgressEl: !!overallProgressEl
+                },
+                valoresActuales: {
+                    totalLevels: totalLevelsEl?.textContent,
+                    completedLevels: completedLevelsEl?.textContent,
+                    currentLevel: currentLevelNumEl?.textContent,
+                    overallProgress: overallProgressEl?.textContent
+                }
+            });
+            
+            // Total de niveles - ACTUALIZACIÓN ULTRA DIRECTA
+            if (totalLevelsEl) {
+                const valor = totalLevels.toString();
+                // Limpiar completamente el contenido
+                totalLevelsEl.innerHTML = '';
+                // Establecer nuevo valor usando createTextNode para evitar problemas
+                const textNode = document.createTextNode(valor);
+                totalLevelsEl.appendChild(textNode);
+                // También establecer textContent e innerText como respaldo
+                totalLevelsEl.textContent = valor;
+                totalLevelsEl.innerText = valor;
+                // Forzar estilos inline para asegurar visibilidad
+                // NO usar color: inherit porque puede hacer el texto invisible
+                // En su lugar, mantener los colores de Tailwind pero forzar visibilidad
+                const isDark = document.documentElement.classList.contains('dark');
+                const colorClass = isDark ? 'rgb(129, 140, 248)' : 'rgb(79, 70, 229)'; // indigo-400 o indigo-600
+                totalLevelsEl.style.cssText = `display: block !important; visibility: visible !important; opacity: 1 !important; color: ${colorClass} !important;`;
+                // Forzar reflow
+                void totalLevelsEl.offsetHeight;
+                const computedTotal = window.getComputedStyle(totalLevelsEl);
+                console.log(`✅ Total Niveles actualizado a: ${totalLevels}`, {
+                    textContent: totalLevelsEl.textContent,
+                    innerHTML: totalLevelsEl.innerHTML,
+                    innerText: totalLevelsEl.innerText,
+                    visible: totalLevelsEl.offsetParent !== null,
+                    computedDisplay: computedTotal.display,
+                    computedVisibility: computedTotal.visibility,
+                    computedOpacity: computedTotal.opacity,
+                    computedColor: computedTotal.color,
+                    computedBackgroundColor: computedTotal.backgroundColor,
+                    rect: totalLevelsEl.getBoundingClientRect()
+                });
+            } else {
+                console.error('❌ totalLevelsEl es null!');
+            }
+
+            // Niveles completados - ACTUALIZACIÓN ULTRA DIRECTA
+            if (completedLevelsEl) {
+                const valor = completedLevels.toString();
+                // Limpiar completamente el contenido
+                completedLevelsEl.innerHTML = '';
+                // Establecer nuevo valor usando createTextNode
+                const textNode = document.createTextNode(valor);
+                completedLevelsEl.appendChild(textNode);
+                // También establecer textContent e innerText como respaldo
+                completedLevelsEl.textContent = valor;
+                completedLevelsEl.innerText = valor;
+                // Forzar estilos inline para asegurar visibilidad
+                const isDark2 = document.documentElement.classList.contains('dark');
+                const colorClass2 = isDark2 ? 'rgb(74, 222, 128)' : 'rgb(22, 163, 74)'; // green-400 o green-600
+                completedLevelsEl.style.cssText = `display: block !important; visibility: visible !important; opacity: 1 !important; color: ${colorClass2} !important;`;
+                // Forzar reflow
+                void completedLevelsEl.offsetHeight;
+                const computedCompleted = window.getComputedStyle(completedLevelsEl);
+                console.log(`✅ Niveles Completados actualizado a: ${completedLevels}`, {
+                    textContent: completedLevelsEl.textContent,
+                    innerHTML: completedLevelsEl.innerHTML,
+                    innerText: completedLevelsEl.innerText,
+                    visible: completedLevelsEl.offsetParent !== null,
+                    computedDisplay: computedCompleted.display,
+                    computedVisibility: computedCompleted.visibility,
+                    computedOpacity: computedCompleted.opacity,
+                    computedColor: computedCompleted.color,
+                    computedBackgroundColor: computedCompleted.backgroundColor,
+                    rect: completedLevelsEl.getBoundingClientRect()
+                });
+            } else {
+                console.error('❌ completedLevelsEl es null!');
+            }
+
+            // Nivel actual - ACTUALIZACIÓN ULTRA DIRECTA
+            if (currentLevelNumEl) {
+                const levelValue = currentLevel || 1;
+                const valor = levelValue.toString();
+                // Limpiar completamente el contenido
+                currentLevelNumEl.innerHTML = '';
+                // Establecer nuevo valor usando createTextNode
+                const textNode = document.createTextNode(valor);
+                currentLevelNumEl.appendChild(textNode);
+                // También establecer textContent e innerText como respaldo
+                currentLevelNumEl.textContent = valor;
+                currentLevelNumEl.innerText = valor;
+                // Forzar estilos inline para asegurar visibilidad
+                const isDark3 = document.documentElement.classList.contains('dark');
+                const colorClass3 = isDark3 ? 'rgb(250, 204, 21)' : 'rgb(202, 138, 4)'; // yellow-400 o yellow-600
+                currentLevelNumEl.style.cssText = `display: block !important; visibility: visible !important; opacity: 1 !important; color: ${colorClass3} !important;`;
+                // Forzar reflow
+                void currentLevelNumEl.offsetHeight;
+                const computedCurrent = window.getComputedStyle(currentLevelNumEl);
+                console.log(`✅ Nivel Actual actualizado a: ${levelValue}`, {
+                    textContent: currentLevelNumEl.textContent,
+                    innerHTML: currentLevelNumEl.innerHTML,
+                    innerText: currentLevelNumEl.innerText,
+                    visible: currentLevelNumEl.offsetParent !== null,
+                    computedDisplay: computedCurrent.display,
+                    computedVisibility: computedCurrent.visibility,
+                    computedOpacity: computedCurrent.opacity,
+                    computedColor: computedCurrent.color,
+                    computedBackgroundColor: computedCurrent.backgroundColor,
+                    rect: currentLevelNumEl.getBoundingClientRect()
+                });
+            } else {
+                console.error('❌ currentLevelNumEl es null!');
+            }
+
+            // Progreso total - ACTUALIZACIÓN ULTRA DIRECTA
+            if (overallProgressEl) {
+                const progressText = `${overallProgress}%`;
+                // Limpiar completamente el contenido
+                overallProgressEl.innerHTML = '';
+                // Establecer nuevo valor usando createTextNode
+                const textNode = document.createTextNode(progressText);
+                overallProgressEl.appendChild(textNode);
+                // También establecer textContent e innerText como respaldo
+                overallProgressEl.textContent = progressText;
+                overallProgressEl.innerText = progressText;
+                overallProgressEl.setAttribute('data-value', overallProgress.toString());
+                // Forzar estilos inline para asegurar visibilidad
+                const isDark4 = document.documentElement.classList.contains('dark');
+                const colorClass4 = isDark4 ? 'rgb(96, 165, 250)' : 'rgb(37, 99, 235)'; // blue-400 o blue-600
+                overallProgressEl.style.cssText = `display: block !important; visibility: visible !important; opacity: 1 !important; color: ${colorClass4} !important;`;
+                // Forzar reflow
+                void overallProgressEl.offsetHeight;
+                console.log(`✅ Progreso Total actualizado a: ${progressText}`, {
+                    textContent: overallProgressEl.textContent,
+                    innerHTML: overallProgressEl.innerHTML,
+                    innerText: overallProgressEl.innerText,
+                    visible: overallProgressEl.offsetParent !== null,
+                    computedDisplay: window.getComputedStyle(overallProgressEl).display,
+                    computedVisibility: window.getComputedStyle(overallProgressEl).visibility,
+                    computedOpacity: window.getComputedStyle(overallProgressEl).opacity
+                });
+            } else {
+                console.error('❌ overallProgressEl es null!');
+            }
+
+            // ACTUALIZAR BARRA DE PROGRESO VISUAL - FORZAR ULTRA AGRESIVO
+            const overallProgressBar = document.getElementById('overall-progress-bar');
+            if (overallProgressBar) {
+                const widthValue = `${overallProgress}%`;
+                // Establecer width y height de múltiples formas
+                overallProgressBar.style.width = widthValue;
+                overallProgressBar.style.height = '100%'; // Asegurar que tenga altura
+                overallProgressBar.setAttribute('style', `width: ${widthValue} !important; height: 100% !important; display: block !important; visibility: visible !important; opacity: 1 !important;`);
+                overallProgressBar.style.cssText = `width: ${widthValue} !important; height: 100% !important; display: block !important; visibility: visible !important; opacity: 1 !important;`;
+                // Forzar reflow
+                void overallProgressBar.offsetHeight;
+                // Verificar estilos computados
+                const computedStyle = window.getComputedStyle(overallProgressBar);
+                const rect = overallProgressBar.getBoundingClientRect();
+                console.log(`✅ Barra de progreso actualizada a: ${overallProgress}%`, {
+                    width: overallProgressBar.style.width,
+                    widthComputed: computedStyle.width,
+                    height: overallProgressBar.style.height,
+                    heightComputed: computedStyle.height,
+                    rectHeight: rect.height,
+                    visible: overallProgressBar.offsetParent !== null,
+                    display: computedStyle.display,
+                    visibility: computedStyle.visibility,
+                    opacity: computedStyle.opacity
+                });
+            } else {
+                console.warn('⚠️ overall-progress-bar no encontrado');
+            }
+
+            // Forzar reflow y actualización visual inmediata
+            requestAnimationFrame(() => {
+                // Actualización inmediata en el siguiente frame de renderizado
+                if (totalLevelsEl) {
+                    totalLevelsEl.textContent = totalLevels.toString();
+                    void totalLevelsEl.offsetHeight; // Forzar reflow
+                }
+                if (completedLevelsEl) {
+                    completedLevelsEl.textContent = completedLevels.toString();
+                    void completedLevelsEl.offsetHeight;
+                }
+                if (currentLevelNumEl) {
+                    const levelValue = currentLevel || 1;
+                    currentLevelNumEl.textContent = levelValue.toString();
+                    void currentLevelNumEl.offsetHeight;
+                }
+                if (overallProgressEl) {
+                    const progressText = `${overallProgress}%`;
+                    overallProgressEl.textContent = progressText;
+                    void overallProgressEl.offsetHeight;
+                }
+                if (overallProgressBar) {
+                    overallProgressBar.style.width = `${overallProgress}%`;
+                    void overallProgressBar.offsetHeight;
+                }
+            });
+            
+            // Forzar reflow para asegurar actualización visual
+            if (totalLevelsEl) {
+                void totalLevelsEl.offsetHeight;
+                // Forzar estilo inline para asegurar visibilidad
+                totalLevelsEl.style.display = 'block';
+                totalLevelsEl.style.visibility = 'visible';
+                totalLevelsEl.style.opacity = '1';
+            }
+            if (completedLevelsEl) {
+                void completedLevelsEl.offsetHeight;
+                completedLevelsEl.style.display = 'block';
+                completedLevelsEl.style.visibility = 'visible';
+                completedLevelsEl.style.opacity = '1';
+            }
+            if (currentLevelNumEl) {
+                void currentLevelNumEl.offsetHeight;
+                currentLevelNumEl.style.display = 'block';
+                currentLevelNumEl.style.visibility = 'visible';
+                currentLevelNumEl.style.opacity = '1';
+            }
+            if (overallProgressEl) {
+                void overallProgressEl.offsetHeight;
+                overallProgressEl.style.display = 'block';
+                overallProgressEl.style.visibility = 'visible';
+                overallProgressEl.style.opacity = '1';
+            }
+            if (overallProgressBar) {
+                void overallProgressBar.offsetHeight;
+            }
+
+            // Verificar que los valores se establecieron correctamente
+            setTimeout(() => {
+                const verification = {
+                    totalLevels: {
+                        textContent: totalLevelsEl?.textContent?.trim(),
+                        expected: totalLevels.toString(),
+                        visible: totalLevelsEl?.offsetParent !== null
+                    },
+                    completedLevels: {
+                        textContent: completedLevelsEl?.textContent?.trim(),
+                        expected: completedLevels.toString(),
+                        visible: completedLevelsEl?.offsetParent !== null
+                    },
+                    currentLevel: {
+                        textContent: currentLevelNumEl?.textContent?.trim(),
+                        expected: (currentLevel || 1).toString(),
+                        visible: currentLevelNumEl?.offsetParent !== null
+                    },
+                    overallProgress: {
+                        textContent: overallProgressEl?.textContent?.trim(),
+                        expected: `${overallProgress}%`,
+                        visible: overallProgressEl?.offsetParent !== null
+                    }
+                };
+                
+                console.log('✅ VERIFICACIÓN DETALLADA DE VALORES EN DOM:', verification);
+                
+                // SOLO CORREGIR SI REALMENTE NO COINCIDEN (usando trim para comparar correctamente)
+                let needsFix = false;
+                if (verification.totalLevels.textContent !== verification.totalLevels.expected) {
+                    console.warn('⚠️ Total niveles no coincide, corrigiendo...', {
+                        actual: verification.totalLevels.textContent,
+                        expected: verification.totalLevels.expected
+                    });
+                    if (totalLevelsEl) {
+                        totalLevelsEl.textContent = verification.totalLevels.expected;
+                    }
+                    needsFix = true;
+                }
+                if (verification.completedLevels.textContent !== verification.completedLevels.expected) {
+                    console.warn('⚠️ Niveles completados no coincide, corrigiendo...', {
+                        actual: verification.completedLevels.textContent,
+                        expected: verification.completedLevels.expected
+                    });
+                    if (completedLevelsEl) {
+                        completedLevelsEl.textContent = verification.completedLevels.expected;
+                    }
+                    needsFix = true;
+                }
+                if (verification.currentLevel.textContent !== verification.currentLevel.expected) {
+                    console.warn('⚠️ Nivel actual no coincide, corrigiendo...', {
+                        actual: verification.currentLevel.textContent,
+                        expected: verification.currentLevel.expected
+                    });
+                    if (currentLevelNumEl) {
+                        currentLevelNumEl.textContent = verification.currentLevel.expected;
+                    }
+                    needsFix = true;
+                }
+                if (verification.overallProgress.textContent !== verification.overallProgress.expected) {
+                    console.warn('⚠️ Progreso total no coincide, corrigiendo...', {
+                        actual: verification.overallProgress.textContent,
+                        expected: verification.overallProgress.expected
+                    });
+                    if (overallProgressEl) {
+                        overallProgressEl.textContent = verification.overallProgress.expected;
+                    }
+                    needsFix = true;
+                }
+                
+                if (needsFix) {
+                    console.log('✅ Correcciones aplicadas');
+                } else {
+                    console.log('✅ Todos los valores coinciden correctamente');
+                }
+            }, 100);
+            
+            // ELIMINADO: MutationObserver causaba bucle infinito
+            
+            // ACTUALIZACIÓN FINAL FORZADA - ASEGURAR QUE LOS VALORES SE MUESTREN
+            setTimeout(() => {
+                console.log('🔧 ACTUALIZACIÓN FINAL FORZADA...');
+                
+                // Forzar actualización de todos los elementos usando createTextNode con colores explícitos
+                const isDark = document.documentElement.classList.contains('dark');
+                
+                if (totalLevelsEl) {
+                    const valor = totalLevels.toString();
+                    totalLevelsEl.innerHTML = '';
+                    totalLevelsEl.appendChild(document.createTextNode(valor));
+                    totalLevelsEl.textContent = valor;
+                    totalLevelsEl.innerText = valor;
+                    const colorIndigo = isDark ? 'rgb(129, 140, 248)' : 'rgb(79, 70, 229)';
+                    totalLevelsEl.style.cssText = `display: block !important; visibility: visible !important; opacity: 1 !important; color: ${colorIndigo} !important;`;
+                    void totalLevelsEl.offsetHeight;
+                    console.log(`✅ FORZADO: Total Niveles = ${totalLevelsEl.textContent}`);
+                }
+                
+                if (completedLevelsEl) {
+                    const valor = completedLevels.toString();
+                    completedLevelsEl.innerHTML = '';
+                    completedLevelsEl.appendChild(document.createTextNode(valor));
+                    completedLevelsEl.textContent = valor;
+                    completedLevelsEl.innerText = valor;
+                    const colorGreen = isDark ? 'rgb(74, 222, 128)' : 'rgb(22, 163, 74)';
+                    completedLevelsEl.style.cssText = `display: block !important; visibility: visible !important; opacity: 1 !important; color: ${colorGreen} !important;`;
+                    void completedLevelsEl.offsetHeight;
+                    console.log(`✅ FORZADO: Niveles Completados = ${completedLevelsEl.textContent}`);
+                }
+                
+                if (currentLevelNumEl) {
+                    const levelValue = currentLevel || 1;
+                    const valor = levelValue.toString();
+                    currentLevelNumEl.innerHTML = '';
+                    currentLevelNumEl.appendChild(document.createTextNode(valor));
+                    currentLevelNumEl.textContent = valor;
+                    currentLevelNumEl.innerText = valor;
+                    const colorYellow = isDark ? 'rgb(250, 204, 21)' : 'rgb(202, 138, 4)';
+                    currentLevelNumEl.style.cssText = `display: block !important; visibility: visible !important; opacity: 1 !important; color: ${colorYellow} !important;`;
+                    void currentLevelNumEl.offsetHeight;
+                    console.log(`✅ FORZADO: Nivel Actual = ${currentLevelNumEl.textContent}`);
+                }
+                
+                if (overallProgressEl) {
+                    const progressText = `${overallProgress}%`;
+                    overallProgressEl.innerHTML = '';
+                    overallProgressEl.appendChild(document.createTextNode(progressText));
+                    overallProgressEl.textContent = progressText;
+                    overallProgressEl.innerText = progressText;
+                    const colorBlue = isDark ? 'rgb(96, 165, 250)' : 'rgb(37, 99, 235)';
+                    overallProgressEl.style.cssText = `display: block !important; visibility: visible !important; opacity: 1 !important; color: ${colorBlue} !important;`;
+                    void overallProgressEl.offsetHeight;
+                    console.log(`✅ FORZADO: Progreso Total = ${overallProgressEl.textContent}`);
+                }
+                
+                const overallProgressBar = document.getElementById('overall-progress-bar');
+                if (overallProgressBar) {
+                    const widthValue = `${overallProgress}%`;
+                    overallProgressBar.style.cssText = `width: ${widthValue} !important; display: block !important; visibility: visible !important; opacity: 1 !important;`;
+                    overallProgressBar.setAttribute('style', `width: ${widthValue} !important; display: block !important; visibility: visible !important; opacity: 1 !important;`);
+                    void overallProgressBar.offsetHeight;
+                    console.log(`✅ FORZADO: Barra de progreso = ${overallProgressBar.style.width}`);
+                }
+                
+                // Verificación final con estilos computados
+                const totalLevelsComputed = totalLevelsEl ? window.getComputedStyle(totalLevelsEl) : null;
+                const completedLevelsComputed = completedLevelsEl ? window.getComputedStyle(completedLevelsEl) : null;
+                const currentLevelComputed = currentLevelNumEl ? window.getComputedStyle(currentLevelNumEl) : null;
+                const overallProgressComputed = overallProgressEl ? window.getComputedStyle(overallProgressEl) : null;
+                const progressBarComputed = overallProgressBar ? window.getComputedStyle(overallProgressBar) : null;
+                
+                console.log('🔍 VERIFICACIÓN FINAL FORZADA (CON ESTILOS COMPUTADOS):', {
+                    totalLevels: {
+                        textContent: totalLevelsEl?.textContent,
+                        innerHTML: totalLevelsEl?.innerHTML,
+                        display: totalLevelsComputed?.display,
+                        visibility: totalLevelsComputed?.visibility,
+                        opacity: totalLevelsComputed?.opacity,
+                        color: totalLevelsComputed?.color,
+                        visible: totalLevelsEl?.offsetParent !== null
+                    },
+                    completedLevels: {
+                        textContent: completedLevelsEl?.textContent,
+                        innerHTML: completedLevelsEl?.innerHTML,
+                        display: completedLevelsComputed?.display,
+                        visibility: completedLevelsComputed?.visibility,
+                        opacity: completedLevelsComputed?.opacity,
+                        color: completedLevelsComputed?.color,
+                        visible: completedLevelsEl?.offsetParent !== null
+                    },
+                    currentLevel: {
+                        textContent: currentLevelNumEl?.textContent,
+                        innerHTML: currentLevelNumEl?.innerHTML,
+                        display: currentLevelComputed?.display,
+                        visibility: currentLevelComputed?.visibility,
+                        opacity: currentLevelComputed?.opacity,
+                        color: currentLevelComputed?.color,
+                        visible: currentLevelNumEl?.offsetParent !== null
+                    },
+                    overallProgress: {
+                        textContent: overallProgressEl?.textContent,
+                        innerHTML: overallProgressEl?.innerHTML,
+                        display: overallProgressComputed?.display,
+                        visibility: overallProgressComputed?.visibility,
+                        opacity: overallProgressComputed?.opacity,
+                        color: overallProgressComputed?.color,
+                        visible: overallProgressEl?.offsetParent !== null
+                    },
+                    progressBar: {
+                        width: overallProgressBar?.style.width,
+                        widthComputed: progressBarComputed?.width,
+                        display: progressBarComputed?.display,
+                        visibility: progressBarComputed?.visibility,
+                        opacity: progressBarComputed?.opacity,
+                        visible: overallProgressBar?.offsetParent !== null
+                    }
+                });
+                
+                // AGREGAR LISTENER PARA DETECTAR CAMBIOS POSTERIORES
+                if (totalLevelsEl && completedLevelsEl && currentLevelNumEl && overallProgressEl) {
+                    const expectedValues = {
+                        totalLevels: totalLevels.toString(),
+                        completedLevels: completedLevels.toString(),
+                        currentLevel: (currentLevel || 1).toString(),
+                        overallProgress: `${overallProgress}%`
+                    };
+                    
+                    // Verificar después de 1 segundo si los valores cambiaron
+                    setTimeout(() => {
+                        const currentValues = {
+                            totalLevels: totalLevelsEl.textContent?.trim(),
+                            completedLevels: completedLevelsEl.textContent?.trim(),
+                            currentLevel: currentLevelNumEl.textContent?.trim(),
+                            overallProgress: overallProgressEl.textContent?.trim()
+                        };
+                        
+                        let changed = false;
+                        if (currentValues.totalLevels !== expectedValues.totalLevels) {
+                            console.warn('⚠️ total-levels fue modificado después de la actualización!', {
+                                esperado: expectedValues.totalLevels,
+                                actual: currentValues.totalLevels
+                            });
+                            changed = true;
+                        }
+                        if (currentValues.completedLevels !== expectedValues.completedLevels) {
+                            console.warn('⚠️ completed-levels fue modificado después de la actualización!', {
+                                esperado: expectedValues.completedLevels,
+                                actual: currentValues.completedLevels
+                            });
+                            changed = true;
+                        }
+                        if (currentValues.currentLevel !== expectedValues.currentLevel) {
+                            console.warn('⚠️ current-level-num fue modificado después de la actualización!', {
+                                esperado: expectedValues.currentLevel,
+                                actual: currentValues.currentLevel
+                            });
+                            changed = true;
+                        }
+                        if (currentValues.overallProgress !== expectedValues.overallProgress) {
+                            console.warn('⚠️ overall-progress fue modificado después de la actualización!', {
+                                esperado: expectedValues.overallProgress,
+                                actual: currentValues.overallProgress
+                            });
+                            changed = true;
+                        }
+                        
+                        if (changed) {
+                            console.warn('⚠️ ALGUNOS VALORES FUERON MODIFICADOS DESPUÉS DE LA ACTUALIZACIÓN - RESTAURANDO...');
+                            // Restaurar valores
+                            if (totalLevelsEl) {
+                                totalLevelsEl.textContent = expectedValues.totalLevels;
+                                totalLevelsEl.innerHTML = expectedValues.totalLevels;
+                            }
+                            if (completedLevelsEl) {
+                                completedLevelsEl.textContent = expectedValues.completedLevels;
+                                completedLevelsEl.innerHTML = expectedValues.completedLevels;
+                            }
+                            if (currentLevelNumEl) {
+                                currentLevelNumEl.textContent = expectedValues.currentLevel;
+                                currentLevelNumEl.innerHTML = expectedValues.currentLevel;
+                            }
+                            if (overallProgressEl) {
+                                overallProgressEl.textContent = expectedValues.overallProgress;
+                                overallProgressEl.innerHTML = expectedValues.overallProgress;
+                            }
+                        } else {
+                            console.log('✅ Todos los valores se mantuvieron correctamente después de 1 segundo');
+                            
+                            // VERIFICACIÓN VISUAL FINAL - Verificar si los elementos son realmente visibles
+                            const rectTotal = totalLevelsEl?.getBoundingClientRect();
+                            const rectCompleted = completedLevelsEl?.getBoundingClientRect();
+                            const rectCurrent = currentLevelNumEl?.getBoundingClientRect();
+                            const rectProgress = overallProgressEl?.getBoundingClientRect();
+                            const rectBar = overallProgressBar?.getBoundingClientRect();
+                            
+                            console.log('🔍 VERIFICACIÓN VISUAL FINAL (getBoundingClientRect):', {
+                                totalLevels: {
+                                    textContent: totalLevelsEl?.textContent,
+                                    width: rectTotal?.width,
+                                    height: rectTotal?.height,
+                                    top: rectTotal?.top,
+                                    left: rectTotal?.left,
+                                    visible: rectTotal && rectTotal.width > 0 && rectTotal.height > 0
+                                },
+                                completedLevels: {
+                                    textContent: completedLevelsEl?.textContent,
+                                    width: rectCompleted?.width,
+                                    height: rectCompleted?.height,
+                                    top: rectCompleted?.top,
+                                    left: rectCompleted?.left,
+                                    visible: rectCompleted && rectCompleted.width > 0 && rectCompleted.height > 0
+                                },
+                                currentLevel: {
+                                    textContent: currentLevelNumEl?.textContent,
+                                    width: rectCurrent?.width,
+                                    height: rectCurrent?.height,
+                                    top: rectCurrent?.top,
+                                    left: rectCurrent?.left,
+                                    visible: rectCurrent && rectCurrent.width > 0 && rectCurrent.height > 0
+                                },
+                                overallProgress: {
+                                    textContent: overallProgressEl?.textContent,
+                                    width: rectProgress?.width,
+                                    height: rectProgress?.height,
+                                    top: rectProgress?.top,
+                                    left: rectProgress?.left,
+                                    visible: rectProgress && rectProgress.width > 0 && rectProgress.height > 0
+                                },
+                                progressBar: {
+                                    width: overallProgressBar?.style.width,
+                                    widthComputed: rectBar?.width,
+                                    height: rectBar?.height,
+                                    visible: rectBar && rectBar.width > 0 && rectBar.height > 0
+                                }
+                            });
+                            
+                            // Si algún elemento no es visible, intentar forzar visualización de nuevo
+                            if (rectTotal && (rectTotal.width === 0 || rectTotal.height === 0)) {
+                                console.warn('⚠️ total-levels no es visible visualmente, forzando...');
+                                if (totalLevelsEl) {
+                                    totalLevelsEl.style.cssText = 'display: block !important; visibility: visible !important; opacity: 1 !important; position: relative !important; z-index: 9999 !important;';
+                                    totalLevelsEl.textContent = totalLevels.toString();
+                                }
+                            }
+                            if (rectCompleted && (rectCompleted.width === 0 || rectCompleted.height === 0)) {
+                                console.warn('⚠️ completed-levels no es visible visualmente, forzando...');
+                                if (completedLevelsEl) {
+                                    completedLevelsEl.style.cssText = 'display: block !important; visibility: visible !important; opacity: 1 !important; position: relative !important; z-index: 9999 !important;';
+                                    completedLevelsEl.textContent = completedLevels.toString();
+                                }
+                            }
+                            if (rectCurrent && (rectCurrent.width === 0 || rectCurrent.height === 0)) {
+                                console.warn('⚠️ current-level-num no es visible visualmente, forzando...');
+                                if (currentLevelNumEl) {
+                                    currentLevelNumEl.style.cssText = 'display: block !important; visibility: visible !important; opacity: 1 !important; position: relative !important; z-index: 9999 !important;';
+                                    currentLevelNumEl.textContent = (currentLevel || 1).toString();
+                                }
+                            }
+                            if (rectProgress && (rectProgress.width === 0 || rectProgress.height === 0)) {
+                                console.warn('⚠️ overall-progress no es visible visualmente, forzando...');
+                                if (overallProgressEl) {
+                                    overallProgressEl.style.cssText = 'display: block !important; visibility: visible !important; opacity: 1 !important; position: relative !important; z-index: 9999 !important;';
+                                    overallProgressEl.textContent = `${overallProgress}%`;
+                                }
+                            }
+                        }
+                    }, 1000);
+                }
+            }, 500);
+
+            // Actualizar información adicional si existe
+            if (progressData) {
+                const statsPanel = document.getElementById('stats-panel');
+                if (statsPanel && progressData.totalProblemas > 0) {
+                    // Añadir información de problemas si no existe
+                    let problemasInfo = document.getElementById('problemas-info');
+                    if (!problemasInfo) {
+                        problemasInfo = document.createElement('div');
+                        problemasInfo.id = 'problemas-info';
+                        problemasInfo.className = 'mt-4 pt-4 border-t border-gray-200 dark:border-gray-700 text-center text-sm text-gray-600 dark:text-gray-400';
+                        statsPanel.appendChild(problemasInfo);
+                    }
+                    problemasInfo.innerHTML = `
+                        <div class="flex items-center justify-center gap-4 flex-wrap">
+                            <span class="flex items-center gap-1">
+                                <i class="fas fa-check-circle text-green-500"></i>
+                                <span class="font-semibold">${progressData.problemasCompletados}/${progressData.totalProblemas}</span>
+                                <span>problemas</span>
+                            </span>
+                            <span class="flex items-center gap-1">
+                                <i class="fas fa-book text-purple-500"></i>
+                                <span class="font-semibold">${progressData.temasCompletados}/${progressData.totalTemas}</span>
+                                <span>temas</span>
+                            </span>
+                            <span class="flex items-center gap-1">
+                                <i class="fas fa-layer-group text-indigo-500"></i>
+                                <span class="font-semibold">${completedLevels}/${totalLevels}</span>
+                                <span>niveles</span>
+                            </span>
+                        </div>
+                    `;
+                }
+            }
+        }
+
+        async function loadRoadmap() {
+            const userId = sessionStorage.getItem('userId');
+            if (!userId) {
+                window.location.href = 'login.html';
+                return;
+            }
+
+            try {
+                // Obtener datos con manejo de errores individual
+                let user = null;
+                let niveles = [];
+                let temas = [];
+
+                try {
+                    const userResult = await window.api.getUserById(userId);
+                    user = userResult || null;
+                    console.log('👤 Usuario cargado:', user ? { id: user.id, username: user.username, nivelActual: user.nivelActual } : 'null');
+                } catch (error) {
+                    console.error('❌ Error al cargar usuario:', error);
+                }
+
+                try {
+                    const nivelesResult = await window.api.getAllNiveles();
+                    // Manejar diferentes formatos de respuesta
+                    if (Array.isArray(nivelesResult)) {
+                        niveles = nivelesResult;
+                    } else if (nivelesResult?.data && Array.isArray(nivelesResult.data)) {
+                        niveles = nivelesResult.data;
+                    } else if (nivelesResult?.result && Array.isArray(nivelesResult.result)) {
+                        niveles = nivelesResult.result;
+                    }
+                    console.log('📚 Niveles cargados:', niveles.length, niveles);
+                } catch (error) {
+                    console.error('❌ Error al cargar niveles:', error);
+                    niveles = [];
+                }
+
+                try {
+                    const temasResult = await window.api.getAllTemas();
+                    // Manejar diferentes formatos de respuesta
+                    if (Array.isArray(temasResult)) {
+                        temas = temasResult;
+                    } else if (temasResult?.data && Array.isArray(temasResult.data)) {
+                        temas = temasResult.data;
+                    } else if (temasResult?.result && Array.isArray(temasResult.result)) {
+                        temas = temasResult.result;
+                    }
+                    console.log('📖 Temas cargados:', temas.length, temas);
+                } catch (error) {
+                    console.error('❌ Error al cargar temas:', error);
+                    temas = [];
+                }
+
+                const usernameDisplay = document.getElementById('username-display');
+                if (user && usernameDisplay) {
+                    usernameDisplay.textContent = user.username || 'Usuario';
+                }
+                // ACTUALIZAR NIVEL DEL USUARIO EN NAVBAR
+                const userLevelEl = document.getElementById('user-level');
+                if (user && userLevelEl) {
+                    const nivelActual = user.nivelActual || user.NivelActual || 1;
+                    userLevelEl.textContent = nivelActual;
+                    userLevelEl.innerText = nivelActual; // Doble actualización
+                    console.log('✅ Nivel de usuario actualizado en navbar:', nivelActual);
+                } else if (!userLevelEl) {
+                    console.warn('⚠️ No se encontró el elemento user-level');
+                }
+
+                // Load profile image
+                const userAvatar = document.querySelector('#user-menu-button img');
+                const avatarContainer = userAvatar?.parentElement;
+                if (user && userAvatar) {
+                    const initial = user.username ? user.username.charAt(0).toUpperCase() : 'U';
+                    if (user.profilePhotoPath && user.profilePhotoPath.trim() !== '') {
+                        userAvatar.src = `http://localhost:5222${user.profilePhotoPath}`;
+                        userAvatar.onerror = () => {
+                            userAvatar.style.display = 'none';
+                            if (avatarContainer) {
+                                const span = document.createElement('span');
+                                span.className = 'text-white text-xs font-bold';
+                                span.textContent = initial;
+                                avatarContainer.appendChild(span);
+                            }
+                        };
+                    } else {
+                        userAvatar.style.display = 'none';
+                        if (avatarContainer) {
+                            const span = document.createElement('span');
+                            span.className = 'text-white text-xs font-bold';
+                            span.textContent = initial;
+                            avatarContainer.appendChild(span);
+                        }
+                    }
+                    userAvatar.alt = `Avatar de ${user.username || 'Usuario'}`;
+                }
+
+                const sortedNiveles = Array.isArray(niveles) && niveles.length > 0
+                    ? niveles.sort((a, b) => (a.orden || a.IdNiveles || 0) - (b.orden || b.IdNiveles || 0))
+                    : [];
+
+                const sortedTemas = Array.isArray(temas) && temas.length > 0
+                    ? temas.sort((a, b) => (a.Orden || a.IdTemas || 0) - (b.Orden || b.IdTemas || 0))
+                    : [];
+
+                const currentLevel = user?.nivelActual || 1;
+                const totalPoints = user?.puntosTotales || 0;
+
+                console.log('🔍 Datos procesados:', {
+                    nivelesCount: sortedNiveles.length,
+                    temasCount: sortedTemas.length,
+                    currentLevel,
+                    totalPoints
+                });
+
+                // ACTUALIZAR VALORES BÁSICOS INMEDIATAMENTE (antes de calcular progreso)
+                const totalLevelsEl = document.getElementById('total-levels');
+                const currentLevelNumEl = document.getElementById('current-level-num');
+                
+                if (totalLevelsEl && sortedNiveles.length > 0) {
+                    totalLevelsEl.textContent = sortedNiveles.length.toString();
+                    console.log('✅ Total niveles actualizado INMEDIATAMENTE:', sortedNiveles.length);
+                }
+                
+                if (currentLevelNumEl) {
+                    currentLevelNumEl.textContent = currentLevel.toString();
+                    console.log('✅ Nivel actual actualizado INMEDIATAMENTE:', currentLevel);
+                }
+
+                // Obtener progreso del usuario
+                let userProgress = [];
+                try {
+                    const progressResult = await window.api.getProgresoByUserId(userId);
+                    console.log('📈 Respuesta completa de getProgresoByUserId:', progressResult);
+                    
+                    // Manejar diferentes formatos de respuesta
+                    if (Array.isArray(progressResult)) {
+                        userProgress = progressResult;
+                    } else if (progressResult?.data && Array.isArray(progressResult.data)) {
+                        userProgress = progressResult.data;
+                    } else if (progressResult?.result && Array.isArray(progressResult.result)) {
+                        userProgress = progressResult.result;
+                    }
+                    
+                    // Filtrar solo los completados para debug
+                    const completados = userProgress.filter(p => p.Completado || p.completado);
+                    console.log('📈 Progreso del usuario cargado (DETALLADO):', {
+                        total: userProgress.length,
+                        completados: completados.length,
+                        muestraCompletados: completados.slice(0, 5),
+                        estructuraPrimerRegistro: userProgress[0] ? {
+                            id: userProgress[0].Id || userProgress[0].id,
+                            userId: userProgress[0].UserId || userProgress[0].userId,
+                            problemaId: userProgress[0].ProblemaId || userProgress[0].problemaId,
+                            completado: userProgress[0].Completado || userProgress[0].completado,
+                            todasLasKeys: Object.keys(userProgress[0])
+                        } : null,
+                        todosLosCompletados: completados.map(p => ({
+                            problemaId: p.ProblemaId || p.problemaId,
+                            completado: p.Completado || p.completado
+                        }))
+                    });
+                } catch (error) {
+                    console.error("❌ Error al cargar progreso:", error);
+                    console.error("Stack trace:", error.stack);
+                    userProgress = [];
+                }
+
+                // Obtener todos los problemas para calcular progreso
+                let allProblemas = [];
+                try {
+                    const problemasResult = await window.api._makeRequest('/Problemas');
+                    // Manejar diferentes formatos de respuesta
+                    if (Array.isArray(problemasResult)) {
+                        allProblemas = problemasResult;
+                    } else if (problemasResult?.data && Array.isArray(problemasResult.data)) {
+                        allProblemas = problemasResult.data;
+                    } else if (problemasResult?.result && Array.isArray(problemasResult.result)) {
+                        allProblemas = problemasResult.result;
+                    }
+                    console.log('📚 Problemas cargados:', allProblemas.length, 'problemas');
+                    
+                    // Log detallado de problemas para diagnóstico
+                    if (allProblemas.length > 0) {
+                        console.log('🔍 DEBUG ESTRUCTURA DE PROBLEMAS:', {
+                            total: allProblemas.length,
+                            primeros3: allProblemas.slice(0, 3).map(p => ({
+                                Id: p.Id,
+                                id: p.id,
+                                IdProblema: p.IdProblema,
+                                TemaId: p.TemaId,
+                                temaId: p.temaId,
+                                tema_id: p.tema_id,
+                                allKeys: Object.keys(p)
+                            })),
+                            tiposDeId: {
+                                usandoId: allProblemas.filter(p => p.Id).length,
+                                usandoIdMinuscula: allProblemas.filter(p => p.id).length,
+                                usandoIdProblema: allProblemas.filter(p => p.IdProblema).length
+                            }
+                        });
+                    }
+                } catch (error) {
+                    console.error("❌ Error al cargar problemas:", error);
+                    allProblemas = [];
+                }
+                
+                console.log('📋 Datos obtenidos:', {
+                    user: user ? { id: user.id, nivelActual: user.nivelActual, puntosTotales: user.puntosTotales } : null,
+                    nivelesCount: sortedNiveles.length,
+                    temasCount: sortedTemas.length,
+                    problemasCount: allProblemas.length,
+                    userProgressCount: userProgress.length
+                });
+
+                // Calcular progreso detallado
+                const progressData = calculateDetailedProgress(
+                    sortedNiveles,
+                    sortedTemas,
+                    allProblemas,
+                    userProgress,
+                    currentLevel
+                );
+
+                // EXPANDIR EL OBJETO PARA VER TODOS LOS VALORES
+                console.log('📊 DATOS CALCULADOS PARA PANELES (DETALLADO):', {
+                    totalNiveles: sortedNiveles.length,
+                    nivelesCompletados: progressData.nivelesCompletados,
+                    nivelActual: currentLevel,
+                    progresoTotal: progressData.overallProgress,
+                    problemasCompletados: progressData.problemasCompletados,
+                    totalProblemas: progressData.totalProblemas,
+                    temasCompletados: progressData.temasCompletados,
+                    totalTemas: progressData.totalTemas,
+                    progresoProblemas: progressData.problemasProgress,
+                    progresoTemas: progressData.temasProgress,
+                    nivelProgressKeys: Object.keys(progressData.nivelProgress || {}),
+                    nivelProgressValues: Object.values(progressData.nivelProgress || {}).map(n => ({
+                        completados: n.completados,
+                        total: n.total,
+                        porcentaje: n.porcentaje,
+                        completado: n.completado
+                    })),
+                    temaProgressKeys: Object.keys(progressData.temaProgress || {}),
+                    temaProgressCount: Object.keys(progressData.temaProgress || {}).length,
+                    progressDataCompleto: progressData
+                });
+                
+                // Verificar que los datos calculados son válidos
+                if (progressData.nivelesCompletados === undefined || progressData.overallProgress === undefined) {
+                    console.error('⚠️ ERROR: progressData tiene valores undefined!', progressData);
+                } else {
+                    console.log('✅ Valores calculados VALIDADOS:', {
+                        nivelesCompletados: progressData.nivelesCompletados,
+                        overallProgress: progressData.overallProgress,
+                        problemasCompletados: progressData.problemasCompletados,
+                        totalProblemas: progressData.totalProblemas
+                    });
+                }
+
+                // Store data globally for filtering
+                allNivelesData = sortedNiveles;
+
+                // FORZAR ACTUALIZACIÓN DE PANELES - EJECUTAR INMEDIATAMENTE
+                console.log('🎯 INICIANDO ACTUALIZACIÓN COMPLETA DE PANELES...');
+                console.log('📦 Datos disponibles:', {
+                    nivelesCount: sortedNiveles.length,
+                    currentLevel,
+                    totalPoints,
+                    hasProgressData: !!progressData,
+                    progressDataKeys: progressData ? Object.keys(progressData) : [],
+                    nivelesCompletados: progressData?.nivelesCompletados,
+                    overallProgress: progressData?.overallProgress
+                });
+
+                // Llamar a updateStatsPanel
+                try {
+                    updateStatsPanel(sortedNiveles, currentLevel, totalPoints, progressData);
+                    console.log('✅ updateStatsPanel ejecutado correctamente');
+                } catch (error) {
+                    console.error('❌ ERROR al actualizar paneles:', error);
+                    console.error('Stack trace:', error.stack);
+                    // Intentar establecer valores mínimos incluso si hay error
+                    const totalLevelsEl = document.getElementById('total-levels');
+                    const completedLevelsEl = document.getElementById('completed-levels');
+                    const currentLevelNumEl = document.getElementById('current-level-num');
+                    const overallProgressEl = document.getElementById('overall-progress');
+                    
+                    if (totalLevelsEl) {
+                        totalLevelsEl.textContent = sortedNiveles.length.toString();
+                        console.log('✅ Total niveles forzado a:', sortedNiveles.length);
+                    }
+                    if (completedLevelsEl) {
+                        completedLevelsEl.textContent = '0';
+                        console.log('✅ Niveles completados forzado a: 0');
+                    }
+                    if (currentLevelNumEl) {
+                        currentLevelNumEl.textContent = (currentLevel || 1).toString();
+                        console.log('✅ Nivel actual forzado a:', currentLevel || 1);
+                    }
+                    if (overallProgressEl) {
+                        overallProgressEl.textContent = '0%';
+                        console.log('✅ Progreso total forzado a: 0%');
+                    }
+                }
+                
+                // Verificación adicional después de un delay
+                setTimeout(() => {
+                    const totalLevelsEl = document.getElementById('total-levels');
+                    const completedLevelsEl = document.getElementById('completed-levels');
+                    const currentLevelNumEl = document.getElementById('current-level-num');
+                    const overallProgressEl = document.getElementById('overall-progress');
+                    
+                    const finalValues = {
+                        totalLevels: totalLevelsEl?.textContent?.trim() || 'NO ENCONTRADO',
+                        completedLevels: completedLevelsEl?.textContent?.trim() || 'NO ENCONTRADO',
+                        currentLevel: currentLevelNumEl?.textContent?.trim() || 'NO ENCONTRADO',
+                        overallProgress: overallProgressEl?.textContent?.trim() || 'NO ENCONTRADO'
+                    };
+                    
+                    console.log('🔍 VERIFICACIÓN FINAL DE VALORES EN DOM:', finalValues);
+                    
+                    // Si algún valor sigue siendo "-", forzar actualización
+                    if (finalValues.totalLevels === '-' || finalValues.completedLevels === '-' || 
+                        finalValues.currentLevel === '-' || finalValues.overallProgress === '-') {
+                        console.warn('⚠️ Algunos valores siguen siendo "-", forzando actualización...');
+                        updateStatsPanel(sortedNiveles, currentLevel, totalPoints, progressData);
+                    }
+                }, 1000);
+
+                renderRoadmap(sortedNiveles, sortedTemas, currentLevel, totalPoints, userProgress, progressData);
+
+                // ACTUALIZACIÓN FINAL DESPUÉS DE TODO - asegurar que los valores se establezcan
+                setTimeout(() => {
+                    console.log('🔍 VERIFICACIÓN FINAL - Re-llamando updateStatsPanel...');
+                // EXPANDIR COMPLETAMENTE EL OBJETO progressData
+                console.log('📊 DATOS QUE SE ENVIARÁN A updateStatsPanel:', {
+                    nivelesCount: sortedNiveles.length,
+                    currentLevel,
+                    totalPoints,
+                    progressDataExists: !!progressData,
+                    progressDataValues: progressData ? {
+                        nivelesCompletados: progressData.nivelesCompletados,
+                        overallProgress: progressData.overallProgress,
+                        problemasCompletados: progressData.problemasCompletados,
+                        totalProblemas: progressData.totalProblemas,
+                        temasCompletados: progressData.temasCompletados,
+                        totalTemas: progressData.totalTemas
+                    } : null,
+                    progressDataCompleto: progressData // OBJETO COMPLETO PARA INSPECCIÓN
+                });
+                
+                // VERIFICAR QUE LOS VALORES NO SEAN 0 CUANDO HAY PROGRESO
+                if (progressData && userProgress.length > 0 && allProblemas.length > 0) {
+                    // Crear mapas de IDs para comparación fácil
+                    const problemasIdsSet = new Set();
+                    allProblemas.forEach(p => {
+                        const id = p.Id || p.id || p.IdProblema;
+                        if (id != null) {
+                            problemasIdsSet.add(parseInt(id));
+                            problemasIdsSet.add(id.toString());
+                            problemasIdsSet.add(id);
+                        }
+                    });
+                    
+                    const progresoIdsSet = new Set();
+                    const progresoCompletados = userProgress.filter(p => p.Completado || p.completado);
+                    progresoCompletados.forEach(p => {
+                        const id = p.ProblemaId || p.problemaId || p.problema_id;
+                        if (id != null) {
+                            progresoIdsSet.add(parseInt(id));
+                            progresoIdsSet.add(id.toString());
+                            progresoIdsSet.add(id);
+                        }
+                    });
+                    
+                    // Encontrar intersección
+                    const interseccion = [];
+                    problemasIdsSet.forEach(id => {
+                        if (progresoIdsSet.has(id) || 
+                            progresoIdsSet.has(parseInt(id)) || 
+                            progresoIdsSet.has(id.toString())) {
+                            interseccion.push(id);
+                        }
+                    });
+                    
+                    console.log('🔍 DIAGNÓSTICO COMPLETO: Verificando por qué los valores son 0...', {
+                        userProgressRegistros: userProgress.length,
+                        problemasTotales: allProblemas.length,
+                        problemasCompletadosEnProgressData: progressData.problemasCompletados,
+                        nivelesCompletadosEnProgressData: progressData.nivelesCompletados,
+                        progresoCompletadosCount: progresoCompletados.length,
+                        problemasIdsSetSize: problemasIdsSet.size,
+                        progresoIdsSetSize: progresoIdsSet.size,
+                        interseccionCount: interseccion.length,
+                        interseccionIds: interseccion.slice(0, 10),
+                        primerProblemaEnProgreso: userProgress[0] ? {
+                            allKeys: Object.keys(userProgress[0]),
+                            valores: userProgress[0]
+                        } : null,
+                        primerProblemaBD: allProblemas[0] ? {
+                            allKeys: Object.keys(allProblemas[0]),
+                            valores: allProblemas[0]
+                        } : null,
+                        primeros3ProblemasIds: allProblemas.slice(0, 3).map(p => p.Id || p.id || p.IdProblema),
+                        primeros3ProgresoIds: userProgress.slice(0, 3).map(p => p.ProblemaId || p.problemaId || p.problema_id),
+                        primeros3ProgresoCompletadosIds: progresoCompletados.slice(0, 3).map(p => p.ProblemaId || p.problemaId || p.problema_id)
+                    });
+                    
+                    // Si hay intersección pero no se está detectando, hay un problema en el cálculo
+                    if (interseccion.length > 0 && progressData.problemasCompletados === 0) {
+                        console.error('❌ ERROR CRÍTICO: Hay intersección de IDs pero problemasCompletados es 0!', {
+                            interseccionIds: interseccion,
+                            problemasCompletados: progressData.problemasCompletados
+                        });
+                        
+                        // CORRECCIÓN: Usar directamente la intersección para recalcular
+                        console.log('🔧 CORRIGIENDO: Recalculando problemasCompletados usando intersección...');
+                        const problemasCompletadosCorregidos = interseccion.length;
+                        // Asegurar que totalProblemas sea correcto - usar allProblemas.length si progressData.totalProblemas es 0
+                        const totalProblemasDisponibles = (progressData.totalProblemas && progressData.totalProblemas > 0) 
+                            ? progressData.totalProblemas 
+                            : allProblemas.length;
+                        
+                        // Actualizar totalProblemas en progressData si es 0
+                        if (!progressData.totalProblemas || progressData.totalProblemas === 0) {
+                            progressData.totalProblemas = allProblemas.length;
+                            console.log(`🔧 Corrigiendo totalProblemas de ${progressData.totalProblemas} a ${allProblemas.length}`);
+                        }
+                        const problemasProgressCorregido = totalProblemasDisponibles > 0 
+                            ? Math.round((problemasCompletadosCorregidos / totalProblemasDisponibles) * 100) 
+                            : 0;
+                        
+                        // Recalcular overallProgress
+                        const temasProgressCorregido = progressData.temasProgress || 0;
+                        const overallProgressCorregido = Math.round((problemasProgressCorregido * 0.6 + temasProgressCorregido * 0.4));
+                        
+                        // Recalcular niveles completados basado en problemas completados de la intersección
+                        let nivelesCompletadosCorregidos = 0;
+                        const nivelProgressCorregido = {};
+                        
+                        // Recorrer cada nivel y contar problemas completados usando la intersección
+                        sortedNiveles.forEach((nivel, index) => {
+                            const nivelId = nivel.IdNiveles || nivel.id;
+                            const nivelOrden = nivel.orden || nivel.IdNiveles || index + 1;
+                            
+                            // Obtener temas de este nivel
+                            const nivelTemas = sortedTemas.filter(t => {
+                                const tNivelId = t.IdNivel || t.idNivel;
+                                return parseInt(tNivelId) === parseInt(nivelId) || tNivelId == nivelId;
+                            });
+                            
+                            // Contar problemas completados de este nivel
+                            let nivelProblemasTotal = 0;
+                            let nivelProblemasCompletados = 0;
+                            
+                            nivelTemas.forEach(tema => {
+                                const temaId = tema.IdTemas || tema.id;
+                                const temaProblemas = allProblemas.filter(p => {
+                                    const pTemaId = p.TemaId || p.temaId || p.tema_id;
+                                    return parseInt(pTemaId) === parseInt(temaId) || pTemaId == temaId;
+                                });
+                                
+                                nivelProblemasTotal += temaProblemas.length;
+                                
+                                // Contar cuántos problemas completados hay usando la intersección
+                                temaProblemas.forEach(prob => {
+                                    const probId = prob.Id || prob.id || prob.IdProblema;
+                                    const probIdNum = parseInt(probId);
+                                    if (interseccion.some(id => parseInt(id) === probIdNum || id == probId)) {
+                                        nivelProblemasCompletados++;
+                                    }
+                                });
+                            });
+                            
+                            // Calcular porcentaje del nivel
+                            const nivelProgressPercent = nivelProblemasTotal > 0 
+                                ? Math.round((nivelProblemasCompletados / nivelProblemasTotal) * 100) 
+                                : 0;
+                            
+                            // Guardar progreso del nivel corregido
+                            nivelProgressCorregido[nivelId] = {
+                                completados: nivelProblemasCompletados,
+                                total: nivelProblemasTotal,
+                                porcentaje: nivelProgressPercent,
+                                completado: nivelProgressPercent === 100 && nivelProblemasTotal > 0,
+                                orden: nivelOrden
+                            };
+                            
+                            // Si el nivel está 100% completo, contarlo
+                            if (nivelProblemasTotal > 0 && nivelProblemasCompletados === nivelProblemasTotal) {
+                                nivelesCompletadosCorregidos++;
+                                console.log(`✅ Nivel ${nivelOrden} está completo: ${nivelProblemasCompletados}/${nivelProblemasTotal} (${nivelProgressPercent}%)`);
+                            } else if (nivelProblemasTotal > 0) {
+                                console.log(`📊 Nivel ${nivelOrden}: ${nivelProblemasCompletados}/${nivelProblemasTotal} (${nivelProgressPercent}%)`);
+                            }
+                        });
+                        
+                        console.log(`✅ Niveles completados calculados: ${nivelesCompletadosCorregidos} de ${sortedNiveles.length}`);
+                        
+                        // Actualizar nivelProgress en progressData con los valores corregidos
+                        if (Object.keys(nivelProgressCorregido).length > 0) {
+                            progressData.nivelProgress = nivelProgressCorregido;
+                        }
+                        
+                        // Actualizar progressData con valores corregidos
+                        progressData.problemasCompletados = problemasCompletadosCorregidos;
+                        progressData.problemasProgress = problemasProgressCorregido;
+                        progressData.overallProgress = overallProgressCorregido;
+                        progressData.nivelesCompletados = nivelesCompletadosCorregidos;
+                        // Asegurar que totalProblemas esté actualizado
+                        if (!progressData.totalProblemas || progressData.totalProblemas === 0) {
+                            progressData.totalProblemas = allProblemas.length;
+                        }
+                        
+                        console.log('✅ VALORES CORREGIDOS:', {
+                            problemasCompletados: problemasCompletadosCorregidos,
+                            problemasProgress: problemasProgressCorregido,
+                            overallProgress: overallProgressCorregido,
+                            nivelesCompletados: nivelesCompletadosCorregidos,
+                            totalProblemas: progressData.totalProblemas
+                        });
+                        
+                        // ACTUALIZAR PANELES CON VALORES CORREGIDOS - FORZAR ACTUALIZACIÓN COMPLETA
+                        console.log('🔄 FORZANDO ACTUALIZACIÓN DE PANELES CON VALORES CORREGIDOS...');
+                        console.log('📦 progressData que se enviará a updateStatsPanel:', {
+                            nivelesCompletados: progressData.nivelesCompletados,
+                            overallProgress: progressData.overallProgress,
+                            problemasCompletados: progressData.problemasCompletados,
+                            totalProblemas: progressData.totalProblemas
+                        });
+                        updateStatsPanel(sortedNiveles, currentLevel, totalPoints, progressData);
+                        
+                        // Actualización adicional después de un breve delay para asegurar
+                        setTimeout(() => {
+                            console.log('🔄 Segunda actualización forzada de paneles...');
+                            updateStatsPanel(sortedNiveles, currentLevel, totalPoints, progressData);
+                            
+                            // Verificar que todos los valores se establecieron
+                            const totalLevelsEl = document.getElementById('total-levels');
+                            const completedLevelsEl = document.getElementById('completed-levels');
+                            const currentLevelNumEl = document.getElementById('current-level-num');
+                            const overallProgressEl = document.getElementById('overall-progress');
+                            const overallProgressBar = document.getElementById('overall-progress-bar');
+                            
+                            console.log('🔍 VERIFICACIÓN FINAL DE TODOS LOS ELEMENTOS:', {
+                                totalLevels: {
+                                    elemento: !!totalLevelsEl,
+                                    valor: totalLevelsEl?.textContent,
+                                    esperado: sortedNiveles.length.toString()
+                                },
+                                completedLevels: {
+                                    elemento: !!completedLevelsEl,
+                                    valor: completedLevelsEl?.textContent,
+                                    esperado: nivelesCompletadosCorregidos.toString()
+                                },
+                                currentLevel: {
+                                    elemento: !!currentLevelNumEl,
+                                    valor: currentLevelNumEl?.textContent,
+                                    esperado: (currentLevel || 1).toString()
+                                },
+                                overallProgress: {
+                                    elemento: !!overallProgressEl,
+                                    valor: overallProgressEl?.textContent,
+                                    esperado: `${overallProgressCorregido}%`
+                                },
+                                progressBar: {
+                                    elemento: !!overallProgressBar,
+                                    width: overallProgressBar?.style.width,
+                                    esperado: `${overallProgressCorregido}%`
+                                }
+                            });
+                        }, 500);
+                    }
+                }
+                    
+                    updateStatsPanel(sortedNiveles, currentLevel, totalPoints, progressData);
+                    
+                    // Verificar una vez más después de otro delay
+                    setTimeout(() => {
+                        const totalLevelsEl = document.getElementById('total-levels');
+                        const completedLevelsEl = document.getElementById('completed-levels');
+                        const currentLevelNumEl = document.getElementById('current-level-num');
+                        const overallProgressEl = document.getElementById('overall-progress');
+                        
+                        const finalCheck = {
+                            totalLevels: {
+                                textContent: totalLevelsEl?.textContent?.trim(),
+                                innerText: totalLevelsEl?.innerText?.trim(),
+                                expected: sortedNiveles.length.toString()
+                            },
+                            completedLevels: {
+                                textContent: completedLevelsEl?.textContent?.trim(),
+                                innerText: completedLevelsEl?.innerText?.trim(),
+                                expected: (progressData?.nivelesCompletados || 0).toString()
+                            },
+                            currentLevel: {
+                                textContent: currentLevelNumEl?.textContent?.trim(),
+                                innerText: currentLevelNumEl?.innerText?.trim(),
+                                expected: (currentLevel || 1).toString()
+                            },
+                            overallProgress: {
+                                textContent: overallProgressEl?.textContent?.trim(),
+                                innerText: overallProgressEl?.innerText?.trim(),
+                                expected: `${progressData?.overallProgress || 0}%`
+                            }
+                        };
+                        
+                        console.log('🔍 VERIFICACIÓN FINAL ABSOLUTA (COMPLETA):', finalCheck);
+                        
+                        // FORZAR ACTUALIZACIÓN SI NO COINCIDEN
+                        let needsForce = false;
+                        if (finalCheck.totalLevels.textContent !== finalCheck.totalLevels.expected) {
+                            console.warn('⚠️ Total niveles no coincide. Forzando...');
+                            if (totalLevelsEl) {
+                                totalLevelsEl.textContent = finalCheck.totalLevels.expected;
+                                totalLevelsEl.innerText = finalCheck.totalLevels.expected;
+                            }
+                            needsForce = true;
+                        }
+                        if (finalCheck.completedLevels.textContent !== finalCheck.completedLevels.expected) {
+                            console.warn('⚠️ Niveles completados no coincide. Forzando...');
+                            if (completedLevelsEl) {
+                                completedLevelsEl.textContent = finalCheck.completedLevels.expected;
+                                completedLevelsEl.innerText = finalCheck.completedLevels.expected;
+                            }
+                            needsForce = true;
+                        }
+                        if (finalCheck.currentLevel.textContent !== finalCheck.currentLevel.expected) {
+                            console.warn('⚠️ Nivel actual no coincide. Forzando...');
+                            if (currentLevelNumEl) {
+                                currentLevelNumEl.textContent = finalCheck.currentLevel.expected;
+                                currentLevelNumEl.innerText = finalCheck.currentLevel.expected;
+                            }
+                            needsForce = true;
+                        }
+                        if (finalCheck.overallProgress.textContent !== finalCheck.overallProgress.expected) {
+                            console.warn('⚠️ Progreso total no coincide. Forzando...');
+                            if (overallProgressEl) {
+                                overallProgressEl.textContent = finalCheck.overallProgress.expected;
+                                overallProgressEl.innerText = finalCheck.overallProgress.expected;
+                            }
+                            needsForce = true;
+                        }
+                        
+                        if (needsForce) {
+                            console.log('✅ Valores forzados directamente');
+                            // Forzar re-render
+                            if (totalLevelsEl) void totalLevelsEl.offsetHeight;
+                            if (completedLevelsEl) void completedLevelsEl.offsetHeight;
+                            if (currentLevelNumEl) void currentLevelNumEl.offsetHeight;
+                            if (overallProgressEl) void overallProgressEl.offsetHeight;
+                        } else {
+                            console.log('✅ Todos los valores coinciden correctamente');
+                        }
+                    }, 500);
+                }, 1500);
+            } catch (error) {
+                console.error("Error loading roadmap:", error);
+                console.error("Stack trace:", error.stack);
+                document.getElementById('roadmap-container').innerHTML = `
+                    <div class="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-xl p-6 text-center">
+                        <p class="text-red-600 dark:text-red-400">Error al cargar el roadmap. Por favor, recarga la página.</p>
+                    </div>
+                `;
+            }
+        }
+
+        // Ejemplos de cada tema
+        const temaEjemplos = {
+            'Lógica de programación': {
+                icon: 'fa-brain',
+                color: 'from-blue-500 to-cyan-600',
+                borderColor: 'border-blue-300 dark:border-blue-700',
+                textColor: 'text-blue-700 dark:text-blue-400',
+                bgColor: 'bg-blue-50 dark:bg-blue-900/20',
+                ejemplos: [
+                    {
+                        titulo: 'Variables y Tipos',
+                        codigo: `nombre = "Juan"
+edad = 25
+activo = True`,
+                        descripcion: 'Aprende a declarar y usar variables'
+                    },
+                    {
+                        titulo: 'Condicionales',
+                        codigo: `if edad >= 18:
+    print("Mayor de edad")
+else:
+    print("Menor de edad")`,
+                        descripcion: 'Toma decisiones con if/else'
+                    },
+                    {
+                        titulo: 'Bucles',
+                        codigo: `for i in range(5):
+    print(f"Número: {i}")`,
+                        descripcion: 'Repite acciones con bucles'
+                    }
+                ]
+            },
+            'Programación orientada a objetos': {
+                icon: 'fa-cube',
+                color: 'from-purple-500 to-pink-600',
+                borderColor: 'border-purple-300 dark:border-purple-700',
+                textColor: 'text-purple-700 dark:text-purple-400',
+                bgColor: 'bg-purple-50 dark:bg-purple-900/20',
+                ejemplos: [
+                    {
+                        titulo: 'Clases y Objetos',
+                        codigo: `class Persona:
+    def __init__(self, nombre):
+        self.nombre = nombre
+    
+    def saludar(self):
+        return f"Hola, soy {self.nombre}"`,
+                        descripcion: 'Crea tus propias clases'
+                    },
+                    {
+                        titulo: 'Herencia',
+                        codigo: `class Estudiante(Persona):
+    def __init__(self, nombre, carrera):
+        super().__init__(nombre)
+        self.carrera = carrera`,
+                        descripcion: 'Reutiliza código con herencia'
+                    },
+                    {
+                        titulo: 'Encapsulación',
+                        codigo: `class Cuenta:
+    def __init__(self):
+        self._saldo = 0  # Privado
+    
+    def depositar(self, monto):
+        self._saldo += monto`,
+                        descripcion: 'Protege tus datos'
+                    }
+                ]
+            },
+            'Fundamentos de bases de datos': {
+                icon: 'fa-database',
+                color: 'from-emerald-500 to-teal-600',
+                borderColor: 'border-emerald-300 dark:border-emerald-700',
+                textColor: 'text-emerald-700 dark:text-emerald-400',
+                bgColor: 'bg-emerald-50 dark:bg-emerald-900/20',
+                ejemplos: [
+                    {
+                        titulo: 'Consultas SELECT',
+                        codigo: `SELECT nombre, email 
+FROM usuarios 
+WHERE edad > 18`,
+                        descripcion: 'Consulta datos de tablas'
+                    },
+                    {
+                        titulo: 'JOIN',
+                        codigo: `SELECT u.nombre, p.titulo
+FROM usuarios u
+JOIN posts p ON u.id = p.usuario_id`,
+                        descripcion: 'Combina datos de múltiples tablas'
+                    },
+                    {
+                        titulo: 'INSERT y UPDATE',
+                        codigo: `INSERT INTO usuarios (nombre, email)
+VALUES ('Juan', 'juan@email.com');
+
+UPDATE usuarios 
+SET email = 'nuevo@email.com'
+WHERE id = 1`,
+                        descripcion: 'Modifica datos en la base'
+                    }
+                ]
+            }
+        };
+
+        function renderTemasMap(temas, isCompleted, isCurrent, isLocked, nivelId, temaProgress = {}, allProblemas = [], userProgress = []) {
+            // Si no hay temas, usar los de ejemplo
+            const temasToShow = temas.length > 0 ? temas : [
+                { Titulo: 'Lógica de programación', IdTemas: 1 },
+                { Titulo: 'Programación orientada a objetos', IdTemas: 2 },
+                { Titulo: 'Fundamentos de bases de datos', IdTemas: 3 }
+            ];
+
+            if (temasToShow.length === 0) return '';
+
+            let mapHtml = '<div class="relative py-8 sm:py-10 md:py-12 lg:py-14 px-6 sm:px-8 md:px-10 lg:px-12 glass-card rounded-2xl border-2 shadow-xl overflow-hidden mx-auto max-w-6xl backdrop-blur-sm">';
+            mapHtml += '<div class="relative">';
+            // Línea de conexión horizontal mejorada
+            mapHtml += '<div class="absolute top-20 sm:top-24 md:top-28 left-1/2 transform -translate-x-1/2 w-full max-w-[90%] sm:max-w-[85%] md:max-w-[80%] h-1 bg-gradient-to-r from-transparent via-indigo-300 dark:via-indigo-600 to-transparent rounded-full hidden sm:block connection-line"></div>';
+            mapHtml += '<div class="flex flex-col sm:flex-row items-center justify-center gap-8 sm:gap-10 md:gap-14 lg:gap-20 relative z-10">';
+
+            temasToShow.forEach((tema, index) => {
+                const temaId = tema.IdTemas || tema.id;
+                const temaTitulo = tema.Titulo || 'Tema';
+
+                // Obtener progreso del tema
+                const temaProg = temaProgress[temaId] || { completados: 0, total: 0, porcentaje: 0, completado: false };
+
+                // Determinar estado del tema basado en progreso real
+                let isTemaCompleted = false;
+                let isTemaCurrent = false;
+                const isTemaLocked = isLocked || (isCurrent && index >= temasToShow.length);
+
+                if (temaProg.completado) {
+                    isTemaCompleted = true;
+                } else if (isCurrent && temaProg.porcentaje > 0 && temaProg.porcentaje < 100) {
+                    isTemaCurrent = true;
+                } else if (isCompleted) {
+                    isTemaCompleted = true;
+                } else if (isCurrent && index === temasToShow.length - 1) {
+                    isTemaCurrent = true;
+                }
+
+                const temaData = temaEjemplos[temaTitulo] || {
+                    icon: 'fa-book',
+                    color: 'from-gray-500 to-gray-600',
+                    borderColor: 'border-gray-300',
+                    textColor: 'text-gray-700',
+                    bgColor: 'bg-gray-50'
+                };
+
+                // Determinar colores y estilos según el estado con mejoras visuales
+                let temaClasses = 'relative flex flex-col items-center z-20 tema-card theme-node';
+                let circleClasses = `w-28 h-28 sm:w-32 sm:h-32 md:w-36 md:h-36 lg:w-40 lg:h-40 rounded-2xl flex items-center justify-center text-white font-semibold text-xl sm:text-2xl md:text-3xl shadow-xl transition-all duration-300 group hover:shadow-2xl`;
+                let labelClasses = 'mt-4 sm:mt-5 md:mt-6 text-xs sm:text-sm md:text-base font-bold text-center max-w-[140px] sm:max-w-[160px] md:max-w-[180px] leading-tight px-2';
+                let icon = '';
+                let pathColor = '';
+                let glowEffect = '';
+
+                if (isTemaCompleted) {
+                    // Completado - Verde con gradiente
+                    circleClasses += ` bg-gradient-to-br from-green-500 to-emerald-600 dark:from-green-600 dark:to-emerald-700 border-2 border-green-400 dark:border-green-500`;
+                    labelClasses += ' text-green-700 dark:text-green-400';
+                    icon = `<i class="fas ${temaData.icon}"></i>`;
+                    pathColor = 'bg-gradient-to-r from-green-400 to-emerald-500';
+                    glowEffect = '<div class="absolute inset-0 rounded-2xl bg-green-500/20 blur-xl -z-10"></div>';
+                } else if (isTemaCurrent) {
+                    // En curso - Indigo con gradiente animado
+                    circleClasses += ` bg-gradient-to-br from-indigo-500 via-purple-500 to-pink-500 dark:from-indigo-600 dark:via-purple-600 dark:to-pink-600 border-2 border-indigo-400 dark:border-indigo-500`;
+                    labelClasses += ` text-indigo-700 dark:text-indigo-400 font-extrabold`;
+                    icon = `<i class="fas ${temaData.icon}"></i>`;
+                    pathColor = 'bg-gradient-to-r from-indigo-400 via-purple-400 to-pink-400';
+                    glowEffect = '<div class="absolute inset-0 rounded-2xl bg-indigo-500/30 blur-xl -z-10 animate-pulse"></div>';
+                } else {
+                    // Bloqueado - Gris
+                    temaClasses += ' cursor-not-allowed';
+                    circleClasses += ' bg-gradient-to-br from-gray-300 to-gray-400 dark:from-slate-600 dark:to-slate-700 opacity-60 border-2 border-gray-400 dark:border-slate-500';
+                    labelClasses += ' text-gray-500 dark:text-gray-400';
+                    icon = '<i class="fas fa-lock"></i>';
+                    pathColor = 'bg-gray-300 dark:bg-slate-600';
+                }
+
+                // Determinar color del camino
+                const nextTemaCompleted = index < temasToShow.length - 1 && (isCompleted || (isCurrent && index < temasToShow.length - 2));
+                const nextTemaCurrent = index < temasToShow.length - 1 && isCurrent && index === temasToShow.length - 2;
+                const pathIsActive = isTemaCompleted || nextTemaCompleted || nextTemaCurrent;
+                const activePathColor = isTemaCompleted ? 'bg-green-400' : (isTemaCurrent ? 'bg-indigo-400' : 'bg-gray-300 dark:bg-slate-600');
+
+                const temaDomId = `tema-${nivelId}-${index}`;
+
+                mapHtml += `
+                    <div class="${temaClasses}" title="${isTemaLocked ? 'Tema bloqueado' : temaTitulo}">
+                        <div class="${circleClasses} relative" title="${temaTitulo}">
+                            ${glowEffect}
+                            ${icon}
+                            ${isTemaCurrent ? '<div class="absolute -top-2 -right-2 w-6 h-6 bg-gradient-to-br from-yellow-400 to-orange-500 rounded-full flex items-center justify-center shadow-lg ring-2 ring-white dark:ring-slate-800 animate-pulse"><i class="fas fa-star text-yellow-900 text-xs"></i></div>' : ''}
+                            ${isTemaCompleted ? '<div class="absolute -top-2 -right-2 w-6 h-6 bg-green-500 rounded-full flex items-center justify-center shadow-lg ring-2 ring-white dark:ring-slate-800"><i class="fas fa-check text-white text-xs"></i></div>' : ''}
+                        </div>
+                        <div class="${labelClasses}">
+                            ${temaTitulo}
+                        </div>
+                        ${!isTemaLocked ? `
+                            <div class="mt-4 sm:mt-5 md:mt-6 flex flex-col items-center gap-3">
+                                ${temaProg.total > 0 ? `
+                                    <div class="w-full max-w-[140px] sm:max-w-[160px] mb-2">
+                                        <div class="flex items-center justify-between text-xs mb-1">
+                                            <span class="text-gray-600 dark:text-gray-400 font-medium">Progreso</span>
+                                            <span class="font-bold ${isTemaCompleted ? 'text-green-600 dark:text-green-400' : isTemaCurrent ? 'text-indigo-600 dark:text-indigo-400' : 'text-gray-500'}">${temaProg.porcentaje}%</span>
+                                        </div>
+                                        <div class="w-full bg-gray-200 dark:bg-slate-700 rounded-full h-1.5 sm:h-2 overflow-hidden">
+                                            <div class="h-full rounded-full transition-all duration-500 ${isTemaCompleted ? 'bg-gradient-to-r from-green-500 to-emerald-500' : isTemaCurrent ? 'bg-gradient-to-r from-indigo-500 to-purple-500' : 'bg-gray-400'}" style="width: ${temaProg.porcentaje}%"></div>
+                                        </div>
+                                        <div class="text-xs text-gray-500 dark:text-gray-400 mt-1 text-center">
+                                            ${temaProg.completados}/${temaProg.total} problemas
+                                        </div>
+                                    </div>
+                                ` : ''}
+                                <a href="theory.html?temaId=${tema.IdTemas || ''}&titulo=${encodeURIComponent(temaTitulo)}" 
+                                   onclick="event.stopPropagation();" 
+                                   class="inline-flex items-center justify-center gap-2 px-4 sm:px-5 py-2 sm:py-2.5 bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white text-xs sm:text-sm font-semibold rounded-lg transition-all shadow-lg hover:shadow-xl transform hover:scale-105">
+                                    <i class="fas fa-book text-xs"></i>
+                                    <span>Teoría</span>
+                                </a>
+                                <button onclick="event.stopPropagation(); toggleTemaEjemplos('${temaDomId}', true)" 
+                                        class="text-xs text-gray-500 dark:text-gray-400 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors">
+                                    Ver ejemplos
+                                </button>
+                            </div>
+                        ` : ''}
+                        ${index < temasToShow.length - 1 ? `
+                            <div class="hidden sm:block absolute top-14 sm:top-16 md:top-20 left-full w-8 sm:w-10 md:w-14 h-1 ${pathIsActive ? activePathColor : 'bg-gray-300 dark:bg-slate-600'} rounded-full z-0 transition-all duration-500 connection-line" style="transform: translateX(-50%);"></div>
+                        ` : ''}
+                    </div>
+                `;
+
+            });
+
+            mapHtml += '</div>'; // Cerrar flex de temas
+
+            // Agregar paneles de ejemplos después de todos los temas
+            mapHtml += '<div class="mt-10 sm:mt-12 md:mt-14 lg:mt-16 space-y-6 sm:space-y-8 md:space-y-10">';
+            temasToShow.forEach((tema, index) => {
+                const isTemaLocked = isLocked || (isCurrent && index >= temasToShow.length);
+                const temaTitulo = tema.Titulo || 'Tema';
+                const temaDomId = `tema-${nivelId}-${index}`;
+
+                if (!isTemaLocked && temaEjemplos[temaTitulo]) {
+                    const temaData = temaEjemplos[temaTitulo];
+                    mapHtml += `
+                        <div id="${temaDomId}-panel" class="hidden w-full transition-all duration-300 ease-in-out transform">
+                            <div class="bg-white dark:bg-slate-800 rounded-xl p-6 sm:p-8 md:p-10 border border-gray-200 dark:border-slate-700 shadow-md">
+                                <div class="flex items-center justify-center sm:justify-between mb-6 sm:mb-8">
+                                    <h5 class="text-base sm:text-lg md:text-xl font-semibold text-gray-900 dark:text-white flex items-center gap-2 sm:gap-3">
+                                        <div class="w-9 h-9 sm:w-10 sm:h-10 rounded-lg bg-indigo-100 dark:bg-indigo-900/30 flex items-center justify-center flex-shrink-0">
+                                            <i class="fas ${temaData.icon} text-indigo-600 dark:text-indigo-400 text-sm sm:text-base"></i>
+                                        </div>
+                                        <span class="break-words">Ejemplos de ${temaTitulo}</span>
+                                    </h5>
+                                    <button onclick="toggleTemaEjemplos('${temaDomId}', false)" class="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-slate-700 transition-colors flex-shrink-0">
+                                        <i class="fas fa-times"></i>
+                                    </button>
+                                </div>
+                                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5 sm:gap-6 md:gap-8 justify-items-center">
+                                    ${temaEjemplos[temaTitulo].ejemplos.map((ejemplo, idx) => {
+                        // Escapar HTML en el código
+                        const codigoEscapado = ejemplo.codigo
+                            .replace(/&/g, '&amp;')
+                            .replace(/</g, '&lt;')
+                            .replace(/>/g, '&gt;')
+                            .replace(/"/g, '&quot;')
+                            .replace(/'/g, '&#39;');
+                        return `
+                                        <div class="bg-white dark:bg-slate-800 rounded-lg p-5 sm:p-6 md:p-7 border border-gray-200 dark:border-slate-700 hover:shadow-lg transition-all duration-200 group shadow-sm hover:-translate-y-1 w-full max-w-sm">
+                                            <div class="flex items-center justify-center gap-2 sm:gap-3 mb-4 sm:mb-5">
+                                                <div class="w-7 h-7 sm:w-8 sm:h-8 rounded-lg bg-indigo-100 dark:bg-indigo-900/30 flex items-center justify-center flex-shrink-0">
+                                                    <span class="text-xs sm:text-sm font-semibold text-indigo-600 dark:text-indigo-400">${idx + 1}</span>
+                                                </div>
+                                                <h6 class="font-semibold text-sm sm:text-base text-gray-900 dark:text-white leading-tight text-center">${ejemplo.titulo}</h6>
+                                            </div>
+                                            <p class="text-xs sm:text-sm text-gray-600 dark:text-gray-400 mb-4 sm:mb-5 leading-relaxed text-center">${ejemplo.descripcion}</p>
+                                            <div class="relative">
+                                                <pre class="bg-slate-900 dark:bg-slate-950 text-green-400 text-xs p-3 sm:p-4 rounded-lg overflow-x-auto font-mono border border-slate-700 max-h-48 sm:max-h-64 overflow-y-auto"><code>${codigoEscapado}</code></pre>
+                                                <button onclick="copyCode(this)" class="absolute top-2 sm:top-3 right-2 sm:right-3 text-gray-400 hover:text-white p-1.5 sm:p-2 rounded bg-slate-800/90 hover:bg-slate-700 opacity-0 group-hover:opacity-100 transition-all" title="Copiar código">
+                                                    <i class="fas fa-copy text-xs"></i>
+                                                </button>
+                                            </div>
+                                        </div>
+                                    `;
+                    }).join('')}
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                }
+            });
+            mapHtml += '</div>'; // Cerrar contenedor de paneles
+
+            mapHtml += '</div></div>'; // Cerrar contenedor principal
+            return mapHtml;
+        }
+
+        // Función para mostrar/ocultar ejemplos de temas
+        window.toggleTemaEjemplos = function (temaId, show) {
+            const panel = document.getElementById(`${temaId}-panel`);
+            if (!panel) return;
+
+            // Cerrar otros paneles abiertos en el mismo nivel
+            const allPanels = document.querySelectorAll('[id$="-panel"]');
+            allPanels.forEach(p => {
+                if (p.id !== `${temaId}-panel` && !p.classList.contains('hidden')) {
+                    p.classList.add('hidden');
+                    p.classList.remove('block');
+                }
+            });
+
+            if (show) {
+                panel.classList.remove('hidden');
+                panel.classList.add('block');
+                // Animación de entrada
+                panel.style.opacity = '0';
+                panel.style.transform = 'translateY(-10px)';
+                setTimeout(() => {
+                    panel.style.transition = 'opacity 0.3s ease, transform 0.3s ease';
+                    panel.style.opacity = '1';
+                    panel.style.transform = 'translateY(0)';
+                }, 10);
+                // Scroll suave al panel
+                setTimeout(() => {
+                    panel.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+                }, 100);
+            } else {
+                panel.style.opacity = '0';
+                panel.style.transform = 'translateY(-10px)';
+                setTimeout(() => {
+                    panel.classList.add('hidden');
+                    panel.classList.remove('block');
+                }, 300);
+            }
+        };
+
+        // Función para copiar código
+        window.copyCode = function (button) {
+            const codeBlock = button.parentElement.querySelector('code');
+            if (codeBlock) {
+                const text = codeBlock.textContent || codeBlock.innerText;
+                navigator.clipboard.writeText(text).then(() => {
+                    const originalHTML = button.innerHTML;
+                    button.innerHTML = '<i class="fas fa-check text-xs text-green-400"></i>';
+                    button.classList.add('bg-green-500/20');
+                    setTimeout(() => {
+                        button.innerHTML = originalHTML;
+                        button.classList.remove('bg-green-500/20');
+                    }, 2000);
+                }).catch(err => {
+                    console.error('Error al copiar:', err);
+                    // Fallback: seleccionar texto
+                    const range = document.createRange();
+                    range.selectNode(codeBlock);
+                    window.getSelection().removeAllRanges();
+                    window.getSelection().addRange(range);
+                    try {
+                        document.execCommand('copy');
+                        button.innerHTML = '<i class="fas fa-check text-xs text-green-400"></i>';
+                        setTimeout(() => {
+                            button.innerHTML = '<i class="fas fa-copy text-xs"></i>';
+                        }, 2000);
+                    } catch (e) {
+                        console.error('Error al copiar:', e);
+                    }
+                });
+            }
+        };
+
+        async function renderRoadmap(niveles, temas, currentLevel, totalPoints, userProgress = [], progressData = null) {
+            const container = document.getElementById('roadmap-container');
+
+            if (niveles.length === 0) {
+                container.innerHTML = `
+                    <div class="bg-white dark:bg-slate-800 rounded-xl p-8 text-center border border-gray-200 dark:border-slate-700">
+                        <p class="text-gray-500 dark:text-gray-400">No hay niveles disponibles</p>
+                    </div>
+                `;
+                return;
+            }
+
+            // Estructura tipo roadmap con línea vertical mejorada
+            let html = '<div class="relative max-w-7xl mx-auto">';
+
+            // Línea vertical del roadmap con animación
+            html += '<div class="absolute left-6 sm:left-8 md:left-12 lg:left-16 top-0 bottom-0 w-1 sm:w-1.5 roadmap-line rounded-full hidden md:block z-0"></div>';
+
+            html += '<div class="relative space-y-16 sm:space-y-20 md:space-y-24 lg:space-y-28">';
+
+            // Obtener todos los problemas una vez
+            let allProblemas = [];
+            try {
+                const problemasResult = await window.api._makeRequest('/Problemas');
+                allProblemas = Array.isArray(problemasResult) ? problemasResult : (problemasResult?.data || []);
+            } catch (error) {
+                console.error("Error al cargar problemas:", error);
+            }
+
+            for (let index = 0; index < niveles.length; index++) {
+                const nivel = niveles[index];
+                const nivelOrden = nivel.orden || nivel.IdNiveles || index + 1;
+                const nivelId = nivel.IdNiveles || nivel.id;
+                const puntosRequeridos = nivel.puntosRequeridos || 0;
+                const isCompleted = nivelOrden < currentLevel;
+                const isCurrent = nivelOrden === currentLevel;
+                const isLocked = nivelOrden > currentLevel || totalPoints < puntosRequeridos;
+
+                // Filtrar temas de este nivel
+                const nivelTemas = temas.filter(t =>
+                    t.IdNivel === nivelId ||
+                    t.IdNivel === nivel.IdNiveles ||
+                    t.IdNivel === nivel.id
+                );
+
+                // Calcular progreso del nivel y contar problemas
+                let nivelProgress = 0;
+                let totalProblemas = 0;
+                let problemasCompletados = 0;
+
+                if (userProgress && userProgress.length > 0 && allProblemas.length > 0) {
+                    // Obtener problemas de este nivel
+                    const nivelProblemas = allProblemas.filter(p => {
+                        const problemaTema = temas.find(t => t.IdTemas === (p.TemaId || p.temaId || p.tema_id));
+                        return problemaTema && (problemaTema.IdNivel === nivelId || problemaTema.IdNivel === nivel.IdNiveles || problemaTema.IdNivel === nivel.id);
+                    });
+
+                    totalProblemas = nivelProblemas.length;
+                    problemasCompletados = userProgress.filter(p =>
+                        nivelProblemas.some(prob => prob.Id === (p.ProblemaId || p.problemaId || p.problema_id))
+                    ).length;
+
+                    if (nivelProblemas.length > 0) {
+                        nivelProgress = Math.round((problemasCompletados / nivelProblemas.length) * 100);
+                    }
+                }
+
+                // Determinar estilos según estado con mejoras visuales
+                let nodeClasses = 'absolute left-0 sm:left-4 md:left-8 lg:left-12 w-14 h-14 sm:w-16 sm:h-16 md:w-20 md:h-20 rounded-full flex items-center justify-center text-xl sm:text-2xl md:text-3xl shadow-xl z-20 transition-all duration-300 hover:scale-110 roadmap-node';
+                let cardClasses = 'ml-16 sm:ml-20 md:ml-28 lg:ml-36 relative rounded-2xl p-8 sm:p-10 md:p-12 lg:p-14 border-2 transition-all duration-500 level-card glass-card shadow-lg';
+                let statusText = '';
+                let statusIcon = '';
+                let badgeHtml = '';
+                let glowEffect = '';
+
+                if (isCompleted) {
+                    nodeClasses += ' bg-gradient-to-br from-green-500 to-emerald-600 dark:from-green-600 dark:to-emerald-700 border-2 border-green-400 dark:border-green-500 text-white';
+                    cardClasses += ' border-green-300 dark:border-green-700/50 completed-level';
+                    statusText = 'Completado';
+                    statusIcon = '<i class="fas fa-check-circle text-green-600 dark:text-green-400"></i>';
+                    badgeHtml = '<div class="absolute -top-3 -right-3 bg-gradient-to-br from-green-500 to-emerald-600 text-white rounded-full w-8 h-8 flex items-center justify-center shadow-lg ring-2 ring-white dark:ring-slate-800"><i class="fas fa-check text-sm"></i></div>';
+                } else if (isCurrent) {
+                    nodeClasses += ' bg-gradient-to-br from-indigo-500 via-purple-500 to-pink-500 dark:from-indigo-600 dark:via-purple-600 dark:to-pink-600 border-2 border-indigo-400 dark:border-indigo-500 text-white';
+                    cardClasses += ' border-indigo-400 dark:border-indigo-600/50 active-level';
+                    statusText = 'En Curso';
+                    statusIcon = '<i class="fas fa-play-circle text-indigo-600 dark:text-indigo-400"></i>';
+                    badgeHtml = '<div class="absolute -top-3 -right-3 bg-gradient-to-br from-yellow-400 to-orange-500 text-yellow-900 rounded-full w-8 h-8 flex items-center justify-center shadow-lg ring-2 ring-white dark:ring-slate-800 animate-pulse"><i class="fas fa-star text-sm"></i></div>';
+                    glowEffect = '<div class="absolute inset-0 rounded-2xl bg-gradient-to-r from-indigo-500/10 via-purple-500/10 to-pink-500/10 blur-xl -z-10"></div>';
+                } else {
+                    nodeClasses += ' bg-gradient-to-br from-gray-300 to-gray-400 dark:from-slate-600 dark:to-slate-700 border-2 border-gray-400 dark:border-slate-500 text-gray-600 dark:text-gray-300 opacity-60';
+                    cardClasses += ' border-gray-300 dark:border-slate-600 opacity-70';
+                    statusText = 'Bloqueado';
+                    statusIcon = '<i class="fas fa-lock text-gray-400 dark:text-gray-500"></i>';
+                }
+
+                // Generar el mapa de temas con progreso
+                const temasMapHtml = renderTemasMap(
+                    nivelTemas,
+                    isCompleted,
+                    isCurrent,
+                    isLocked,
+                    nivelId || index,
+                    progressData?.temaProgress || {},
+                    allProblemas,
+                    userProgress
+                );
+
+                html += `
+                    <div class="relative reveal">
+                        <!-- Tarjeta del nivel -->
+                        <div class="${cardClasses}">
+                            ${glowEffect}
+                            ${badgeHtml}
+                            
+                            <!-- Header del nivel -->
+                            <div class="flex flex-col sm:flex-row sm:items-center sm:justify-center gap-6 sm:gap-8 mb-8 sm:mb-10 md:mb-12">
+                                <div class="flex-1 min-w-0 text-center sm:text-left max-w-4xl mx-auto sm:mx-0">
+                                    <div class="flex items-center justify-center sm:justify-start gap-3 sm:gap-4 mb-4 sm:mb-5 flex-wrap">
+                                        <h3 class="text-xl sm:text-2xl md:text-3xl lg:text-4xl font-bold text-gray-900 dark:text-white leading-tight tracking-tight">
+                                            ${nivel.NombreNivel || `Nivel ${nivelOrden}`}
+                                        </h3>
+                                        <span class="flex-shrink-0 text-xl sm:text-2xl md:text-3xl">${statusIcon}</span>
+                                    </div>
+                                    <p class="text-gray-600 dark:text-gray-400 text-sm sm:text-base md:text-lg leading-relaxed max-w-3xl mx-auto sm:mx-0">
+                                        ${nivel.DescripcionNivel || 'Sin descripción disponible'}
+                                    </p>
+                                </div>
+                                
+                                <!-- Botón de acción -->
+                                <div class="flex-shrink-0 flex justify-center sm:justify-end">
+                                    ${isLocked
+                        ? `<button disabled class="px-5 sm:px-6 py-2.5 sm:py-3 rounded-xl bg-gradient-to-r from-gray-200 to-gray-300 dark:from-slate-700 dark:to-slate-600 text-gray-500 dark:text-gray-400 cursor-not-allowed text-sm font-semibold transition-all shadow-md">
+                                            <i class="fas fa-lock mr-2"></i>Bloqueado
+                                        </button>`
+                        : isCurrent
+                            ? `<a href="Exercises.html" class="inline-flex items-center gap-2 px-5 sm:px-6 py-2.5 sm:py-3 rounded-xl bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 hover:from-indigo-700 hover:via-purple-700 hover:to-pink-700 text-white font-semibold transition-all shadow-lg hover:shadow-xl text-sm transform hover:scale-105 relative overflow-hidden group">
+                                            <span class="absolute inset-0 bg-white/20 transform scale-x-0 group-hover:scale-x-100 transition-transform origin-left"></span>
+                                            <i class="fas fa-play mr-2 relative z-10"></i>
+                                            <span class="relative z-10">Continuar</span>
+                                        </a>`
+                            : `<button class="px-5 sm:px-6 py-2.5 sm:py-3 rounded-xl bg-gradient-to-r from-green-500 to-emerald-600 text-white font-semibold cursor-default text-sm shadow-lg">
+                                            <i class="fas fa-check mr-2"></i>Completado
+                                        </button>`
+                    }
+                                </div>
+                            </div>
+
+                            <!-- Info badges -->
+                            <div class="flex flex-wrap items-center justify-center gap-3 sm:gap-4 mb-8 sm:mb-10">
+                                <div class="group relative flex items-center gap-2 px-4 sm:px-5 py-2 sm:py-2.5 bg-gradient-to-r from-blue-50 to-cyan-50 dark:from-blue-900/20 dark:to-cyan-900/20 rounded-xl border border-blue-200 dark:border-blue-800 transition-all hover:shadow-lg hover:scale-105 cursor-help">
+                                    <i class="fas fa-signal text-blue-600 dark:text-blue-400 text-sm"></i>
+                                    <span class="text-blue-700 dark:text-blue-300 font-semibold text-xs sm:text-sm">${nivel.dificultad || 'Media'}</span>
+                                    <div class="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-3 py-2 bg-gray-900 dark:bg-slate-800 text-white text-xs rounded-lg opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none whitespace-nowrap z-50">
+                                        Dificultad del nivel
+                                        <div class="absolute top-full left-1/2 transform -translate-x-1/2 border-4 border-transparent border-t-gray-900 dark:border-t-slate-800"></div>
+                                </div>
+                                </div>
+                                <div class="group relative flex items-center gap-2 px-4 sm:px-5 py-2 sm:py-2.5 bg-gradient-to-r from-yellow-50 to-orange-50 dark:from-yellow-900/20 dark:to-orange-900/20 rounded-xl border border-yellow-200 dark:border-yellow-800 transition-all hover:shadow-lg hover:scale-105 cursor-help">
+                                    <i class="fas fa-star text-yellow-600 dark:text-yellow-400 text-sm"></i>
+                                    <span class="text-yellow-700 dark:text-yellow-300 font-semibold text-xs sm:text-sm">${puntosRequeridos} XP</span>
+                                    <div class="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-3 py-2 bg-gray-900 dark:bg-slate-800 text-white text-xs rounded-lg opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none whitespace-nowrap z-50">
+                                        Puntos requeridos
+                                        <div class="absolute top-full left-1/2 transform -translate-x-1/2 border-4 border-transparent border-t-gray-900 dark:border-t-slate-800"></div>
+                                    </div>
+                                </div>
+                                <div class="group relative flex items-center gap-2 px-4 sm:px-5 py-2 sm:py-2.5 ${isCompleted ? 'bg-gradient-to-r from-green-50 to-emerald-50 dark:from-green-900/20 dark:to-emerald-900/20 border-green-200 dark:border-green-800' : isCurrent ? 'bg-gradient-to-r from-indigo-50 to-purple-50 dark:from-indigo-900/20 dark:to-purple-900/20 border-indigo-200 dark:border-indigo-800' : 'bg-gray-100 dark:bg-slate-700 border-gray-200 dark:border-slate-600'} rounded-xl border transition-all hover:shadow-lg hover:scale-105 cursor-help">
+                                    ${statusIcon}
+                                    <span class="text-xs sm:text-sm font-semibold ${isCompleted ? 'text-green-700 dark:text-green-300' : isCurrent ? 'text-indigo-700 dark:text-indigo-300' : 'text-gray-700 dark:text-gray-300'}">${statusText}</span>
+                                    <div class="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-3 py-2 bg-gray-900 dark:bg-slate-800 text-white text-xs rounded-lg opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none whitespace-nowrap z-50">
+                                        Estado del nivel
+                                        <div class="absolute top-full left-1/2 transform -translate-x-1/2 border-4 border-transparent border-t-gray-900 dark:border-t-slate-800"></div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            ${isCurrent ? `
+                            <div class="mb-8 sm:mb-10 md:mb-12 max-w-2xl mx-auto">
+                                <div class="flex items-center justify-between text-xs sm:text-sm text-gray-600 dark:text-gray-400 mb-3 sm:mb-4">
+                                    <span class="font-semibold flex items-center gap-2">
+                                        <i class="fas fa-chart-line text-indigo-600 dark:text-indigo-400"></i>
+                                        Progreso del nivel
+                                    </span>
+                                    <span class="font-bold text-indigo-600 dark:text-indigo-400">${nivelProgress}%</span>
+                                </div>
+                                <div class="w-full bg-gray-200 dark:bg-slate-700 rounded-full h-3 sm:h-4 overflow-hidden shadow-inner progress-bar">
+                                    <div class="bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 h-full rounded-full transition-all duration-700 ease-out shadow-lg relative" style="width: ${nivelProgress}%">
+                                        <div class="absolute inset-0 bg-white/30 rounded-full"></div>
+                                    </div>
+                                </div>
+                                <div class="flex items-center justify-center gap-4 mt-3 text-xs text-gray-500 dark:text-gray-400">
+                                    <span class="flex items-center gap-1">
+                                        <i class="fas fa-check-circle text-green-500"></i>
+                                        ${problemasCompletados} completados
+                                    </span>
+                                    <span class="flex items-center gap-1">
+                                        <i class="fas fa-tasks text-indigo-500"></i>
+                                        ${totalProblemas} totales
+                                    </span>
+                                </div>
+                            </div>
+                            ` : isCompleted ? `
+                            <div class="mb-8 sm:mb-10 md:mb-12 max-w-2xl mx-auto">
+                                <div class="flex items-center justify-center gap-4 text-xs text-gray-500 dark:text-gray-400">
+                                    <span class="flex items-center gap-1">
+                                        <i class="fas fa-check-circle text-green-500"></i>
+                                        ${problemasCompletados} problemas completados
+                                    </span>
+                                </div>
+                            </div>
+                            ` : ''}
+                        </div>
+                    </div>
+                `;
+            }
+
+            html += '</div></div>';
+            container.innerHTML = html;
+
+            // Activar animaciones de scroll reveal
+            const reveals = container.querySelectorAll('.reveal');
+            const observerOptions = {
+                threshold: 0.1,
+                rootMargin: '0px 0px -100px 0px'
+            };
+
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        entry.target.classList.add('active');
+                    }
+                });
+            }, observerOptions);
+
+            reveals.forEach(reveal => observer.observe(reveal));
+
+            // Add data attributes for filtering
+            reveals.forEach((reveal, index) => {
+                const nivel = niveles[index];
+                if (nivel) {
+                    const nivelOrden = nivel.orden || nivel.IdNiveles || index + 1;
+                    const isCompleted = nivelOrden < currentLevel;
+                    const isCurrent = nivelOrden === currentLevel;
+                    const isLocked = nivelOrden > currentLevel || totalPoints < (nivel.puntosRequeridos || 0);
+
+                    reveal.setAttribute('data-level-order', nivelOrden);
+                    reveal.setAttribute('data-level-name', (nivel.NombreNivel || `Nivel ${nivelOrden}`).toLowerCase());
+                    if (isCurrent) reveal.setAttribute('data-status', 'current');
+                    else if (isCompleted) reveal.setAttribute('data-status', 'completed');
+                    else if (isLocked) reveal.setAttribute('data-status', 'locked');
+                }
+            });
+
+            // Guardar referencia al progreso para actualización
+            window.currentProgressData = progressData;
+        }
+
+        // Función para actualizar progreso (puede ser llamada desde otras páginas)
+        window.updateRoadmapProgress = async function () {
+            const userId = sessionStorage.getItem('userId');
+            if (!userId) return;
+
+            try {
+                const [user, niveles, temas] = await Promise.all([
+                    window.api.getUserById(userId),
+                    window.api.getAllNiveles(),
+                    window.api.getAllTemas()
+                ]);
+
+                const sortedNiveles = Array.isArray(niveles)
+                    ? niveles.sort((a, b) => (a.orden || 0) - (b.orden || 0))
+                    : [];
+
+                const sortedTemas = Array.isArray(temas)
+                    ? temas.sort((a, b) => (a.Orden || 0) - (b.Orden || 0))
+                    : [];
+
+                const currentLevel = user?.nivelActual || 1;
+                const totalPoints = user?.puntosTotales || 0;
+
+                // Obtener progreso del usuario
+                let userProgress = null;
+                try {
+                    const progressResult = await window.api.getProgresoByUserId(userId);
+                    userProgress = Array.isArray(progressResult) ? progressResult : (progressResult?.data || []);
+                } catch (error) {
+                    console.error("Error al cargar progreso:", error);
+                    userProgress = [];
+                }
+
+                // Obtener problemas
+                let allProblemas = [];
+                try {
+                    const problemasResult = await window.api._makeRequest('/Problemas');
+                    allProblemas = Array.isArray(problemasResult) ? problemasResult : (problemasResult?.data || []);
+                } catch (error) {
+                    console.error("Error al cargar problemas:", error);
+                }
+
+                // Calcular progreso detallado
+                const progressData = calculateDetailedProgress(
+                    sortedNiveles,
+                    sortedTemas,
+                    allProblemas,
+                    userProgress,
+                    currentLevel
+                );
+
+                // Actualizar panel de estadísticas
+                updateStatsPanel(sortedNiveles, currentLevel, totalPoints, progressData);
+
+                // Re-renderizar roadmap con nuevo progreso
+                renderRoadmap(sortedNiveles, sortedTemas, currentLevel, totalPoints, userProgress, progressData);
+            } catch (error) {
+                console.error("Error al actualizar progreso:", error);
+            }
+        };
+    </script>
+</body>
+
+</html>

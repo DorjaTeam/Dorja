@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="es" class="">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Registro - Dorja</title>
+    <link href="css/output.css" rel="stylesheet">
+</head>
+
+<body class="bg-gray-50 dark:bg-slate-900 font-sans transition-colors duration-300">
+    <div class="absolute top-5 right-5 z-10">
+        <label for="theme-toggle" class="cursor-pointer">
+            <input type="checkbox" id="theme-toggle" class="sr-only peer">
+            <div
+                class="relative w-14 h-8 bg-gray-300 peer-checked:bg-indigo-600 dark:bg-slate-700 rounded-full transition-colors duration-300">
+                <div
+                    class="absolute w-6 h-6 bg-white rounded-full left-1 top-1 peer-checked:translate-x-6 transition-transform duration-300 ease-in-out">
+                </div>
+            </div>
+        </label>
+    </div>
+    <main class="flex items-center justify-center min-h-screen py-16 px-4">
+        <div class="w-full max-w-2xl">
+            <form id="signup-form"
+                class="bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 shadow-2xl rounded-2xl p-10">
+                <h2 class="text-4xl font-bold mb-2 text-center text-gray-800 dark:text-white">Crear una Cuenta</h2>
+                <p class="text-center text-gray-500 dark:text-slate-400 mb-8">Completa tus datos para unirte a Dorja.
+                </p>
+
+                <div id="error-container"
+                    class="hidden items-center gap-3 p-3 mb-6 rounded-lg bg-red-50 dark:bg-red-500/10 border border-red-200 dark:border-red-500/30">
+                    <svg class="w-5 h-5 text-red-600 dark:text-red-400" xmlns="http://www.w3.org/2000/svg"
+                        viewBox="0 0 20 20" fill="currentColor">
+                        <path fill-rule="evenodd"
+                            d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.28 7.22a.75.75 0 00-1.06 1.06L8.94 10l-1.72 1.72a.75.75 0 101.06 1.06L10 11.06l1.72 1.72a.75.75 0 101.06-1.06L11.06 10l1.72-1.72a.75.75 0 00-1.06-1.06L10 8.94 8.28 7.22z"
+                            clip-rule="evenodd" />
+                    </svg>
+                    <p id="error-message" class="text-sm font-medium text-red-800 dark:text-red-300"></p>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-5">
+                    <div>
+                        <label class="block text-gray-600 dark:text-slate-300 text-sm font-bold mb-2"
+                            for="username">Nombre de Usuario</label>
+                        <input
+                            class="dark:text-white bg-gray-100 dark:bg-slate-700 border-2 border-transparent focus:border-indigo-500 focus:ring-0 rounded-lg w-full py-3 px-4"
+                            id="username" type="text" required>
+                    </div>
+                    <div>
+                        <label class="text-white block text-gray-600 dark:text-slate-300 text-sm font-bold mb-2"
+                            for="nombre">Nombre(s)</label>
+                        <input
+                            class="dark:text-white bg-gray-100 dark:bg-slate-700 border-2 border-transparent focus:border-indigo-500 focus:ring-0 rounded-lg w-full py-3 px-4"
+                            id="nombre" type="text" required>
+                    </div>
+                    <div>
+                        <label class="block text-gray-600 dark:text-slate-300 text-sm font-bold mb-2"
+                            for="apellidoPaterno">Apellido Paterno</label>
+                        <input
+                            class="dark:text-white bg-gray-100 dark:bg-slate-700 border-2 border-transparent focus:border-indigo-500 focus:ring-0 rounded-lg w-full py-3 px-4"
+                            id="apellidoPaterno" type="text" required>
+                    </div>
+                    <div>
+                        <label class="block text-gray-600 dark:text-slate-300 text-sm font-bold mb-2"
+                            for="apellidoMaterno">Apellido Materno</label>
+                        <input
+                            class="dark:text-white bg-gray-100 dark:bg-slate-700 border-2 border-transparent focus:border-indigo-500 focus:ring-0 rounded-lg w-full py-3 px-4"
+                            id="apellidoMaterno" type="text" required>
+                    </div>
+                    <div class="md:col-span-2">
+                        <label class="block text-gray-600 dark:text-slate-300 text-sm font-bold mb-2"
+                            for="email">Email</label>
+                        <input
+                            class="dark:text-white bg-gray-100 dark:bg-slate-700 border-2 border-transparent focus:border-indigo-500 focus:ring-0 rounded-lg w-full py-3 px-4"
+                            id="email" type="email" required>
+                    </div>
+                    <div>
+                        <label class="block text-gray-600 dark:text-slate-300 text-sm font-bold mb-2"
+                            for="password">Contraseña</label>
+                        <input
+                            class="dark:text-white bg-gray-100 dark:bg-slate-700 border-2 border-transparent focus:border-indigo-500 focus:ring-0 rounded-lg w-full py-3 px-4"
+                            id="password" type="password" required>
+                    </div>
+                    <div>
+                        <label class="block text-gray-600 dark:text-slate-300 text-sm font-bold mb-2"
+                            for="confirmPassword">Repetir Contraseña</label>
+                        <input
+                            class="dark:text-white bg-gray-100 dark:bg-slate-700 border-2 border-transparent focus:border-indigo-500 focus:ring-0 rounded-lg w-full py-3 px-4"
+                            id="confirmPassword" type="password" required>
+                    </div>
+                </div>
+                <div class="flex flex-col gap-5 mt-8">
+                    <button
+                        class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 px-4 rounded-lg transition-transform transform hover:scale-105"
+                        type="submit">Crear Cuenta</button>
+                    <p class="text-center text-sm text-gray-500 dark:text-slate-400">
+                        ¿Ya tienes una cuenta? <a class="font-bold text-indigo-600 dark:text-indigo-400 hover:underline"
+                            href="login.html">Inicia Sesión</a>
+                    </p>
+                </div>
+            </form>
+        </div>
+    </main>
+    <script src="./api.js"></script>
+    <script src="js/signup.js"></script>
+    <script src="./js/theme-toggle.js"></script>
+</body>
+
+</html>

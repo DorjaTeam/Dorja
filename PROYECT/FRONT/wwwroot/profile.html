@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="es" class="">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mi Perfil - Dorja</title>
+    <link href="css/output.css" rel="stylesheet">
+</head>
+
+<body class="bg-gray-50 dark:bg-slate-900 font-sans transition-colors duration-300">
+    <header
+        class="fixed top-0 left-0 w-full p-4 sm:p-6 flex justify-between items-center z-30 bg-white/80 dark:bg-slate-900/80 backdrop-blur-sm border-b border-gray-200 dark:border-slate-700">
+        <h1 class="text-2xl font-bold text-slate-800 dark:text-white">Dorja</h1>
+        <div class="flex items-center gap-4 sm:gap-6">
+            <a href="home.html"
+                class="flex items-center gap-2 text-slate-600 dark:text-white/80 hover:text-slate-900 dark:hover:text-white transition-colors">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                    <path fill-rule="evenodd"
+                        d="M9.707 16.707a1 1 0 01-1.414 0l-6-6a1 1 0 010-1.414l6-6a1 1 0 011.414 1.414L5.414 9H17a1 1 0 110 2H5.414l4.293 4.293a1 1 0 010 1.414z"
+                        clip-rule="evenodd" />
+                </svg>
+                Volver al Inicio
+            </a>
+            <label for="theme-toggle" class="cursor-pointer">
+                <input type="checkbox" id="theme-toggle" class="sr-only peer">
+                <div
+                    class="relative w-14 h-8 bg-gray-300 peer-checked:bg-indigo-600 dark:bg-slate-700 rounded-full transition-colors duration-300">
+                    <div
+                        class="absolute w-6 h-6 bg-white rounded-full left-1 top-1 peer-checked:translate-x-6 transition-transform duration-300 ease-in-out">
+                    </div>
+                </div>
+            </label>
+        </div>
+    </header>
+    <main class="container max-w-5xl mx-auto px-4 sm:px-8 pt-28 pb-16">
+        <div
+            class="relative bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-2xl shadow-xl mb-10">
+            <div class="h-52 sm:h-64 rounded-t-2xl overflow-hidden bg-indigo-600">
+                <img id="cover-photo" src="" alt="Foto de portada" class="w-full h-full object-cover"
+                    onerror="this.style.display='none'; this.parentElement.classList.add('bg-indigo-600');">
+            </div>
+            <div class="p-8">
+                <div class="flex flex-col sm:flex-row items-center sm:items-end gap-6 -mt-24 sm:-mt-28">
+                    <div id="profile-photo-container"
+                        class="w-32 h-32 sm:w-40 sm:h-40 rounded-full border-4 border-white dark:border-slate-800 bg-indigo-500 flex items-center justify-center">
+                        <img id="profile-photo" src="" alt="Foto de perfil"
+                            class="w-full h-full rounded-full object-cover">
+                    </div>
+                    <div class="text-center sm:text-left">
+                        <h2 id="profile-username" class="text-3xl sm:text-4xl font-bold text-gray-800 dark:text-white">
+                            Cargando...</h2>
+                        <p id="profile-email" class="text-md text-gray-500 dark:text-slate-400">Cargando...</p>
+                    </div>
+                </div>
+            </div>
+            <button id="edit-profile-btn"
+                class="absolute top-6 right-6 px-4 py-2 text-sm font-semibold bg-black/20 hover:bg-black/30 text-white rounded-lg transition-colors backdrop-blur-sm">Editar
+                Perfil</button>
+        </div>
+        <div class="grid md:grid-cols-3 gap-10">
+            <div class="md:col-span-2 flex flex-col gap-10">
+                <div
+                    class="bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 shadow-xl rounded-2xl p-8">
+                    <h3 class="text-2xl font-bold text-gray-800 dark:text-indigo-400 mb-6">Mi Avance</h3>
+                    <div id="no-progress-view"
+                        class="text-center p-10 border-2 border-dashed border-gray-300 dark:border-slate-600 rounded-xl">
+                        <p class="text-gray-500 dark:text-slate-400 mb-6 text-lg">Aún no has comenzado ningún curso.</p>
+                        <a href="Exercises.html"
+                            class="inline-block bg-indigo-600 text-white font-bold py-3 px-8 rounded-lg hover:bg-indigo-700 transition-transform transform hover:scale-105">Iniciar
+                            Curso</a>
+                    </div>
+                </div>
+                <div
+                    class="bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 shadow-xl rounded-2xl p-8">
+                    <h3 class="text-2xl font-bold text-gray-800 dark:text-indigo-400 mb-6">Logros Conseguidos</h3>
+                    <div id="achievements-container" class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div class="text-center py-8 text-gray-500 dark:text-gray-400">
+                            <i class="fas fa-spinner fa-spin text-4xl mb-4"></i>
+                            <p>Cargando logros...</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="md:col-span-1">
+                <div
+                    class="bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 shadow-xl rounded-2xl p-8">
+                    <h3 class="text-2xl font-bold text-gray-800 dark:text-indigo-400 mb-6">Configuración</h3>
+                    <div class="flex flex-col gap-4">
+                        <button id="change-password-btn"
+                            class="text-left w-full text-gray-600 dark:text-slate-300 hover:text-indigo-600 dark:hover:text-indigo-400 transition font-medium">Cambiar
+                            contraseña</button>
+                        <button id="delete-account-btn"
+                            class="text-left w-full text-red-600 dark:text-red-500 hover:text-red-800 dark:hover:text-red-400 transition font-medium">Eliminar
+                            mi cuenta</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+    <div id="edit-modal"
+        class="hidden fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex justify-center items-center p-4">
+        <div class="bg-white dark:bg-slate-800 rounded-2xl shadow-2xl max-w-md w-full">
+            <div class="p-6 border-b border-gray-200 dark:border-slate-700">
+                <h3 class="text-xl font-bold">Editar Perfil</h3>
+            </div>
+            <form id="edit-profile-form" class="p-8 flex flex-col gap-6">
+                <div>
+                    <label for="edit-username"
+                        class="block text-sm font-medium text-gray-600 dark:text-slate-300 mb-2">Nombre de
+                        Usuario</label>
+                    <input type="text" id="edit-username"
+                        class="w-full bg-gray-100 dark:bg-slate-700 border-2 border-transparent focus:border-indigo-500 focus:ring-0 rounded-lg p-3">
+                </div>
+                <div>
+                    <label for="edit-email"
+                        class="block text-sm font-medium text-gray-600 dark:text-slate-300 mb-2">Email</label>
+                    <input type="email" id="edit-email"
+                        class="w-full bg-gray-100 dark:bg-slate-700 border-2 border-transparent focus:border-indigo-500 focus:ring-0 rounded-lg p-3">
+                </div>
+                <div>
+                    <label for="profile-photo-input" class="block text-sm font-medium mb-2">Foto de perfil</label>
+                    <input type="file" id="profile-photo-input" accept="image/png, image/jpeg"
+                        class="text-sm w-full file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-indigo-50 dark:file:bg-slate-600 file:text-indigo-700 dark:file:text-slate-200 hover:file:bg-indigo-100 dark:hover:file:bg-slate-500 cursor-pointer">
+                </div>
+                <div>
+                    <label for="cover-photo-input" class="block text-sm font-medium mb-2">Foto de portada</label>
+                    <input type="file" id="cover-photo-input" accept="image/png, image/jpeg"
+                        class="text-sm w-full file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-indigo-50 dark:file:bg-slate-600 file:text-indigo-700 dark:file:text-slate-200 hover:file:bg-indigo-100 dark:hover:file:bg-slate-500 cursor-pointer">
+                </div>
+            </form>
+            <div
+                class="p-6 bg-gray-50 dark:bg-slate-800/50 border-t border-gray-200 dark:border-slate-700 flex justify-end gap-4 rounded-b-2xl">
+                <button id="cancel-edit-btn"
+                    class="px-5 py-2 text-sm font-semibold bg-gray-200 hover:bg-gray-300 dark:bg-slate-600 dark:hover:bg-slate-500 rounded-lg transition">Cancelar</button>
+                <button id="save-edit-btn"
+                    class="px-5 py-2 text-sm font-semibold bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg transition">Guardar
+                    Cambios</button>
+            </div>
+        </div>
+    </div>
+    <div id="password-modal"
+        class="hidden fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex justify-center items-center p-4"></div>
+    <div id="delete-modal"
+        class="hidden fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex justify-center items-center p-4"></div>
+    <script src="./api.js"></script>
+    <script src="./js/achievements.js"></script>
+    <script src="./js/profile.js"></script>
+    <script src="./js/theme-toggle.js"></script>
+</body>
+
+</html>

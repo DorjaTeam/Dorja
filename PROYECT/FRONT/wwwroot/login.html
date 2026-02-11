@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="es" class="">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Iniciar Sesión - Dorja</title>
+    <link href="css/output.css" rel="stylesheet">
+    <style>
+        .animate-delay-200 {
+            animation-delay: 200ms;
+        }
+
+        .animate-delay-400 {
+            animation-delay: 400ms;
+        }
+    </style>
+</head>
+
+<body class="bg-gray-50 dark:bg-slate-900 font-sans transition-colors duration-300">
+
+    <main class="grid lg:grid-cols-2 min-h-screen">
+
+        <div
+            class="relative hidden lg:flex flex-col items-center justify-center bg-gradient-to-br from-indigo-500 via-purple-500 to-fuchsia-500 p-12 text-white text-center animate-gradient-xy [background-size:200%_200%] overflow-hidden">
+            <div
+                class="absolute inset-0 [background:radial-gradient(600px_at_var(--mouse-x)_var(--mouse-y),_rgba(255,255,255,0.1),_transparent_80%)]">
+            </div>
+            <div class="z-10 animate-fade-in-up opacity-0">
+                <h1 class="text-6xl font-extrabold mb-4">Bienvenido a Dorja</h1>
+                <p class="text-xl max-w-md">Tu plataforma para dominar las bases matemáticas de la programación.</p>
+            </div>
+            <img src="./assets/capibara.gif" alt="Mascota de Dorja"
+                class="w-full max-w-sm rounded-2xl shadow-2xl mt-10 z-10 animate-fade-in-up opacity-0 animate-delay-200">
+        </div>
+
+        <div class="flex flex-col items-center justify-center p-8 animate-fade-in-up opacity-0 animate-delay-400">
+            <div class="w-full max-w-md">
+                <div class="absolute top-5 right-5 lg:hidden">
+                    <label for="theme-toggle-mobile" class="cursor-pointer">
+                        <input type="checkbox" id="theme-toggle-mobile" class="sr-only peer">
+                        <div
+                            class="relative w-14 h-8 bg-gray-300 peer-checked:bg-indigo-600 dark:bg-slate-700 rounded-full">
+                            <div
+                                class="absolute w-6 h-6 bg-white rounded-full left-1 top-1 peer-checked:translate-x-6 transition-transform">
+                            </div>
+                        </div>
+                    </label>
+                </div>
+
+                <form id="login-form"
+                    class="bg-white/80 dark:bg-slate-800/60 backdrop-blur-lg border border-gray-200 dark:border-slate-700 shadow-2xl rounded-2xl p-10">
+
+                    <h2 class="text-4xl font-bold mb-2 text-center text-gray-800 dark:text-white">Iniciar Sesión</h2>
+                    <p class="text-center text-gray-500 dark:text-slate-400 mb-8">Ingresa tus credenciales para
+                        continuar.</p>
+
+                    <div id="error-container"
+                        class="hidden items-center gap-3 p-3 mb-6 rounded-lg bg-red-50 dark:bg-red-500/10 border border-red-200 dark:border-red-500/30">
+                        <svg class="w-5 h-5 text-red-600 dark:text-red-400" xmlns="http://www.w3.org/2000/svg"
+                            viewBox="0 0 20 20" fill="currentColor">
+                            <path fill-rule="evenodd"
+                                d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.28 7.22a.75.75 0 00-1.06 1.06L8.94 10l-1.72 1.72a.75.75 0 101.06 1.06L10 11.06l1.72 1.72a.75.75 0 101.06-1.06L11.06 10l1.72-1.72a.75.75 0 00-1.06-1.06L10 8.94 8.28 7.22z"
+                                clip-rule="evenodd" />
+                        </svg>
+                        <p id="error-message" class="text-sm font-medium text-red-800 dark:text-red-300"></p>
+                    </div>
+
+                    <div class="mb-5">
+                        <label class="block text-gray-600 dark:text-slate-300 text-sm font-bold mb-2"
+                            for="username">Nombre de Usuario</label>
+                        <input
+                            class="bg-gray-100 dark:bg-slate-700 border-2 border-transparent focus:border-indigo-500 focus:ring-0 rounded-lg w-full py-3 px-4 text-gray-800 dark:text-gray-200 transition"
+                            id="username" type="text" required>
+                    </div>
+                    <div class="mb-6">
+                        <label class="block text-gray-600 dark:text-slate-300 text-sm font-bold mb-2"
+                            for="password">Contraseña</label>
+                        <input
+                            class="bg-gray-100 dark:bg-slate-700 border-2 border-transparent focus:border-indigo-500 focus:ring-0 rounded-lg w-full py-3 px-4 text-gray-800 dark:text-gray-200 transition"
+                            id="password" type="password" required>
+                    </div>
+                    <div class="flex items-center justify-between mb-8">
+                        <label class="flex items-center text-sm">
+                            <input type="checkbox"
+                                class="h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500">
+                            <span class="ml-2 text-gray-600 dark:text-slate-300">Recordarme</span>
+                        </label>
+                        <a href="#"
+                            class="text-sm font-bold text-indigo-600 hover:underline dark:text-indigo-400">¿Olvidaste tu
+                            contraseña?</a>
+                    </div>
+                    <div class="flex flex-col gap-5">
+                        <button
+                            class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 px-4 rounded-lg transition-transform transform hover:scale-105"
+                            type="submit">Entrar</button>
+                        <p class="text-center text-sm text-gray-500 dark:text-slate-400">
+                            ¿No tienes una cuenta? <a
+                                class="font-bold text-indigo-600 dark:text-indigo-400 hover:underline"
+                                href="signup.html">Regístrate</a>
+                        </p>
+                    </div>
+                </form>
+            </div>
+            <div class="hidden lg:block absolute bottom-5 right-5">
+                <label for="theme-toggle" class="cursor-pointer">
+                    <input type="checkbox" id="theme-toggle" class="sr-only peer">
+                    <div
+                        class="relative w-14 h-8 bg-gray-300 peer-checked:bg-indigo-600 dark:bg-slate-700 rounded-full">
+                        <div
+                            class="absolute w-6 h-6 bg-white rounded-full left-1 top-1 peer-checked:translate-x-6 transition-transform">
+                        </div>
+                    </div>
+                </label>
+            </div>
+        </div>
+    </main>
+
+    <script src="./api.js"></script>
+    <script>
+        // Verify api.js loaded correctly
+        if (typeof window.api === 'undefined') {
+            console.error('api.js failed to load! Check the browser console for 404 errors.');
+            alert('Error: No se pudo cargar la API. Por favor, recarga la página.');
+        } else {
+            console.log('api.js loaded successfully');
+        }
+    </script>
+    <script src="./js/ui.js"></script>
+    <script src="./js/login.js"></script>
+    <script src="./js/theme-toggle.js"></script>
+</body>
+
+</html>

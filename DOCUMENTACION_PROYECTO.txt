@@ -1,0 +1,1235 @@
+================================================================================
+                    DOCUMENTACIÓN COMPLETA DEL PROYECTO DORJA
+                    Plataforma Educativa de Programación
+================================================================================
+
+FECHA DE DOCUMENTACIÓN: 2024
+VERSIÓN: 1.0.0
+
+================================================================================
+1. DESCRIPCIÓN GENERAL DEL PROYECTO
+================================================================================
+
+Dorja es una plataforma educativa de programación que permite a los estudiantes
+aprender programación de manera estructurada y progresiva. El sistema incluye:
+
+- Sistema de autenticación de usuarios
+- Gestión de niveles y temas de aprendizaje
+- Ejercicios de programación interactivos
+- Validación automática de código (Python y C#)
+- Sistema de logros y certificados
+- Seguimiento de progreso individual
+- Aplicación de escritorio con Electron
+- Base de datos SQLite embebida
+
+ARQUITECTURA:
+- Backend: ASP.NET Core Web API (C#)
+- Frontend: HTML5, CSS3, JavaScript (Vanilla)
+- Base de Datos: SQLite (embebida)
+- Desktop App: Electron
+- Editor de Código: Monaco Editor
+
+================================================================================
+2. ESTRUCTURA DEL PROYECTO
+================================================================================
+
+DORJA-MVC-2/
+│
+├── main.js                          # Archivo principal de Electron
+├── package.json                     # Configuración de Node.js/Electron
+├── package-lock.json                # Lock file de dependencias
+│
+└── PROYECT/
+    │
+    ├── BACK/                        # Backend API (ASP.NET Core)
+    │   ├── Controllers/             # Controladores de la API
+    │   │   ├── UsersController.cs
+    │   │   ├── PythonController.cs
+    │   │   ├── ProblemasController.cs
+    │   │   ├── TemasController.cs
+    │   │   ├── NivelesController.cs
+    │   │   ├── LogrosController.cs
+    │   │   ├── Logros_UsuarioController.cs
+    │   │   ├── CertificadoController.cs
+    │   │   ├── Progreso_ProblemasRepository.cs
+    │   │   └── ExerciseController.cs
+    │   ├── Services/                 # Servicios de negocio
+    │   │   └── ExerciseService.cs
+    │   ├── DatabaseInitializer.cs    # Inicialización de BD
+    │   ├── Program.cs                # Punto de entrada
+    │   ├── appsettings.json          # Configuración
+    │   ├── BACK.csproj               # Proyecto .NET
+    │   └── dorja.db                  # Base de datos SQLite
+    │
+    ├── Clases/                       # Modelos de dominio
+    │   ├── Users.cs
+    │   ├── Niveles.cs
+    │   ├── Temas.cs
+    │   ├── Problema.cs
+    │   ├── Progreso_Problema.cs
+    │   ├── Logros.cs
+    │   ├── Logros_Usuario.cs
+    │   ├── Certificados.cs
+    │   ├── SyllabusSection.cs
+    │   ├── ProgresoUsuario.cs
+    │   └── UsuarioEjercicio.cs
+    │
+    ├── ModelsData/                   # Capa de acceso a datos
+    │   ├── Repositories/             # Repositorios (Patrón Repository)
+    │   │   ├── UsuersRepository.cs
+    │   │   ├── NivelesRepository.cs
+    │   │   ├── TemasRepository.cs
+    │   │   ├── ProblemaRepository.cs
+    │   │   ├── Progreso_ProblemaRepository.cs
+    │   │   ├── LogrosRepository.cs
+    │   │   ├── Logros_UsuarioRepository.cs
+    │   │   ├── CertificadoRepository.cs
+    │   │   ├── SyllabusSectionRepository.cs
+    │   │   ├── ProgresoUsuarioRepository.cs
+    │   │   └── UsuarioEjercicioRepository.cs
+    │   └── SQLiteConfiguration.cs
+    │
+    └── FRONT/                        # Frontend (ASP.NET Core Static Files)
+        ├── wwwroot/                  # Archivos estáticos
+        │   ├── api.js                # Cliente API JavaScript
+        │   ├── home.html             # Página principal
+        │   ├── login.html            # Página de login
+        │   ├── signup.html           # Página de registro
+        │   ├── profile.html          # Perfil de usuario
+        │   ├── Exercises.html        # Editor de ejercicios
+        │   ├── niveles.html          # Vista de niveles
+        │   ├── theory.html           # Teoría
+        │   ├── css/                  # Estilos
+        │   │   ├── styles.css
+        │   │   └── output.css        # Tailwind CSS compilado
+        │   ├── js/                   # Scripts JavaScript
+        │   │   ├── renderer.js       # Renderizado de home
+        │   │   ├── login.js          # Lógica de login
+        │   │   ├── signup.js         # Lógica de registro
+        │   │   ├── profile.js        # Gestión de perfil
+        │   │   ├── problems-renderer.js
+        │   │   ├── curriculum-manager.js
+        │   │   ├── monaco-init.js    # Inicialización Monaco Editor
+        │   │   ├── achievements.js   # Sistema de logros
+        │   │   ├── theme-toggle.js   # Toggle tema oscuro/claro
+        │   │   ├── dropdown.js       # Menús desplegables
+        │   │   ├── ui.js             # Utilidades UI
+        │   │   └── cargar_problemas.js
+        │   └── preload.js            # Preload script para Electron
+        │   └── Program.cs            # Servidor de archivos estáticos
+
+================================================================================
+3. TECNOLOGÍAS Y DEPENDENCIAS
+================================================================================
+
+BACKEND (.NET):
+- .NET 10.0
+- ASP.NET Core Web API
+- Microsoft.Data.Sqlite (9.0.0)
+- Dapper (2.1.66)
+- Swashbuckle.AspNetCore (9.0.6)
+
+FRONTEND:
+- HTML5
+- CSS3 (Tailwind CSS)
+- JavaScript (ES6+)
+- Monaco Editor (Editor de código)
+- Font Awesome 6.4.0
+
+DESKTOP APP:
+- Electron (^28.0.0)
+- electron-builder (^24.9.1)
+
+BASE DE DATOS:
+- SQLite (embebida)
+- Archivo: dorja.db (se crea automáticamente)
+
+================================================================================
+4. ESQUEMA DE BASE DE DATOS
+================================================================================
+
+TABLA: users
+-----------
+- id (INTEGER PRIMARY KEY)
+- username (TEXT NOT NULL)
+- nombre (TEXT NOT NULL)
+- apellidoPaterno (TEXT NOT NULL)
+- apellidoMaterno (TEXT NOT NULL)
+- email (TEXT NOT NULL UNIQUE)
+- password (TEXT NOT NULL) - Hash SHA256
+- fechaRegistro (TEXT NOT NULL)
+- ultimaConexion (TEXT)
+- puntosTotales (INTEGER DEFAULT 0)
+- nivelActual (INTEGER DEFAULT 1)
+- profilePhotoPath (TEXT DEFAULT '')
+- coverPhotoPath (TEXT DEFAULT '')
+- profilePhotoBlob (BLOB)
+- coverPhotoBlob (BLOB)
+
+TABLA: niveles
+--------------
+- id (INTEGER PRIMARY KEY)
+- nombre (TEXT NOT NULL)
+- descripcion (TEXT)
+- dificultad (TEXT)
+- orden (INTEGER)
+- puntosRequeridos (INTEGER DEFAULT 0)
+
+TABLA: temas
+-----------
+- id (INTEGER PRIMARY KEY)
+- nivel_id (INTEGER) - FK a niveles
+- titulo (TEXT NOT NULL)
+- descripcion (TEXT)
+- orden (INTEGER)
+- locked (INTEGER DEFAULT 1)
+- puntos_requeridos (INTEGER DEFAULT 0)
+
+TABLA: problemas
+---------------
+- id (INTEGER PRIMARY KEY)
+- tema_id (INTEGER) - FK a temas
+- titulo (TEXT NOT NULL)
+- descripcion (TEXT)
+- ejemplo (TEXT)
+- dificultad (TEXT)
+- codigo_inicial (TEXT)
+- solucion (TEXT)
+- orden (INTEGER)
+- locked (INTEGER DEFAULT 1)
+- puntos_otorgados (INTEGER DEFAULT 10)
+
+TABLA: progreso_problema
+-----------------------
+- id (INTEGER PRIMARY KEY)
+- user_id (INTEGER) - FK a users
+- problema_id (INTEGER) - FK a problemas
+- completado (INTEGER DEFAULT 0)
+- puntuacion (INTEGER DEFAULT 0)
+- intentos (INTEGER DEFAULT 0)
+- ultimo_codigo (TEXT)
+- fecha_completado (TEXT)
+
+TABLA: logros
+-----------
+- id (INTEGER PRIMARY KEY)
+- nombre (TEXT NOT NULL)
+- descripcion (TEXT)
+- iconoPhoto (TEXT)
+
+TABLA: logros_usuario
+--------------------
+- id (INTEGER PRIMARY KEY)
+- user_id (INTEGER) - FK a users
+- logro_id (INTEGER) - FK a logros
+- fechaDesbloqueo (TEXT)
+
+TABLA: certificados
+-----------------
+- id (INTEGER PRIMARY KEY)
+- user_id (INTEGER) - FK a users
+- nivel_id (INTEGER) - FK a niveles
+- rutaPDF (TEXT)
+- fechaGenerado (TEXT)
+
+================================================================================
+5. API ENDPOINTS - BACKEND
+================================================================================
+
+BASE URL: http://localhost:5222/api
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+USERS CONTROLLER (/api/Users)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+GET    /api/Users
+       Obtiene todos los usuarios
+       Response: Array de objetos Users
+
+GET    /api/Users/{id}
+       Obtiene un usuario por ID
+       Response: Objeto Users
+
+POST   /api/Users
+       Crea un nuevo usuario
+       Body: { username, nombre, apellidoPaterno, apellidoMaterno, email, password }
+       Response: Created
+
+PUT    /api/Users
+       Actualiza un usuario existente
+       Body: { id, username, email, nombre, apellidoPaterno, apellidoMaterno, ... }
+       Response: Objeto Users actualizado
+
+DELETE /api/Users?id={id}
+       Elimina un usuario
+       Response: NoContent
+
+POST   /api/Users/signup
+       Registro de nuevo usuario
+       Body: { username, email, password, nombre, apellidoPaterno, apellidoMaterno }
+       Response: { message, userId, achievementGranted }
+
+POST   /api/Users/login
+       Inicio de sesión
+       Body: { username/email, password }
+       Response: { message, user: { id, username, email, ... } }
+
+POST   /api/Users/{userId}/upload-image
+       Sube imagen de perfil o portada
+       FormData: file, imageType ("profile" | "cover")
+       Response: { success, message, path, achievementGranted }
+
+POST   /api/Users/{userId}/upload-image-blob
+       Sube imagen como BLOB en base de datos
+       FormData: file, imageType
+       Response: { success, message, storageType, size }
+
+GET    /api/Users/{userId}/image-blob?imageType={type}
+       Obtiene imagen BLOB de la base de datos
+       Response: File (imagen)
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+PYTHON CONTROLLER (/api/Python)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+POST   /api/Python/execute
+       Ejecuta código Python o C#
+       Body: { code, language ("python" | "csharp"), userId? }
+       Response: { success, output, achievementGranted? }
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+PROBLEMAS CONTROLLER (/api/Problemas)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+GET    /api/Problemas
+       Obtiene todos los problemas
+       Response: Array de objetos Problema
+
+GET    /api/Problemas/{id}
+       Obtiene un problema por ID
+       Response: Objeto Problema
+
+POST   /api/Problemas
+       Crea un nuevo problema
+       Body: Objeto Problema completo
+       Response: Created
+
+PUT    /api/Problemas
+       Actualiza un problema
+       Body: Objeto Problema
+       Response: NoContent
+
+DELETE /api/Problemas/{id}
+       Elimina un problema
+       Response: NoContent
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+TEMAS CONTROLLER (/api/Temas)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+GET    /api/Temas
+       Obtiene todos los temas
+       Response: Array de objetos Temas
+
+GET    /api/Temas/{id}
+       Obtiene un tema por ID
+       Response: Objeto Temas
+
+POST   /api/Temas
+       Crea un nuevo tema
+       Body: Objeto Temas
+       Response: Created
+
+PUT    /api/Temas
+       Actualiza un tema
+       Body: Objeto Temas
+       Response: NoContent
+
+DELETE /api/Temas/{id}
+       Elimina un tema
+       Response: NoContent
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+NIVELES CONTROLLER (/api/Niveles)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+GET    /api/Niveles
+       Obtiene todos los niveles
+       Response: Array de objetos Niveles
+
+GET    /api/Niveles/{id}
+       Obtiene un nivel por ID
+       Response: Objeto Niveles
+
+POST   /api/Niveles
+       Crea un nuevo nivel
+       Body: Objeto Niveles
+       Response: Created
+
+PUT    /api/Niveles
+       Actualiza un nivel
+       Body: Objeto Niveles
+       Response: NoContent
+
+DELETE /api/Niveles/{id}
+       Elimina un nivel
+       Response: NoContent
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+LOGROS CONTROLLER (/api/Logros)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+GET    /api/Logros
+       Obtiene todos los logros
+       Response: Array de objetos Logros
+
+GET    /api/Logros/{id}
+       Obtiene un logro por ID
+       Response: Objeto Logros
+
+GET    /api/Logros/by-name/{nombre}
+       Obtiene un logro por nombre
+       Response: Objeto Logros
+
+POST   /api/Logros
+       Crea un nuevo logro
+       Body: Objeto Logros
+       Response: Created
+
+PUT    /api/Logros
+       Actualiza un logro
+       Body: Objeto Logros
+       Response: NoContent
+
+DELETE /api/Logros/{id}
+       Elimina un logro
+       Response: NoContent
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+LOGROS_USUARIO CONTROLLER (/api/Logros_Usuario)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+GET    /api/Logros_Usuario
+       Obtiene todos los logros de usuarios
+       Response: Array de objetos Logros_Usuario
+
+GET    /api/Logros_Usuario/{id}
+       Obtiene un logro de usuario por ID
+       Response: Objeto Logros_Usuario
+
+GET    /api/Logros_Usuario/user/{userId}
+       Obtiene logros de un usuario específico
+       Response: Array de objetos Logros_Usuario
+
+POST   /api/Logros_Usuario
+       Asigna un logro a un usuario
+       Body: { user_id, logro_id, fechaDesbloqueo }
+       Response: Created
+
+POST   /api/Logros_Usuario/grant
+       Otorga un logro a un usuario
+       Body: { UserId, LogroId }
+       Response: { success, message }
+
+PUT    /api/Logros_Usuario
+       Actualiza un logro de usuario
+       Body: Objeto Logros_Usuario
+       Response: NoContent
+
+DELETE /api/Logros_Usuario?id={id}
+       Elimina un logro de usuario
+       Response: NoContent
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+CERTIFICADOS CONTROLLER (/api/Certificados)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+GET    /api/Certificados
+       Obtiene todos los certificados
+       Response: Array de objetos Certificados
+
+GET    /api/Certificados/{id}
+       Obtiene un certificado por ID
+       Response: Objeto Certificados
+
+POST   /api/Certificados
+       Crea un nuevo certificado
+       Body: Objeto Certificados
+       Response: Created
+
+PUT    /api/Certificados
+       Actualiza un certificado
+       Body: Objeto Certificados
+       Response: NoContent
+
+DELETE /api/Certificados?id={id}
+       Elimina un certificado
+       Response: NoContent
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+PROGRESO_PROBLEMA CONTROLLER (/api/Progreso_Problema)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+GET    /api/Progreso_Problema
+       Obtiene todo el progreso de problemas
+       Response: Array de objetos Progreso_Problema
+
+GET    /api/Progreso_Problema/{id}
+       Obtiene progreso por ID
+       Response: Objeto Progreso_Problema
+
+GET    /api/Progreso_Problema?userId={userId}
+       Obtiene progreso de un usuario
+       Response: Array de objetos Progreso_Problema
+
+POST   /api/Progreso_Problema
+       Crea registro de progreso
+       Body: Objeto Progreso_Problema
+       Response: Created
+
+PUT    /api/Progreso_Problema
+       Actualiza progreso
+       Body: Objeto Progreso_Problema
+       Response: NoContent
+
+DELETE /api/Progreso_Problema/{id}
+       Elimina progreso
+       Response: NoContent
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+EXERCISE CONTROLLER (/api/Exercise)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+GET    /api/Exercise/next/{userId}
+       Obtiene el siguiente ejercicio único para el usuario
+       Respeta el orden del sílabo y previene repeticiones
+       Response: Objeto Problema
+
+POST   /api/Exercise/validate
+       Valida una solución y actualiza el progreso
+       Body: { UserId, ProblemaId, Codigo, Language? }
+       Response: { IsCorrect, Message, PuntosOtorgados }
+
+================================================================================
+6. MODELOS DE DATOS (CLASES)
+================================================================================
+
+USERS
+-----
+- Id: int
+- Username: string
+- Nombre: string
+- ApellidoPaterno: string
+- ApellidoMaterno: string
+- Email: string
+- Password: string (Hash SHA256)
+- ProfilePhotoPath: string
+- CoverPhotoPath: string
+- FechaRegistro: DateTime
+- UltimaConexion: DateTime?
+- PuntosTotales: int
+- NivelActual: int
+
+NIVELES
+-------
+- IdNiveles: int
+- NombreNivel: string
+- DescripcionNivel: string
+- dificultad: string
+- orden: int
+- puntosRequeridos: int
+
+TEMAS
+-----
+- IdTemas: int
+- IdNivel: int
+- Titulo: string
+- Descripcion: string
+- Orden: int
+- Locked: bool
+- PuntosRequeridos: int
+
+PROBLEMA
+--------
+- Id: int
+- TemaId: int
+- Titulo: string
+- Descripcion: string
+- Ejemplo: string
+- Dificultad: string
+- CodigoInicial: string
+- Solucion: string
+- Orden: int
+- Locked: bool
+- PuntosOtorgados: int
+
+PROGRESO_PROBLEMA
+-----------------
+- Id: int
+- UserId: int
+- ProblemaId: int
+- Completado: bool
+- Puntuacion: int
+- Intentos: int
+- UltimoCodigo: string
+- FechaCompletado: DateTime?
+
+LOGROS
+------
+- Id: int
+- Nombre: string
+- Descripcion: string
+- iconoPhoto: string
+
+LOGROS_USUARIO
+-------------
+- id: int
+- Id_Usuario: int
+- Id_Logro: int
+- Fecha_Obtencion: DateTime
+
+CERTIFICADOS
+-----------
+- idCertificados: int
+- Id_User: int
+- Nivel_Id: int
+- rutaPDF: string
+- fechaGenerado: DateTime
+
+================================================================================
+7. FUNCIONALIDADES DEL FRONTEND
+================================================================================
+
+ARCHIVO: api.js
+---------------
+Cliente API JavaScript que maneja todas las comunicaciones con el backend.
+Funciones principales:
+- signup(): Registro de usuario
+- login(): Inicio de sesión
+- getUserById(): Obtener datos de usuario
+- updateUserProfile(): Actualizar perfil
+- deleteUserAccount(): Eliminar cuenta
+- saveImage(): Subir imágenes
+- executePython() / executeCode(): Ejecutar código
+- cargarTemas(): Cargar temas
+- cargarProblemas(): Cargar problemas
+- obtenerProblema(): Obtener problema específico
+- getAllNiveles(): Obtener niveles
+- getAllTemas(): Obtener temas
+- getAllLogros(): Obtener logros
+- getLogrosByUserId(): Obtener logros de usuario
+
+ARCHIVO: home.html
+------------------
+Página principal con:
+- Lobby de progreso (puntos, nivel actual, barra de progreso)
+- Tarjeta de próximo nivel
+- Acciones rápidas
+- Sección de sílabo expandible
+- Notificaciones
+- Menú de usuario
+
+ARCHIVO: Exercises.html
+----------------------
+Editor de ejercicios con:
+- Sidebar de temas (temario)
+- Sidebar de problemas
+- Editor de código (Monaco Editor)
+- Consola de salida
+- Botones de ejecutar y verificar
+- Selector de nivel
+- Selector de lenguaje (Python/C#)
+
+ARCHIVO: profile.html
+---------------------
+Perfil de usuario con:
+- Foto de perfil y portada editables
+- Información del usuario
+- Sección de avance
+- Logros conseguidos
+- Configuración (cambiar contraseña, eliminar cuenta)
+
+ARCHIVO: login.html / signup.html
+---------------------------------
+Páginas de autenticación con validación de formularios.
+
+ARCHIVO: renderer.js
+-------------------
+Inicializa la página home:
+- Carga datos del usuario
+- Carga progreso
+- Carga próximo nivel
+- Carga sílabo
+
+ARCHIVO: problems-renderer.js
+----------------------------
+Gestiona la visualización de problemas:
+- Renderiza sidebar de temas
+- Renderiza lista de problemas
+- Carga problema seleccionado
+- Maneja navegación entre problemas
+- Verifica soluciones
+
+ARCHIVO: curriculum-manager.js
+------------------------------
+Gestiona el currículum:
+- Carga temas por nivel
+- Carga problemas por tema
+- Verifica soluciones
+- Marca problemas como completados
+
+ARCHIVO: achievements.js
+-----------------------
+Sistema de logros:
+- Carga logros del usuario
+- Muestra popups de logros desbloqueados
+- Renderiza logros en la UI
+
+ARCHIVO: monaco-init.js
+----------------------
+Inicializa Monaco Editor:
+- Configuración del editor
+- Resaltado de sintaxis
+- Autocompletado
+- Temas (claro/oscuro)
+
+================================================================================
+8. SISTEMA DE SÍLABO Y PROGRESO
+================================================================================
+
+El sistema implementa un sílabo estricto que debe seguirse en orden:
+
+SÍLABO OFICIAL:
+---------------
+2. Introduction to Programming
+   2.1 Basic concepts
+   2.2 Characteristics of a programming language
+   2.3 Basic structure of a program
+   2.4 Language elements: data types, literals, constants, variables, 
+       identifiers, parameters, operators, and output
+   2.5 Program translation: compilation, linking, execution, and errors
+
+3. Control Flow
+   3.1 Sequential structures
+   3.2 Selective structures: simple, double, and multiple
+   3.3 Iterative structures: while, repeat-until, for
+
+4. Data Organization
+   4.1 Arrays
+   4.2 One-dimensional arrays: basic concepts, operations, and applications
+   4.3 Multidimensional arrays: basic concepts, operations, and applications
+   4.4 Structures/records
+
+5. Modularity
+   5.1 Declaration and use of modules
+   5.2 Parameter/argument passing
+   5.3 Implementation
+
+REGLAS DE PROGRESO:
+------------------
+1. Los usuarios NO pueden saltar niveles o secciones
+2. Deben completar todos los ejercicios anteriores antes de desbloquear
+   el siguiente
+3. Cada ejercicio se asigna de forma única (no se repiten)
+4. El sistema valida que se completen los prerrequisitos antes de
+   permitir acceso a contenido nuevo
+5. El progreso se guarda automáticamente en la base de datos
+
+VALIDACIÓN DE EJERCICIOS:
+-------------------------
+- El código del usuario se compara con la solución esperada
+- Se normaliza el código (elimina espacios, comentarios, etc.)
+- Se verifica funcionalmente (comparación de patrones clave)
+- Se registran intentos y puntuación
+- Se otorgan puntos al completar correctamente
+
+PREVENCIÓN DE REPETICIÓN:
+------------------------
+- Cada ejercicio asignado a un usuario se marca como único
+- El sistema genera variantes de ejercicios cuando se agotan los originales
+- Los parámetros únicos se almacenan para evitar duplicados
+
+================================================================================
+9. CONFIGURACIÓN Y PUESTA EN MARCHA
+================================================================================
+
+REQUISITOS PREVIOS:
+------------------
+1. .NET SDK 10.0 o superior
+2. Node.js 18+ y npm
+3. Python 3.x (para ejecutar código Python)
+4. Visual Studio 2022 o VS Code (opcional)
+
+INSTALACIÓN:
+-----------
+
+1. Instalar dependencias de Node.js:
+   cd DORJA-MVC-2
+   npm install
+
+2. Restaurar paquetes NuGet:
+   cd PROYECT/BACK
+   dotnet restore
+
+   cd ../FRONT
+   dotnet restore
+
+EJECUCIÓN COMO APLICACIÓN DE ESCRITORIO (Electron):
+---------------------------------------------------
+
+Opción 1 - Automático (Electron inicia el backend):
+   npm start
+
+Opción 2 - Manual (más control):
+   Terminal 1:
+   cd PROYECT/BACK
+   dotnet run
+
+   Terminal 2:
+   npm start
+
+EJECUCIÓN COMO APLICACIÓN WEB:
+------------------------------
+
+Terminal 1 - Backend:
+   cd PROYECT/BACK
+   dotnet run
+   (Servidor en http://localhost:5222)
+
+Terminal 2 - Frontend:
+   cd PROYECT/FRONT
+   dotnet run
+   (Abrir navegador en la URL mostrada)
+
+CONFIGURACIÓN DE BASE DE DATOS:
+------------------------------
+La base de datos SQLite se crea automáticamente en:
+- PROYECT/BACK/dorja.db
+
+La inicialización incluye:
+- Creación de todas las tablas
+- Datos semilla (niveles, temas, problemas, logros)
+- Estructura del sílabo
+
+CONFIGURACIÓN DE CONEXIÓN:
+------------------------
+Archivo: PROYECT/BACK/appsettings.json
+{
+  "ConnectionStrings": {
+    "DorjaConnection": "Data Source=dorja.db"
+  }
+}
+
+================================================================================
+10. FLUJO DE USUARIO TÍPICO
+================================================================================
+
+1. REGISTRO:
+   - Usuario accede a signup.html
+   - Completa formulario (username, email, password, nombre, apellidos)
+   - Sistema valida datos y crea cuenta
+   - Se otorga logro "Crear cuenta"
+   - Redirección a login.html
+
+2. LOGIN:
+   - Usuario ingresa credenciales
+   - Sistema valida y crea sesión
+   - Se guarda userId en sessionStorage
+   - Redirección a home.html
+
+3. HOME (Lobby):
+   - Muestra progreso del usuario (puntos, nivel)
+   - Próximo nivel disponible
+   - Acciones rápidas
+   - Sílabo completo (expandible)
+   - Notificaciones
+
+4. EJERCICIOS:
+   - Usuario accede a Exercises.html
+   - Selecciona nivel (si tiene acceso)
+   - Ve temas disponibles (bloqueados/desbloqueados)
+   - Selecciona tema
+   - Ve problemas del tema
+   - Selecciona problema
+   - Escribe código en editor
+   - Ejecuta código (prueba)
+   - Verifica solución
+   - Si es correcta: se marca como completado, otorga puntos
+   - Si es incorrecta: muestra error, incrementa intentos
+
+5. PROGRESO:
+   - Al completar ejercicios, se actualiza progreso
+   - Se desbloquean nuevos temas/niveles
+   - Se otorgan logros automáticamente
+   - Se actualiza nivel actual del usuario
+
+6. PERFIL:
+   - Usuario puede ver su información
+   - Editar username y email
+   - Subir foto de perfil y portada
+   - Ver logros conseguidos
+   - Cambiar contraseña
+   - Eliminar cuenta
+
+================================================================================
+11. SISTEMA DE LOGROS
+================================================================================
+
+LOGROS PREDEFINIDOS:
+-------------------
+1. "Crear cuenta" - Se otorga al registrarse
+2. "Personalizar perfil" - Se otorga al subir foto de perfil
+3. "Tu primer código" - Se otorga al ejecutar código por primera vez
+
+OTORGAMIENTO AUTOMÁTICO:
+-----------------------
+Los logros se otorgan automáticamente cuando:
+- Se cumple la condición del logro
+- El usuario no tiene ya ese logro
+- Se verifica en el backend antes de otorgar
+
+VISUALIZACIÓN:
+-------------
+- Los logros aparecen en home.html (sección de logros recientes)
+- Se muestran en profile.html (todos los logros del usuario)
+- Popups de notificación cuando se desbloquea un logro
+
+================================================================================
+12. SEGURIDAD
+================================================================================
+
+AUTENTICACIÓN:
+-------------
+- Contraseñas se hashean con SHA256 antes de almacenar
+- Validación de credenciales en cada login
+- Sesión basada en sessionStorage (frontend)
+
+VALIDACIÓN:
+----------
+- Validación de formularios en frontend y backend
+- Sanitización de inputs
+- Validación de tipos de archivo para imágenes
+- Límite de tamaño de archivos (5MB)
+
+CORS:
+----
+Configurado para permitir cualquier origen en desarrollo:
+- AllowAnyOrigin()
+- AllowAnyHeader()
+- AllowAnyMethod()
+
+NOTA: En producción, configurar CORS apropiadamente.
+
+================================================================================
+13. CARACTERÍSTICAS ESPECIALES
+================================================================================
+
+EDITOR DE CÓDIGO (Monaco Editor):
+---------------------------------
+- Resaltado de sintaxis para Python y C#
+- Autocompletado inteligente
+- Temas claro/oscuro
+- Números de línea
+- Búsqueda y reemplazo
+- Zoom in/out
+
+EJECUCIÓN DE CÓDIGO:
+-------------------
+- Soporte para Python (python3/python)
+- Soporte para C# (dotnet-script)
+- Captura de salida estándar y errores
+- Timeout de ejecución
+- Sandboxing básico
+
+SISTEMA DE TEMAS:
+---------------
+- Modo claro y oscuro
+- Persistencia en localStorage
+- Toggle en todas las páginas
+- Transiciones suaves
+
+RESPONSIVE DESIGN:
+----------------
+- Diseño adaptable a móviles y tablets
+- Breakpoints de Tailwind CSS
+- Menús adaptativos
+
+================================================================================
+14. ESTRUCTURA DE ARCHIVOS JAVASCRIPT
+================================================================================
+
+api.js
+------
+Cliente API centralizado. Todas las funciones hacen requests HTTP al backend.
+
+renderer.js
+----------
+Inicializa home.html, carga datos del usuario, progreso, niveles y sílabo.
+
+problems-renderer.js
+-------------------
+Clase ProblemsRenderer que gestiona:
+- Renderizado de temas en sidebar
+- Renderizado de problemas
+- Carga de problema seleccionado
+- Navegación entre problemas
+- Verificación de soluciones
+
+curriculum-manager.js
+--------------------
+Clase CurriculumManager que gestiona:
+- Carga de temas por nivel
+- Carga de problemas por tema
+- Verificación de soluciones
+- Actualización de progreso
+
+achievements.js
+--------------
+Funciones para:
+- Cargar logros del usuario
+- Mostrar popups de logros
+- Renderizar logros en UI
+
+monaco-init.js
+-------------
+Inicializa y configura Monaco Editor:
+- Crea instancia del editor
+- Configura temas
+- Maneja cambios de código
+- Integra con sistema de temas
+
+theme-toggle.js
+--------------
+Gestiona el cambio de tema claro/oscuro:
+- Lee preferencia guardada
+- Aplica tema al documento
+- Guarda preferencia
+
+dropdown.js
+----------
+Gestiona menús desplegables (usuario, notificaciones).
+
+ui.js
+----
+Utilidades de UI y helpers.
+
+================================================================================
+15. PATRONES DE DISEÑO IMPLEMENTADOS
+================================================================================
+
+REPOSITORY PATTERN:
+------------------
+Todos los accesos a datos se realizan a través de repositorios:
+- IUserRepository / UsersRepository
+- IProblemaRepository / ProblemaRepository
+- etc.
+
+SERVICES LAYER:
+--------------
+Lógica de negocio en servicios:
+- ExerciseService: Gestión de ejercicios únicos y validación
+
+DEPENDENCY INJECTION:
+-------------------
+- Repositorios inyectados en controladores
+- Servicios inyectados donde se necesitan
+- Configuración inyectada
+
+SEPARATION OF CONCERNS:
+---------------------
+- Clases: Modelos de dominio
+- ModelsData: Acceso a datos
+- BACK: Lógica de aplicación y API
+- FRONT: Presentación
+
+================================================================================
+16. BASE DE DATOS - DATOS SEMILLA
+================================================================================
+
+Al inicializar, se crean automáticamente:
+
+NIVELES:
+-------
+- Nivel 1: Fundamentos de programación (Principiante, 0 puntos)
+- Nivel 2: Programación Orientada a Objetos (Intermedio, 100 puntos)
+- Nivel 3: Fundamentos de bases de datos (Avanzado, 250 puntos)
+
+TEMAS Y PROBLEMAS:
+----------------
+Nivel 1 incluye:
+- Lógica de programación (6 problemas)
+  * Introducción a Variables
+  * Operadores Aritméticos
+  * Condicionales: if/else
+  * Bucles: for
+  * Bucles: while
+  * Listas y Operaciones
+
+Nivel 2 incluye:
+- Programación Orientada a Objetos (5 problemas)
+  * Clases y Objetos
+  * Métodos y Atributos
+  * Herencia
+  * Encapsulación
+  * Polimorfismo
+
+Nivel 3 incluye:
+- Fundamentos de bases de datos (6 problemas)
+  * SELECT Básico
+  * INSERT y UPDATE
+  * JOIN: Combinar Tablas
+  * WHERE y Operadores
+  * GROUP BY y Agregaciones
+  * LEFT JOIN y RIGHT JOIN
+
+LOGROS:
+------
+- Crear cuenta
+- Personalizar perfil
+- Tu primer código
+
+================================================================================
+17. COMANDOS ÚTILES
+================================================================================
+
+DESARROLLO:
+----------
+# Iniciar backend
+cd PROYECT/BACK
+dotnet run
+
+# Iniciar frontend (web)
+cd PROYECT/FRONT
+dotnet run
+
+# Iniciar Electron (desktop)
+npm start
+
+# Compilar backend
+cd PROYECT/BACK
+dotnet build
+
+# Restaurar paquetes
+dotnet restore
+
+# Limpiar build
+dotnet clean
+
+BASE DE DATOS:
+-------------
+# Ver base de datos (requiere sqlite3)
+sqlite3 PROYECT/BACK/dorja.db
+
+# Backup de base de datos
+cp PROYECT/BACK/dorja.db PROYECT/BACK/dorja.db.backup
+
+# Reiniciar base de datos (eliminar y reiniciar backend)
+rm PROYECT/BACK/dorja.db
+# Luego iniciar backend (se crea automáticamente)
+
+ELECTRON:
+--------
+# Desarrollo
+npm start
+
+# Build para producción
+npm run build
+
+# Instalar dependencias
+npm install
+
+================================================================================
+18. TROUBLESHOOTING
+================================================================================
+
+ERROR: "ERR_CONNECTION_REFUSED"
+-------------------------------
+Solución: El backend no está corriendo
+- Iniciar backend manualmente: cd PROYECT/BACK && dotnet run
+- Verificar que esté en http://localhost:5222
+
+ERROR: "Cannot read properties of undefined (reading 'signup')"
+----------------------------------------------------------------
+Solución: api.js no se está cargando
+- Verificar que la ruta en HTML sea relativa: "api.js" no "/api.js"
+- Verificar que api.js existe en wwwroot
+
+ERROR: "No handler registered for 'signup'"
+-------------------------------------------
+Solución: preload.js estaba usando IPC, ahora usa HTTP
+- Ya está corregido: preload.js solo expone electronAPI
+- api.js maneja todas las comunicaciones HTTP
+
+ERROR: Compilación falla
+------------------------
+Solución: Verificar:
+- Todos los using statements están presentes
+- Referencias de proyecto están correctas
+- Paquetes NuGet están restaurados: dotnet restore
+
+ERROR: Base de datos no se crea
+--------------------------------
+Solución:
+- Verificar permisos de escritura en PROYECT/BACK/
+- Verificar que DatabaseInitializer se ejecuta en Program.cs
+- Revisar logs del backend para errores
+
+ERROR: Electron no inicia backend
+---------------------------------
+Solución:
+- Verificar que dotnet está en PATH
+- Iniciar backend manualmente primero
+- Revisar consola de Electron para errores
+
+================================================================================
+19. PRÓXIMAS MEJORAS SUGERIDAS
+================================================================================
+
+FUNCIONALIDADES:
+---------------
+1. Sistema de validación de código más sofisticado (AST comparison)
+2. Ejecución de código en sandbox seguro
+3. Sistema de hints para ejercicios
+4. Chat o foro de discusión
+5. Sistema de rankings/leaderboards
+6. Exportación de certificados en PDF
+7. Modo offline con sincronización
+8. Multi-idioma
+9. Sistema de comentarios en código
+10. Integración con Git para versionado de código
+
+TÉCNICAS:
+--------
+1. Implementar JWT para autenticación más segura
+2. Agregar tests unitarios y de integración
+3. Implementar logging estructurado
+4. Agregar métricas y monitoreo
+5. Optimizar consultas a base de datos
+6. Implementar caché
+7. Agregar rate limiting
+8. Mejorar manejo de errores
+9. Documentación de API con Swagger mejorada
+10. CI/CD pipeline
+
+================================================================================
+20. CONTACTO Y SOPORTE
+================================================================================
+
+Para problemas o preguntas sobre el proyecto:
+- Revisar esta documentación
+- Verificar logs del backend
+- Revisar consola del navegador (F12)
+- Verificar que todas las dependencias están instaladas
+
+ARCHIVOS DE CONFIGURACIÓN IMPORTANTES:
+--------------------------------------
+- PROYECT/BACK/appsettings.json: Configuración del backend
+- PROYECT/BACK/Program.cs: Configuración de servicios y middleware
+- package.json: Configuración de Electron
+- main.js: Configuración de Electron
+- PROYECT/FRONT/wwwroot/api.js: Configuración de cliente API
+
+================================================================================
+FIN DE LA DOCUMENTACIÓN
+================================================================================
+

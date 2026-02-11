@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Certificado Estudiantil</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Georgia', serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .certificate-container {
+            background: white;
+            width: 100%;
+            max-width: 900px;
+            padding: 60px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            border: 20px solid #2c3e50;
+            border-image: linear-gradient(45deg, #667eea, #764ba2) 1;
+            position: relative;
+        }
+
+        .certificate-border {
+            border: 3px solid #f39c12;
+            padding: 40px;
+            position: relative;
+        }
+
+        .corner-decoration {
+            position: absolute;
+            width: 80px;
+            height: 80px;
+            border: 3px solid #f39c12;
+        }
+
+        .corner-decoration.top-left {
+            top: -3px;
+            left: -3px;
+            border-right: none;
+            border-bottom: none;
+        }
+
+        .corner-decoration.top-right {
+            top: -3px;
+            right: -3px;
+            border-left: none;
+            border-bottom: none;
+        }
+
+        .corner-decoration.bottom-left {
+            bottom: -3px;
+            left: -3px;
+            border-right: none;
+            border-top: none;
+        }
+
+        .corner-decoration.bottom-right {
+            bottom: -3px;
+            right: -3px;
+            border-left: none;
+            border-top: none;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .logo {
+            width: 100px;
+            height: 100px;
+            margin: 0 auto 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 48px;
+            font-weight: bold;
+        }
+
+        .institution-name {
+            font-size: 28px;
+            color: #2c3e50;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+
+        .institution-subtitle {
+            font-size: 16px;
+            color: #7f8c8d;
+            margin-bottom: 10px;
+        }
+
+        .certificate-title {
+            font-size: 42px;
+            color: #667eea;
+            text-transform: uppercase;
+            letter-spacing: 4px;
+            margin: 30px 0;
+            font-weight: bold;
+        }
+
+        .certificate-text {
+            text-align: center;
+            font-size: 18px;
+            color: #34495e;
+            line-height: 1.8;
+            margin: 30px 0;
+        }
+
+        .student-name {
+            font-size: 36px;
+            color: #2c3e50;
+            font-weight: bold;
+            margin: 30px 0;
+            padding: 10px 0;
+            border-bottom: 2px solid #f39c12;
+            display: inline-block;
+        }
+
+        .details {
+            margin: 40px 0;
+            font-size: 16px;
+            color: #34495e;
+            line-height: 2;
+        }
+
+        .details strong {
+            color: #2c3e50;
+        }
+
+        .footer {
+            display: flex;
+            justify-content: space-around;
+            margin-top: 60px;
+            padding-top: 40px;
+        }
+
+        .signature-block {
+            text-align: center;
+            flex: 1;
+            margin: 0 20px;
+        }
+
+        .signature-line {
+            border-top: 2px solid #2c3e50;
+            margin-bottom: 10px;
+            padding-top: 10px;
+        }
+
+        .signature-name {
+            font-weight: bold;
+            color: #2c3e50;
+            font-size: 16px;
+        }
+
+        .signature-title {
+            color: #7f8c8d;
+            font-size: 14px;
+        }
+
+        .date-location {
+            text-align: center;
+            margin-top: 30px;
+            color: #7f8c8d;
+            font-size: 14px;
+        }
+
+        .seal {
+            position: absolute;
+            bottom: 100px;
+            right: 80px;
+            width: 120px;
+            height: 120px;
+            border: 3px solid #e74c3c;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+            color: #e74c3c;
+            font-weight: bold;
+            text-align: center;
+            transform: rotate(-15deg);
+            opacity: 0.3;
+        }
+
+        @media print {
+            body {
+                background: white;
+            }
+
+            .certificate-container {
+                box-shadow: none;
+                max-width: 100%;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="certificate-container">
+        <div class="certificate-border">
+            <div class="corner-decoration top-left"></div>
+            <div class="corner-decoration top-right"></div>
+            <div class="corner-decoration bottom-left"></div>
+            <div class="corner-decoration bottom-right"></div>
+
+            <div class="header">
+                <div class="logo">🎓</div>
+                <div class="institution-name">INSTITUTO EDUCATIVO SUPERIOR</div>
+                <div class="institution-subtitle">Formando líderes del mañana</div>
+            </div>
+
+            <div style="text-align: center;">
+                <div class="certificate-title">Certificado</div>
+
+                <div class="certificate-text">
+                    Por medio del presente se certifica que
+                </div>
+
+                <div class="student-name">Juan Carlos Pérez García</div>
+
+                <div class="certificate-text">
+                    Ha cursado y aprobado satisfactoriamente
+                </div>
+
+                <div class="details" style="text-align: center;">
+                    <strong>Programa:</strong> Licenciatura en Administración de Empresas<br>
+                    <strong>Nivel:</strong> Pregrado<br>
+                    <strong>Período:</strong> 2021 - 2024<br>
+                    <strong>Promedio:</strong> 9.2/10
+                </div>
+
+                <div class="certificate-text">
+                    Cumpliendo con todos los requisitos académicos establecidos por esta institución.
+                </div>
+            </div>
+
+            <div class="footer">
+                <div class="signature-block">
+                    <div class="signature-line">
+                        <div class="signature-name">Dr. María Elena Rodríguez</div>
+                        <div class="signature-title">Directora Académica</div>
+                    </div>
+                </div>
+                <div class="signature-block">
+                    <div class="signature-line">
+                        <div class="signature-name">Lic. Roberto Martínez</div>
+                        <div class="signature-title">Secretario General</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="date-location">
+                Ciudad Juárez, Chihuahua, México - 20 de Noviembre de 2025
+            </div>
+
+            <div class="seal">
+                SELLO<br>OFICIAL
+            </div>
+        </div>
+    </div>
+</body>
+
+</html>

@@ -1,0 +1,472 @@
+<!DOCTYPE html>
+<html lang="es" class="">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Problemas - Dorja</title>
+  <link href="css/output.css" rel="stylesheet">
+  <style>
+    html,
+    body {
+      height: 100%;
+      overflow-y: auto;
+      overflow-x: hidden;
+    }
+
+    body {
+      position: relative;
+      min-height: 100vh;
+    }
+
+    .tema {
+      border-left: 4px solid #4f46e5;
+      transition: all 0.3s ease;
+      cursor: pointer;
+    }
+
+    .tema.locked {
+      border-left-color: #9ca3af;
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+
+    .tema:hover:not(.locked) {
+      background-color: #f8fafc;
+      transform: translateX(4px);
+    }
+
+    .dark .tema:hover:not(.locked) {
+      background-color: #334155;
+    }
+
+    .progress-bar {
+      transition: width 0.5s ease;
+    }
+
+    .problema-item {
+      padding: 8px 12px;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .problema-item:hover:not(.locked) {
+      background-color: #f1f5f9;
+    }
+
+    .dark .problema-item:hover:not(.locked) {
+      background-color: #374151;
+    }
+
+    .problema-item.locked {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    .problema-item.completed {
+      background-color: #dcfce7;
+      border-left: 3px solid #16a34a;
+    }
+
+    .dark .problema-item.completed {
+      background-color: #166534;
+    }
+
+    .problema-item.active {
+      background-color: #dbeafe;
+      border-left: 3px solid #3b82f6;
+    }
+
+    .dark .problema-item.active {
+      background-color: #1e3a8a;
+    }
+
+    /* Layout principal corregido */
+    .main-container {
+      display: grid;
+      grid-template-columns: 280px 280px 1fr;
+      grid-template-rows: 1fr;
+      height: calc(100vh - 65px);
+      margin-top: 65px;
+    }
+
+    /* Sidebar de temas */
+    #topics-sidebar {
+      display: block !important;
+      visibility: visible !important;
+      opacity: 1 !important;
+      overflow-y: auto;
+      border-right: 1px solid #e5e7eb;
+    }
+
+    .dark #topics-sidebar {
+      border-right-color: #374151;
+    }
+
+    /* Sidebar de problemas */
+    #problems-sidebar {
+      overflow-y: auto;
+      border-right: 1px solid #e5e7eb;
+    }
+
+    .dark #problems-sidebar {
+      border-right-color: #374151;
+    }
+
+    /* Área de contenido principal */
+    .content-area {
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      padding: 1.5rem;
+      gap: 1.5rem;
+    }
+
+    /* Panel del problema con altura fija */
+    .problem-panel {
+      flex: 0 0 auto;
+      max-height: 40%;
+      min-height: 200px;
+      overflow-y: auto;
+    }
+
+    /* Área del editor y consola */
+    .editor-area {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      min-height: 0;
+      gap: 1.5rem;
+    }
+
+    /* Editor de código */
+    .code-editor {
+      flex: 1;
+      min-height: 0;
+    }
+
+    /* Consola */
+    .console-panel {
+      flex: 0 0 30%;
+      min-height: 150px;
+      max-height: 250px;
+    }
+
+    /* Responsive */
+    @media (max-width: 1024px) {
+      .main-container {
+        grid-template-columns: 1fr;
+        grid-template-rows: auto auto 1fr;
+      }
+      
+      #topics-sidebar, 
+      #problems-sidebar {
+        height: auto;
+        max-height: 200px;
+      }
+    }
+
+    /* Estilo para las barras de desplazamiento */
+    ::-webkit-scrollbar {
+      width: 8px;
+    }
+
+    ::-webkit-scrollbar-track {
+      background: #f1f1f1;
+      border-radius: 4px;
+    }
+
+    ::-webkit-scrollbar-thumb {
+      background: #c1c1c1;
+      border-radius: 4px;
+    }
+
+    ::-webkit-scrollbar-thumb:hover {
+      background: #a8a8a8;
+    }
+
+    /* Estilos para modo oscuro */
+    .dark ::-webkit-scrollbar-track {
+      background: #374151;
+    }
+
+    .dark ::-webkit-scrollbar-thumb {
+      background: #6b7280;
+    }
+
+    .dark ::-webkit-scrollbar-thumb:hover {
+      background: #9ca3af;
+    }
+  </style>
+</head>
+
+<body class="bg-gray-50 dark:bg-slate-900 font-sans transition-colors duration-300">
+  <header
+    class="fixed top-0 left-0 w-full h-[65px] px-4 sm:px-6 lg:px-8 flex justify-between items-center z-30 bg-white/80 dark:bg-slate-900/80 backdrop-blur-sm border-b border-gray-200 dark:border-slate-700">
+    <h1 class="text-2xl font-bold text-slate-800 dark:text-white">Dorja</h1>
+    <div class="flex items-center gap-4 sm:gap-6">
+      <a href="home.html"
+        class="flex items-center gap-2 text-slate-600 dark:text-white/80 hover:text-slate-900 dark:hover:text-white transition-colors">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+          <path fill-rule="evenodd"
+            d="M9.707 16.707a1 1 0 01-1.414 0l-6-6a1 1 0 010-1.414l6-6a1 1 0 011.414 1.414L5.414 9H17a1 1 0 110 2H5.414l4.293 4.293a1 1 0 010 1.414z"
+            clip-rule="evenodd" />
+        </svg>
+        Volver al Inicio
+      </a>
+      <label for="theme-toggle" class="cursor-pointer">
+        <input type="checkbox" id="theme-toggle" class="sr-only peer">
+        <div
+          class="relative w-14 h-8 bg-gray-300 peer-checked:bg-indigo-600 dark:bg-slate-700 rounded-full transition-colors duration-300">
+          <div
+            class="absolute w-6 h-6 bg-white rounded-full left-1 top-1 peer-checked:translate-x-6 transition-transform duration-300 ease-in-out">
+          </div>
+        </div>
+      </label>
+    </div>
+  </header>
+
+  <!-- Contenedor principal corregido -->
+  <div class="main-container">
+    <!-- Sidebar de Temas -->
+    <div id="topics-sidebar" class="bg-white dark:bg-slate-800 shadow-lg overflow-y-auto">
+      <div class="p-4 border-b border-gray-200 dark:border-slate-700">
+        <h3 class="font-bold text-gray-800 dark:text-white mb-2">Temas</h3>
+        <div class="text-sm text-gray-600 dark:text-slate-400" id="topics-count">Cargando temas...</div>
+      </div>
+      <div class="p-2" id="topics-list">
+        <div class="text-gray-500 dark:text-slate-400 text-sm p-4">Cargando temas...</div>
+      </div>
+    </div>
+
+    <!-- Sidebar de Problemas -->
+    <div id="problems-sidebar" class="bg-white dark:bg-slate-800 shadow-lg overflow-y-auto">
+      <div class="p-4 border-b border-gray-200 dark:border-slate-700">
+        <h3 class="font-bold text-gray-800 dark:text-white mb-2" id="problems-title">Problemas</h3>
+        <div class="text-sm text-gray-600 dark:text-slate-400" id="problems-count">Selecciona un tema</div>
+      </div>
+      <div class="p-2" id="problems-list">
+        <div class="text-gray-500 dark:text-slate-400 text-sm p-4">Selecciona un tema para ver los problemas</div>
+      </div>
+      <!-- BOTÓN DE CERTIFICADO - ÚNICO BOTÓN -->
+      <div id="certificate-panel-container" class="mt-4 p-4 bg-gray-50 dark:bg-slate-700 border-2 border-gray-300 dark:border-slate-600 rounded-lg text-center">
+        <h4 class="font-bold text-gray-800 dark:text-white mb-2" id="certificate-title">Nivel en Progreso</h4>
+        <p class="text-sm text-gray-600 dark:text-slate-400 mb-3" id="certificate-message">Completa 10 problemas para desbloquear el certificado</p>
+        <button id="certificate-btn-main" disabled 
+                class="w-full px-4 py-3 bg-gray-400 dark:bg-slate-600 text-white font-semibold rounded-lg cursor-not-allowed opacity-60 transition-all duration-300 disabled:opacity-60 disabled:cursor-not-allowed">
+          📄 Descargar Certificado PDF
+        </button>
+      </div>
+    </div>
+
+    <!-- Área de Contenido Principal -->
+    <div class="content-area">
+      <!-- Panel del Problema -->
+      <div class="problem-panel bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 shadow-lg rounded-xl overflow-hidden">
+        <div class="p-6 border-b border-gray-200 dark:border-slate-700 flex justify-between items-center">
+          <div>
+            <h2 class="text-2xl font-bold text-gray-800 dark:text-indigo-400" id="problem-title">Selecciona un problema</h2>
+            <div class="flex items-center gap-4 mt-2">
+              <span class="text-sm text-gray-600 dark:text-slate-400" id="problem-info">-</span>
+              <span
+                class="text-sm px-2 py-1 bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-200 rounded hidden"
+                id="completed-badge">✓ Completado</span>
+            </div>
+          </div>
+          <div class="flex items-center gap-4">
+            <span class="text-sm text-gray-600 dark:text-slate-400" id="problem-counter">-/-</span>
+            <div class="flex gap-2">
+              <button id="prev-problem-btn"
+                class="px-3 py-1 text-sm font-semibold bg-gray-200 hover:bg-gray-300 dark:bg-slate-700 dark:hover:bg-slate-600 text-slate-800 dark:text-white rounded-md transition-colors disabled:opacity-50"
+                disabled>←</button>
+              <button id="next-problem-btn"
+                class="px-3 py-1 text-sm font-semibold bg-gray-200 hover:bg-gray-300 dark:bg-slate-700 dark:hover:bg-slate-600 text-slate-800 dark:text-white rounded-md transition-colors disabled:opacity-50"
+                disabled>→</button>
+            </div>
+          </div>
+        </div>
+        <div class="p-6 overflow-y-auto">
+          <div class="prose prose-sm dark:prose-invert max-w-none text-gray-600 dark:text-slate-300"
+            id="problem-description">
+            <p>Selecciona un problema de la lista para comenzar a programar.</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Editor y Consola -->
+      <div class="editor-area">
+        <!-- Editor de Código -->
+        <div class="code-editor bg-slate-900 rounded-xl shadow-2xl overflow-hidden flex flex-col">
+          <div class="bg-slate-800 border-b border-slate-700 px-4 py-2 flex items-center justify-between">
+            <div class="flex items-center gap-2">
+              <div class="w-3 h-3 rounded-full bg-red-500"></div>
+              <div class="w-3 h-3 rounded-full bg-yellow-500"></div>
+              <div class="w-3 h-3 rounded-full bg-green-500"></div>
+              <span class="ml-2 text-sm text-slate-400">IDE de ejercicio</span>
+            </div>
+            <select id="language-selector"
+              class="bg-slate-700 text-slate-200 text-sm px-3 py-1 rounded border border-slate-600 focus:outline-none focus:ring-2 focus:ring-indigo-500">
+              <option value="python">Python</option>
+            </select>
+          </div>
+          <div id="editor" class="flex-grow"></div>
+        </div>
+
+        <!-- Consola -->
+        <div class="console-panel bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 shadow-lg rounded-xl overflow-hidden flex flex-col">
+          <div class="p-4 border-b border-gray-200 dark:border-slate-700 flex justify-between items-center">
+            <h2 class="text-lg font-bold text-gray-800 dark:text-indigo-400">Consola</h2>
+            <div class="flex gap-4">
+              <button id="run-btn"
+                class="px-4 py-1.5 text-sm font-semibold bg-gray-200 hover:bg-gray-300 dark:bg-slate-700 dark:hover:bg-slate-600 text-slate-800 dark:text-white rounded-md transition-colors disabled:opacity-50"
+                disabled>Ejecutar</button>
+              <button id="verify-btn"
+                class="px-5 py-1.5 text-sm font-semibold bg-indigo-600 hover:bg-indigo-700 text-white rounded-md transition-colors disabled:bg-slate-400 dark:disabled:bg-slate-600 disabled:cursor-not-allowed"
+                disabled>Verificar</button>
+            </div>
+          </div>
+          <div id="output-content"
+            class="flex-grow p-4 font-mono text-sm text-gray-700 dark:text-slate-300 overflow-y-auto whitespace-pre-wrap">
+            # Selecciona un problema y escribe tu código para comenzar.
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="./api.js"></script>
+  <script src="./js/curriculum-manager.js"></script>
+  <script src="https://unpkg.com/monaco-editor@latest/min/vs/loader.js"></script>
+  <script src="./js/theme-toggle.js"></script>
+  <script src="./js/monaco-init.js"></script>
+  <!-- Cargar html2pdf.js ANTES de pdf-generator.js -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+  <script src="./js/pdf-generator.js"></script>
+  <script src="./js/problems-renderer.js?v=6"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', async function () {
+      const userId = sessionStorage.getItem('userId');
+      if (!userId) {
+        window.location.href = 'login.html';
+        return;
+      }
+
+      // Obtener el nivel actual del usuario
+      let nivelId = null;
+      try {
+        const user = await window.api.getUserById(userId);
+        nivelId = user?.nivelActual || user?.nivel_actual || 1;
+      } catch (error) {
+        console.error('Error obteniendo nivel del usuario:', error);
+        nivelId = 1; // Nivel por defecto
+      }
+
+      await window.problemsRenderer.init(userId, nivelId);
+
+      // Configurar selector de nivel
+      const nivelSelector = document.getElementById('nivel-selector');
+      if (nivelSelector) {
+        nivelSelector.value = nivelId;
+        nivelSelector.addEventListener('change', async (e) => {
+          const nuevoNivelId = parseInt(e.target.value);
+          console.log('🔄 Cambiando a nivel:', nuevoNivelId);
+          window.problemsRenderer.currentNivelId = nuevoNivelId;
+          await window.problemsRenderer.renderSidebarTemas();
+        });
+      }
+
+      // Configurar event listeners...
+      const prevBtn = document.getElementById('prev-problem-btn');
+      const nextBtn = document.getElementById('next-problem-btn');
+      const verifyBtn = document.getElementById('verify-btn');
+      const runBtn = document.getElementById('run-btn');
+
+      if (prevBtn) {
+        prevBtn.addEventListener('click', () => {
+          window.problemsRenderer.cargarProblemaAnterior();
+        });
+      }
+
+      if (nextBtn) {
+        nextBtn.addEventListener('click', () => {
+          window.problemsRenderer.cargarProblemaSiguiente();
+        });
+      }
+
+      if (verifyBtn) {
+        verifyBtn.addEventListener('click', () => {
+          window.problemsRenderer.verificarSolucion();
+        });
+      }
+
+      if (runBtn) {
+        runBtn.addEventListener('click', () => {
+          window.problemsRenderer.ejecutarCodigo();
+        });
+      }
+
+      // Script único para actualizar el botón de certificado
+      function actualizarBotonCertificado() {
+        try {
+          const panel = document.getElementById('certificate-panel-container');
+          const btn = document.getElementById('certificate-btn-main');
+          const msg = document.getElementById('certificate-message');
+          const title = document.getElementById('certificate-title');
+          const pc = document.getElementById('problems-count');
+          
+          if (!panel || !btn || !msg || !title || !pc) return;
+          
+          const txt = pc.textContent || '';
+          const m = txt.match(/(\d+)\/(\d+)/);
+          
+          if (m) {
+            const completados = parseInt(m[1]);
+            const tid = (window.problemsRenderer && window.problemsRenderer.currentTemaId) || 1;
+            
+            if (completados >= 10) {
+              panel.className = 'mt-4 p-4 bg-gradient-to-r from-green-50 to-emerald-50 dark:from-green-900/20 dark:to-emerald-900/20 border-2 border-green-500 dark:border-green-400 rounded-lg text-center';
+              title.textContent = '¡Nivel Completado!';
+              title.className = 'font-bold text-green-800 dark:text-green-300 mb-2';
+              msg.textContent = `Has completado ${completados} problemas. ¡Felicidades!`;
+              msg.className = 'text-sm text-green-700 dark:text-green-400 mb-3';
+              btn.disabled = false;
+              btn.className = 'w-full px-4 py-3 bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white font-semibold rounded-lg shadow-lg transition-all duration-300 transform hover:scale-105';
+              btn.onclick = function() {
+                if (window.problemsRenderer && window.problemsRenderer.generarCertificadoNivel) {
+                  window.problemsRenderer.generarCertificadoNivel(tid);
+                }
+              };
+            } else {
+              panel.className = 'mt-4 p-4 bg-gray-50 dark:bg-slate-700 border-2 border-gray-300 dark:border-slate-600 rounded-lg text-center';
+              title.textContent = 'Nivel en Progreso';
+              title.className = 'font-bold text-gray-800 dark:text-white mb-2';
+              msg.textContent = `Completa ${10 - completados} problemas más para desbloquear el certificado`;
+              msg.className = 'text-sm text-gray-600 dark:text-slate-400 mb-3';
+              btn.disabled = true;
+              btn.className = 'w-full px-4 py-3 bg-gray-400 dark:bg-slate-600 text-white font-semibold rounded-lg cursor-not-allowed opacity-60 transition-all duration-300 disabled:opacity-60 disabled:cursor-not-allowed';
+              btn.onclick = null;
+            }
+          }
+        } catch (error) {
+          console.error('Error actualizando botón:', error);
+        }
+      }
+      
+      // Observar cambios en el contador
+      const problemsCount = document.getElementById('problems-count');
+      if (problemsCount) {
+        const observer = new MutationObserver(actualizarBotonCertificado);
+        observer.observe(problemsCount, { 
+          childList: true, 
+          characterData: true, 
+          subtree: true 
+        });
+        setInterval(actualizarBotonCertificado, 1000);
+      }
+    });
+
+  </script>
+</body>
+
+</html>

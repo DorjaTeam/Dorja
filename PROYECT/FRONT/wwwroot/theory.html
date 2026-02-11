@@ -1,0 +1,374 @@
+<!DOCTYPE html>
+<html lang="es" class="scroll-smooth">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Teoría - Dorja</title>
+    <link href="css/output.css" rel="stylesheet" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+    <style>
+        .theory-content {
+            max-width: 900px;
+        }
+        .code-block {
+            background: #1e293b;
+            border-left: 4px solid #6366f1;
+        }
+        .highlight-box {
+            background: linear-gradient(135deg, rgba(99, 102, 241, 0.1) 0%, rgba(168, 85, 247, 0.1) 100%);
+            border-left: 4px solid #6366f1;
+        }
+    </style>
+</head>
+
+<body class="bg-white dark:bg-slate-900 text-gray-900 dark:text-gray-100 font-sans transition-colors duration-300 antialiased">
+    <!-- NAVBAR -->
+    <nav class="bg-white/95 dark:bg-slate-900/95 backdrop-blur-sm border-b border-gray-200 dark:border-slate-800 shadow-sm sticky top-0 z-40">
+        <div class="container mx-auto px-6 py-4 flex items-center justify-between">
+            <div class="flex items-center gap-3">
+                <a href="home.html" class="flex items-center gap-3">
+                    <div class="w-10 h-10 bg-indigo-600 rounded-lg flex items-center justify-center shadow-sm">
+                        <i class="fas fa-code text-white"></i>
+                    </div>
+                    <div>
+                        <h1 class="text-xl font-bold text-gray-900 dark:text-white">Dorja</h1>
+                    </div>
+                </a>
+            </div>
+            <div class="flex items-center gap-4">
+                <a href="niveles.html" class="text-gray-600 dark:text-gray-400 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors">
+                    <i class="fas fa-arrow-left mr-2"></i>Volver a Niveles
+                </a>
+            </div>
+        </div>
+    </nav>
+
+    <main class="container mx-auto px-4 sm:px-6 lg:px-8 py-12 min-h-screen">
+        <div class="theory-content mx-auto">
+            <!-- Header -->
+            <div class="mb-12 text-center">
+                <div class="inline-flex items-center justify-center w-16 h-16 bg-indigo-100 dark:bg-indigo-900/30 rounded-2xl mb-6">
+                    <i id="tema-icon" class="fas fa-book text-indigo-600 dark:text-indigo-400 text-2xl"></i>
+                </div>
+                <h1 id="tema-titulo" class="text-4xl sm:text-5xl font-bold text-gray-900 dark:text-white mb-4">
+                    Cargando...
+                </h1>
+                <p id="tema-descripcion" class="text-lg text-gray-600 dark:text-gray-400 max-w-2xl mx-auto">
+                    Cargando descripción...
+                </p>
+            </div>
+
+            <!-- Contenido de Teoría -->
+            <div id="theory-content" class="space-y-8">
+                <div class="flex items-center justify-center py-20">
+                    <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600"></div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script src="./api.js"></script>
+    <script>
+        // Obtener parámetros de la URL
+        const urlParams = new URLSearchParams(window.location.search);
+        const temaId = urlParams.get('temaId');
+        const temaTitulo = urlParams.get('titulo') || 'Teoría';
+
+        // Contenido de teoría por tema
+        const teoriaContenido = {
+            'Lógica de programación': {
+                icon: 'fa-brain',
+                color: 'text-blue-600 dark:text-blue-400',
+                bgColor: 'bg-blue-100 dark:bg-blue-900/30',
+                secciones: [
+                    {
+                        titulo: 'Introducción',
+                        contenido: `
+                            <p class="text-gray-700 dark:text-gray-300 leading-relaxed mb-4">
+                                La lógica de programación es la base fundamental de cualquier lenguaje de programación. 
+                                Comprender los conceptos básicos te permitirá resolver problemas de manera eficiente y estructurada.
+                            </p>
+                            <div class="highlight-box p-6 rounded-lg my-6">
+                                <p class="text-gray-800 dark:text-gray-200 font-medium">
+                                    <i class="fas fa-lightbulb text-yellow-500 mr-2"></i>
+                                    <strong>Concepto clave:</strong> La programación es el arte de dar instrucciones claras y precisas a una computadora.
+                                </p>
+                            </div>
+                        `
+                    },
+                    {
+                        titulo: 'Variables y Tipos de Datos',
+                        contenido: `
+                            <p class="text-gray-700 dark:text-gray-300 leading-relaxed mb-4">
+                                Las variables son contenedores que almacenan información. En Python, puedes crear una variable simplemente asignándole un valor.
+                            </p>
+                            <div class="code-block p-6 rounded-lg my-6">
+                                <pre class="text-green-400 text-sm font-mono overflow-x-auto"><code># Variables en Python
+nombre = "Juan"
+edad = 25
+altura = 1.75
+activo = True
+
+# Tipos de datos
+print(type(nombre))  # &lt;class 'str'&gt;
+print(type(edad))    # &lt;class 'int'&gt;
+print(type(altura))  # &lt;class 'float'&gt;
+print(type(activo))  # &lt;class 'bool'&gt;</code></pre>
+                            </div>
+                            <ul class="list-disc list-inside space-y-2 text-gray-700 dark:text-gray-300 ml-4">
+                                <li><strong>str</strong>: Cadenas de texto (strings)</li>
+                                <li><strong>int</strong>: Números enteros</li>
+                                <li><strong>float</strong>: Números decimales</li>
+                                <li><strong>bool</strong>: Valores booleanos (True/False)</li>
+                            </ul>
+                        `
+                    },
+                    {
+                        titulo: 'Estructuras Condicionales',
+                        contenido: `
+                            <p class="text-gray-700 dark:text-gray-300 leading-relaxed mb-4">
+                                Las estructuras condicionales permiten que tu programa tome decisiones basadas en condiciones.
+                            </p>
+                            <div class="code-block p-6 rounded-lg my-6">
+                                <pre class="text-green-400 text-sm font-mono overflow-x-auto"><code># Estructura if-else
+edad = 18
+
+if edad >= 18:
+    print("Eres mayor de edad")
+else:
+    print("Eres menor de edad")
+
+# Múltiples condiciones con elif
+nota = 85
+
+if nota >= 90:
+    print("Excelente")
+elif nota >= 70:
+    print("Buen trabajo")
+else:
+    print("Necesitas estudiar más")</code></pre>
+                            </div>
+                        `
+                    },
+                    {
+                        titulo: 'Bucles y Repetición',
+                        contenido: `
+                            <p class="text-gray-700 dark:text-gray-300 leading-relaxed mb-4">
+                                Los bucles permiten repetir una acción múltiples veces, ahorrando código y haciendo tu programa más eficiente.
+                            </p>
+                            <div class="code-block p-6 rounded-lg my-6">
+                                <pre class="text-green-400 text-sm font-mono overflow-x-auto"><code># Bucle for
+for i in range(5):
+    print(f"Número: {i}")
+
+# Bucle while
+contador = 0
+while contador < 5:
+    print(f"Contador: {contador}")
+    contador += 1
+
+# Iterar sobre una lista
+frutas = ["manzana", "banana", "naranja"]
+for fruta in frutas:
+    print(f"Me gusta la {fruta}")</code></pre>
+                            </div>
+                        `
+                    }
+                ]
+            },
+            'Programación orientada a objetos': {
+                icon: 'fa-cube',
+                color: 'text-purple-600 dark:text-purple-400',
+                bgColor: 'bg-purple-100 dark:bg-purple-900/30',
+                secciones: [
+                    {
+                        titulo: 'Introducción a POO',
+                        contenido: `
+                            <p class="text-gray-700 dark:text-gray-300 leading-relaxed mb-4">
+                                La Programación Orientada a Objetos (POO) es un paradigma que organiza el código en objetos que contienen datos y métodos.
+                            </p>
+                            <div class="highlight-box p-6 rounded-lg my-6">
+                                <p class="text-gray-800 dark:text-gray-200 font-medium">
+                                    <i class="fas fa-lightbulb text-yellow-500 mr-2"></i>
+                                    <strong>Conceptos fundamentales:</strong> Clases, Objetos, Herencia, Encapsulación y Polimorfismo.
+                                </p>
+                            </div>
+                        `
+                    },
+                    {
+                        titulo: 'Clases y Objetos',
+                        contenido: `
+                            <p class="text-gray-700 dark:text-gray-300 leading-relaxed mb-4">
+                                Una clase es un molde que define las características y comportamientos de un objeto.
+                            </p>
+                            <div class="code-block p-6 rounded-lg my-6">
+                                <pre class="text-green-400 text-sm font-mono overflow-x-auto"><code># Definir una clase
+class Persona:
+    def __init__(self, nombre, edad):
+        self.nombre = nombre
+        self.edad = edad
+    
+    def saludar(self):
+        return f"Hola, soy {self.nombre} y tengo {self.edad} años"
+
+# Crear un objeto (instancia)
+persona1 = Persona("Ana", 25)
+print(persona1.saludar())</code></pre>
+                            </div>
+                        `
+                    },
+                    {
+                        titulo: 'Herencia',
+                        contenido: `
+                            <p class="text-gray-700 dark:text-gray-300 leading-relaxed mb-4">
+                                La herencia permite crear nuevas clases basadas en clases existentes, reutilizando código.
+                            </p>
+                            <div class="code-block p-6 rounded-lg my-6">
+                                <pre class="text-green-400 text-sm font-mono overflow-x-auto"><code>class Persona:
+    def __init__(self, nombre):
+        self.nombre = nombre
+    
+    def presentarse(self):
+        return f"Soy {self.nombre}"
+
+class Estudiante(Persona):
+    def __init__(self, nombre, carrera):
+        super().__init__(nombre)
+        self.carrera = carrera
+    
+    def estudiar(self):
+        return f"{self.nombre} está estudiando {self.carrera}"
+
+estudiante = Estudiante("Carlos", "Ingeniería")
+print(estudiante.presentarse())
+print(estudiante.estudiar())</code></pre>
+                            </div>
+                        `
+                    }
+                ]
+            },
+            'Fundamentos de bases de datos': {
+                icon: 'fa-database',
+                color: 'text-emerald-600 dark:text-emerald-400',
+                bgColor: 'bg-emerald-100 dark:bg-emerald-900/30',
+                secciones: [
+                    {
+                        titulo: 'Introducción a Bases de Datos',
+                        contenido: `
+                            <p class="text-gray-700 dark:text-gray-300 leading-relaxed mb-4">
+                                Una base de datos es un sistema organizado para almacenar, gestionar y recuperar información de manera eficiente.
+                            </p>
+                            <div class="highlight-box p-6 rounded-lg my-6">
+                                <p class="text-gray-800 dark:text-gray-200 font-medium">
+                                    <i class="fas fa-lightbulb text-yellow-500 mr-2"></i>
+                                    <strong>SQL</strong> (Structured Query Language) es el lenguaje estándar para interactuar con bases de datos relacionales.
+                                </p>
+                            </div>
+                        `
+                    },
+                    {
+                        titulo: 'Consultas SELECT',
+                        contenido: `
+                            <p class="text-gray-700 dark:text-gray-300 leading-relaxed mb-4">
+                                La consulta SELECT permite recuperar datos de una o más tablas.
+                            </p>
+                            <div class="code-block p-6 rounded-lg my-6">
+                                <pre class="text-green-400 text-sm font-mono overflow-x-auto"><code>-- Seleccionar todas las columnas
+SELECT * FROM usuarios;
+
+-- Seleccionar columnas específicas
+SELECT nombre, email FROM usuarios;
+
+-- Con condiciones WHERE
+SELECT * FROM usuarios WHERE edad > 18;
+
+-- Ordenar resultados
+SELECT * FROM usuarios ORDER BY nombre ASC;</code></pre>
+                            </div>
+                        `
+                    },
+                    {
+                        titulo: 'Operaciones CRUD',
+                        contenido: `
+                            <p class="text-gray-700 dark:text-gray-300 leading-relaxed mb-4">
+                                CRUD son las operaciones básicas: Create (INSERT), Read (SELECT), Update (UPDATE) y Delete (DELETE).
+                            </p>
+                            <div class="code-block p-6 rounded-lg my-6">
+                                <pre class="text-green-400 text-sm font-mono overflow-x-auto"><code>-- INSERT: Crear nuevos registros
+INSERT INTO usuarios (nombre, email) 
+VALUES ('Juan', 'juan@email.com');
+
+-- UPDATE: Actualizar registros
+UPDATE usuarios 
+SET email = 'nuevo@email.com' 
+WHERE id = 1;
+
+-- DELETE: Eliminar registros
+DELETE FROM usuarios WHERE id = 1;</code></pre>
+                            </div>
+                        `
+                    }
+                ]
+            }
+        };
+
+        // Función para cargar el contenido de teoría
+        async function loadTheory() {
+            const contentDiv = document.getElementById('theory-content');
+            const tituloDiv = document.getElementById('tema-titulo');
+            const descripcionDiv = document.getElementById('tema-descripcion');
+            const iconDiv = document.getElementById('tema-icon');
+
+            // Obtener información del tema desde la API si hay temaId
+            let temaInfo = null;
+            if (temaId) {
+                try {
+                    temaInfo = await window.api._makeRequest(`/Temas/${temaId}`);
+                    const tema = temaInfo.data || temaInfo;
+                    if (tema) {
+                        tituloDiv.textContent = tema.Titulo || temaTitulo;
+                        descripcionDiv.textContent = tema.Descripcion || 'Aprende los conceptos fundamentales de este tema';
+                    }
+                } catch (error) {
+                    console.error('Error al cargar tema:', error);
+                }
+            }
+
+            const temaNombre = temaInfo?.data?.Titulo || temaTitulo;
+            const teoria = teoriaContenido[temaNombre] || teoriaContenido['Lógica de programación'];
+
+            // Actualizar icono
+            if (iconDiv) {
+                iconDiv.className = `fas ${teoria.icon} ${teoria.color} text-2xl`;
+                iconDiv.parentElement.className = `inline-flex items-center justify-center w-16 h-16 ${teoria.bgColor} rounded-2xl mb-6`;
+            }
+
+            // Renderizar secciones
+            let html = '';
+            teoria.secciones.forEach((seccion, index) => {
+                html += `
+                    <div class="bg-white dark:bg-slate-800 rounded-xl p-8 border border-gray-200 dark:border-slate-700 shadow-sm">
+                        <div class="flex items-center gap-3 mb-6">
+                            <div class="w-10 h-10 rounded-lg ${teoria.bgColor} flex items-center justify-center">
+                                <span class="text-lg font-bold ${teoria.color}">${index + 1}</span>
+                            </div>
+                            <h2 class="text-2xl font-bold text-gray-900 dark:text-white">${seccion.titulo}</h2>
+                        </div>
+                        <div class="prose prose-lg dark:prose-invert max-w-none">
+                            ${seccion.contenido}
+                        </div>
+                    </div>
+                `;
+            });
+
+            contentDiv.innerHTML = html;
+        }
+
+        // Cargar contenido al iniciar
+        document.addEventListener('DOMContentLoaded', loadTheory);
+    </script>
+</body>
+
+</html>
+
