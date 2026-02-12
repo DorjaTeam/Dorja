@@ -1,9 +1,10 @@
-const { app, BrowserWindow } = require('electron');
+const { app, BrowserWindow, ipcMain } = require('electron');
 const path = require('path');
 const { spawn } = require('child_process');
 const fs = require('fs');
 const { autoUpdater } = require('electron-updater');
 const log = require('electron-log');
+const net = require('net');
 
 // Configure logging
 log.transports.file.level = 'info';
@@ -13,9 +14,38 @@ autoUpdater.autoDownload = false; // Optional: set to true if you want auto down
 
 let mainWindow;
 let backendProcess;
+let backendPort = 5222; // Default, will be updated dynamically
+
+// Helper to find a free port
+const findFreePort = (startPort) => {
+  return new Promise((resolve, reject) => {
+    const server = net.createServer();
+    server.listen(startPort, () => {
+      const port = server.address().port;
+      server.close(() => resolve(port));
+    });
+    server.on('error', (err) => {
+      if (err.code === 'EADDRINUSE') {
+        resolve(findFreePort(startPort + 1));
+      } else {
+        reject(err);
+      }
+    });
+  });
+};
 
 // Start the backend server
-const startBackend = () => {
+const startBackend = async () => {
+  // Find a free port starting from 5222
+  try {
+    backendPort = await findFreePort(5222);
+    log.info(`Selected backend port: ${backendPort}`);
+  } catch (err) {
+    log.error('Failed to find free port:', err);
+    backendPort = 0; // Let OS choose (though we prefer specific range)
+  }
+
+  const portArg = `http://localhost:${backendPort}`;
   let backendProcess;
 
   if (app.isPackaged) {
@@ -30,7 +60,7 @@ const startBackend = () => {
     }
 
     // Spawn the backend executable
-    backendProcess = spawn(backendPath, ['--urls', 'http://localhost:5222'], {
+    backendProcess = spawn(backendPath, ['--urls', portArg], {
       cwd: path.dirname(backendPath),
       stdio: ['ignore', 'pipe', 'pipe']
     });
@@ -46,7 +76,7 @@ const startBackend = () => {
     }
 
     // Try running with dotnet
-    backendProcess = spawn('dotnet', ['run', '--urls', 'http://localhost:5222'], {
+    backendProcess = spawn('dotnet', ['run', '--urls', portArg], {
       cwd: backendDir,
       shell: true,
       stdio: ['ignore', 'pipe', 'pipe'] // Capture output
@@ -112,43 +142,53 @@ function createWindow() {
     show: false
   });
 
-  // Start backend first
-  const backendProc = startBackend();
+  // Handle IPC for config
+  ipcMain.handle('get-api-config', () => {
+    return {
+      baseUrl: `http://localhost:${backendPort}/api`
+    };
+  });
 
-  // Wait for backend to be ready, then load the page
-  const checkBackend = setInterval(() => {
-    // Try to connect to the backend
-    const http = require('http');
-    const req = http.get('http://localhost:5222/api/Users', (res) => {
-      if (res.statusCode === 200 || res.statusCode === 404) {
-        // Backend is responding
-        clearInterval(checkBackend);
-        console.log('✅ Backend is ready, loading frontend...');
+  // Start backend first
+  startBackend().then(proc => {
+    backendProcess = proc;
+
+    // Wait for backend to be ready, then load the page
+    const checkBackend = setInterval(() => {
+      // Try to connect to the backend
+      const http = require('http');
+      const req = http.get(`http://localhost:${backendPort}/api/Users`, (res) => {
+        if (res.statusCode === 200 || res.statusCode === 404) {
+          // Backend is responding
+          clearInterval(checkBackend);
+          console.log('✅ Backend is ready, loading frontend...');
+          const htmlPath = path.join(__dirname, 'PROYECT', 'FRONT', 'wwwroot', 'home.html');
+          mainWindow.loadFile(htmlPath);
+          mainWindow.show();
+        }
+      });
+
+      req.on('error', () => {
+        // Backend not ready yet, keep waiting
+      });
+
+      req.setTimeout(1000, () => {
+        req.destroy();
+      });
+    }, 1000);
+
+    // Timeout after 30 seconds
+    setTimeout(() => {
+      clearInterval(checkBackend);
+      if (!mainWindow.isVisible()) {
+        console.error('⚠️ Backend did not start in time. Loading frontend anyway...');
         const htmlPath = path.join(__dirname, 'PROYECT', 'FRONT', 'wwwroot', 'home.html');
         mainWindow.loadFile(htmlPath);
         mainWindow.show();
       }
-    });
+    }, 30000);
+  });
 
-    req.on('error', () => {
-      // Backend not ready yet, keep waiting
-    });
-
-    req.setTimeout(1000, () => {
-      req.destroy();
-    });
-  }, 1000);
-
-  // Timeout after 30 seconds
-  setTimeout(() => {
-    clearInterval(checkBackend);
-    if (!mainWindow.isVisible()) {
-      console.error('⚠️ Backend did not start in time. Loading frontend anyway...');
-      const htmlPath = path.join(__dirname, 'PROYECT', 'FRONT', 'wwwroot', 'home.html');
-      mainWindow.loadFile(htmlPath);
-      mainWindow.show();
-    }
-  }, 30000);
 
   mainWindow.on('closed', () => {
     mainWindow = null;
@@ -213,4 +253,3 @@ function setupAutoUpdater() {
 app.on('before-quit', () => {
   stopBackend();
 });
-
