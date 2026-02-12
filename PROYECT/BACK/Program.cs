@@ -106,6 +106,15 @@ app.MapControllers();
 // Log startup information
 Console.WriteLine($" Backend server starting...");
 Console.WriteLine($" Database initialized at: {connectionString}");
-Console.WriteLine($" Server will be available at: http://localhost:5222");
+
+// Add a lifetime event to log the actual address once the server starts
+app.Lifetime.ApplicationStarted.Register(() =>
+{
+    var addresses = app.Urls;
+    foreach (var address in addresses)
+    {
+        Console.WriteLine($" Now listening on: {address}");
+    }
+});
 
 app.Run();
