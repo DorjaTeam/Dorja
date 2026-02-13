@@ -152,58 +152,56 @@ function createWindow() {
     show: false
   });
 
-});
+  // Start backend first
+  startBackend().then(proc => {
+    backendProcess = proc;
 
-// Start backend first
-startBackend().then(proc => {
-  backendProcess = proc;
+    if (!proc) {
+      // Backend failed to even start spawning
+      console.error('❌ Backend process could not be started.');
+      return;
+    }
 
-  if (!proc) {
-    // Backend failed to even start spawning
-    console.error('❌ Backend process could not be started.');
-    return;
-  }
+    // Wait for backend to be ready, then load the page
+    const checkBackend = setInterval(() => {
+      // Try to connect to the backend
+      const http = require('http');
+      const req = http.get(`http://localhost:${backendPort}/api/Users`, (res) => {
+        if (res.statusCode === 200 || res.statusCode === 404) {
+          // Backend is responding
+          clearInterval(checkBackend);
+          console.log('✅ Backend is ready, loading frontend...');
+          const htmlPath = path.join(__dirname, 'PROYECT', 'FRONT', 'wwwroot', 'home.html');
+          mainWindow.loadFile(htmlPath);
+          mainWindow.show();
+        }
+      });
 
-  // Wait for backend to be ready, then load the page
-  const checkBackend = setInterval(() => {
-    // Try to connect to the backend
-    const http = require('http');
-    const req = http.get(`http://localhost:${backendPort}/api/Users`, (res) => {
-      if (res.statusCode === 200 || res.statusCode === 404) {
-        // Backend is responding
-        clearInterval(checkBackend);
-        console.log('✅ Backend is ready, loading frontend...');
+      req.on('error', () => {
+        // Backend not ready yet, keep waiting
+      });
+
+      req.setTimeout(1000, () => {
+        req.destroy();
+      });
+    }, 1000);
+
+    // Timeout after 30 seconds
+    setTimeout(() => {
+      clearInterval(checkBackend);
+      if (!mainWindow.isVisible()) {
+        console.error('⚠️ Backend did not start in time. Loading frontend anyway...');
         const htmlPath = path.join(__dirname, 'PROYECT', 'FRONT', 'wwwroot', 'home.html');
         mainWindow.loadFile(htmlPath);
         mainWindow.show();
       }
-    });
-
-    req.on('error', () => {
-      // Backend not ready yet, keep waiting
-    });
-
-    req.setTimeout(1000, () => {
-      req.destroy();
-    });
-  }, 1000);
-
-  // Timeout after 30 seconds
-  setTimeout(() => {
-    clearInterval(checkBackend);
-    if (!mainWindow.isVisible()) {
-      console.error('⚠️ Backend did not start in time. Loading frontend anyway...');
-      const htmlPath = path.join(__dirname, 'PROYECT', 'FRONT', 'wwwroot', 'home.html');
-      mainWindow.loadFile(htmlPath);
-      mainWindow.show();
-    }
-  }, 30000);
-});
+    }, 30000);
+  });
 
 
-mainWindow.on('closed', () => {
-  mainWindow = null;
-});
+  mainWindow.on('closed', () => {
+    mainWindow = null;
+  });
 }
 
 app.whenReady().then(() => {
