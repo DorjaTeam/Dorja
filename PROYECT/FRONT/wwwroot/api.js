@@ -6,23 +6,31 @@ if (typeof window.api === 'undefined') {
     window.api = {
         baseUrl: '', // Will be configured dynamically
         configured: false,
+        _initPromise: null,
 
         // Initialize the API configuration
         init: async () => {
-            if (window.api.configured) return;
+            if (window.api.configured) return true;
+            if (window.api._initPromise) return window.api._initPromise;
 
-            if (isElectron && window.electronAPI && window.electronAPI.getConfig) {
-                try {
-                    const config = await window.electronAPI.getConfig();
-                    if (config && config.baseUrl) {
-                        console.log('API configured with dynamic base URL:', config.baseUrl);
-                        window.api.baseUrl = config.baseUrl;
-                        window.api.configured = true;
+            window.api._initPromise = (async () => {
+                if (isElectron && window.electronAPI && window.electronAPI.getConfig) {
+                    try {
+                        const config = await window.electronAPI.getConfig();
+                        if (config && config.baseUrl) {
+                            console.log('API configured with dynamic base URL:', config.baseUrl);
+                            window.api.baseUrl = config.baseUrl;
+                            window.api.configured = true;
+                            return true;
+                        }
+                    } catch (err) {
+                        console.error('Failed to get API config:', err);
                     }
-                } catch (err) {
-                    console.error('Failed to get API config:', err);
                 }
-            }
+                return false;
+            })();
+
+            return window.api._initPromise;
         },
 
         // Helper method for making API calls
@@ -30,6 +38,11 @@ if (typeof window.api === 'undefined') {
             // Ensure configuration is loaded before making any request
             if (!window.api.configured && isElectron) {
                 await window.api.init();
+            }
+
+            if (isElectron && !window.api.baseUrl) {
+                console.error('API Error: Base URL not configured');
+                return { success: false, message: 'Error interno: Servidor no configurado' };
             }
 
             try {
@@ -77,10 +90,10 @@ if (typeof window.api === 'undefined') {
                 let errorMessage = error.message || 'Error de conexión con el servidor';
 
                 // Provide more helpful error messages
-                if (error.message && error.message.includes('SSL') || error.message.includes('HTTPS')) {
-                    errorMessage = 'Error: El servidor está configurado para HTTP, no HTTPS. Verifica que el backend esté ejecutándose en http://localhost:5222';
+                if (error.message && (error.message.includes('SSL') || error.message.includes('HTTPS'))) {
+                    errorMessage = 'Error: El servidor está configurado para HTTP, no HTTPS.';
                 } else if (error.message && error.message.includes('Failed to fetch')) {
-                    errorMessage = 'Error: No se pudo conectar con el servidor. Asegúrate de que el backend esté ejecutándose en http://localhost:5222';
+                    errorMessage = 'Error: No se pudo conectar con el servidor. El backend no parece estar respondiendo.';
                 }
 
                 return {
