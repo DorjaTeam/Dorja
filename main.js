@@ -1,4 +1,4 @@
-const { app, BrowserWindow, ipcMain } = require('electron');
+const { app, BrowserWindow, ipcMain, dialog } = require('electron');
 const path = require('path');
 const { spawn } = require('child_process');
 const fs = require('fs');
@@ -56,6 +56,7 @@ const startBackend = async () => {
 
     if (!fs.existsSync(backendPath)) {
       log.error('Backend executable not found at:', backendPath);
+      dialog.showErrorBox('Error de Inicio', `No se encontró el ejecutable del servidor en: ${backendPath}`);
       return null;
     }
 
@@ -108,11 +109,17 @@ const startBackend = async () => {
       log.info(`Backend process exited with code ${code}`);
       if (!app.isPackaged) console.log(`Backend process exited with code ${code}`);
       backendReady = false;
+
+      // If code is not 0 and not null (killed), show error
+      if (code !== 0 && code !== null) {
+        dialog.showErrorBox('Servidor Detenido', `El servidor backend se cerró inesperadamente (Código: ${code}). Verifique que el puerto esté libre y que tenga instalados los componentes necesarios.`);
+      }
     });
 
     backendProcess.on('error', (err) => {
       log.error('Failed to start backend:', err);
       if (!app.isPackaged) console.error('Failed to start backend:', err);
+      dialog.showErrorBox('Error al Iniciar Servidor', `No se pudo iniciar el proceso del backend: ${err.message}`);
     });
   }
 
@@ -152,6 +159,12 @@ function createWindow() {
   // Start backend first
   startBackend().then(proc => {
     backendProcess = proc;
+
+    if (!proc) {
+      // Backend failed to even start spawning
+      console.error('❌ Backend process could not be started.');
+      return;
+    }
 
     // Wait for backend to be ready, then load the page
     const checkBackend = setInterval(() => {

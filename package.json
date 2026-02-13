@@ -1,13 +1,13 @@
 {
   "name": "dorja-desktop",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "Dorja Educational Platform Desktop Application",
   "main": "main.js",
   "scripts": {
     "start": "electron .",
     "dev": "electron . --dev",
     "build": "npm run build:backend && electron-builder",
-    "build:backend": "dotnet publish PROYECT/BACK/BACK.csproj -c Release -o backend-dist",
+    "build:backend": "dotnet publish PROYECT/BACK/BACK.csproj -c Release -o backend-dist -r win-x64 --self-contained true",
     "publish": "npm run build:backend && electron-builder --publish always"
   },
   "keywords": [
