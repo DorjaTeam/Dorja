@@ -14,35 +14,31 @@ autoUpdater.autoDownload = false; // Optional: set to true if you want auto down
 
 let mainWindow;
 let backendProcess;
-let backendPort = 5222; // Default, will be updated dynamically
+let backendPort = 0; // OS will assign an available port
 
-// Helper to find a free port
-const findFreePort = (startPort) => {
+// Helper to find a free port (using 0 lets the OS pick any available port)
+const findFreePort = () => {
   return new Promise((resolve, reject) => {
     const server = net.createServer();
-    server.listen(startPort, () => {
+    server.listen(0, () => {
       const port = server.address().port;
       server.close(() => resolve(port));
     });
     server.on('error', (err) => {
-      if (err.code === 'EADDRINUSE') {
-        resolve(findFreePort(startPort + 1));
-      } else {
-        reject(err);
-      }
+      reject(err);
     });
   });
 };
 
 // Start the backend server
 const startBackend = async () => {
-  // Find a free port starting from 5222
+  // Find an available port assigned by the OS
   try {
-    backendPort = await findFreePort(5222);
-    log.info(`Selected backend port: ${backendPort}`);
+    backendPort = await findFreePort();
+    log.info(`Selected dynamic backend port: ${backendPort}`);
   } catch (err) {
     log.error('Failed to find free port:', err);
-    backendPort = 0; // Let OS choose (though we prefer specific range)
+    backendPort = 0; // Final fallback for dotnet to choose
   }
 
   const portArg = `http://localhost:${backendPort}`;

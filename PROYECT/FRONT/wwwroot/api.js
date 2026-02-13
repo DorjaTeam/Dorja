@@ -4,16 +4,20 @@ if (typeof window.api === 'undefined') {
     const isElectron = typeof window !== 'undefined' && (window.electronAPI || (window.process && window.process.type));
 
     window.api = {
-        baseUrl: 'http://localhost:5222/api', // Default fallback
+        baseUrl: '', // Will be configured dynamically
+        configured: false,
 
         // Initialize the API configuration
         init: async () => {
+            if (window.api.configured) return;
+
             if (isElectron && window.electronAPI && window.electronAPI.getConfig) {
                 try {
                     const config = await window.electronAPI.getConfig();
                     if (config && config.baseUrl) {
                         console.log('API configured with dynamic base URL:', config.baseUrl);
                         window.api.baseUrl = config.baseUrl;
+                        window.api.configured = true;
                     }
                 } catch (err) {
                     console.error('Failed to get API config:', err);
@@ -23,12 +27,8 @@ if (typeof window.api === 'undefined') {
 
         // Helper method for making API calls
         async _makeRequest(endpoint, options = {}) {
-            // Ensure configuration is loaded (idempotent check inside init if needed, but for now simple check)
-            // Note: Ideally init should be called at startup, but calling here ensures we have the latest config
-            // if we haven't initialized yet or if we want to be safe. 
-            // However, awaiting init() on every request might be slight overhead, but safe.
-            // Let's rely on the base URL being updated. If it's still default 5222, we might want to try Init once.
-            if (window.api.baseUrl.includes('5222') && isElectron) {
+            // Ensure configuration is loaded before making any request
+            if (!window.api.configured && isElectron) {
                 await window.api.init();
             }
 
