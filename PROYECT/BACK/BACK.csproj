@@ -18,4 +18,10 @@
     <ProjectReference Include="..\ModelsData\DorjaData.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <None Update="dorja.db">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+
 </Project>
