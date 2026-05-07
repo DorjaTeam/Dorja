@@ -6,102 +6,244 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Registro - Dorja</title>
     <link href="css/output.css" rel="stylesheet">
+    <style>
+        /* --- Feedback animations --- */
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            20% { transform: translateX(-7px); }
+            40% { transform: translateX(7px); }
+            60% { transform: translateX(-4px); }
+            80% { transform: translateX(4px); }
+        }
+        @keyframes slideDown {
+            from { opacity: 0; transform: translateY(-8px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
+        @keyframes popIn {
+            0%   { opacity: 0; transform: scale(0.80); }
+            70%  { transform: scale(1.04); }
+            100% { opacity: 1; transform: scale(1); }
+        }
+        @keyframes drawCheck {
+            to { stroke-dashoffset: 0; }
+        }
+        @keyframes fillBar {
+            from { width: 0%; }
+            to   { width: 100%; }
+        }
+
+        .shake { animation: shake 0.42s ease; }
+
+        #error-container {
+            display: none;
+            animation: slideDown 0.25s ease;
+        }
+        #error-container.visible {
+            display: flex;
+        }
+
+        /* Success overlay */
+        #success-overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            z-index: 9999;
+            background: rgba(10, 10, 30, 0.60);
+            backdrop-filter: blur(5px);
+            -webkit-backdrop-filter: blur(5px);
+            align-items: center;
+            justify-content: center;
+        }
+        #success-overlay.visible {
+            display: flex;
+        }
+        #success-card {
+            background: #fff;
+            border-radius: 24px;
+            padding: 48px 44px 40px;
+            max-width: 420px;
+            width: 92%;
+            text-align: center;
+            box-shadow: 0 40px 100px rgba(0,0,0,0.30);
+            animation: popIn 0.45s cubic-bezier(.34,1.56,.64,1) both;
+        }
+        .dark #success-card {
+            background: #1e293b;
+        }
+
+        /* Check circle */
+        #check-circle {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #6366f1 0%, #4338ca 100%);
+            margin: 0 auto 22px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 8px 32px rgba(99,102,241,0.45);
+        }
+        #check-path {
+            stroke-dasharray: 36;
+            stroke-dashoffset: 36;
+            animation: drawCheck 0.55s ease 0.3s forwards;
+        }
+
+        /* Progress bar */
+        #redirect-bar {
+            height: 100%;
+            width: 0%;
+            background: linear-gradient(90deg, #6366f1, #4338ca);
+            border-radius: 999px;
+        }
+        #redirect-bar.animating {
+            animation: fillBar 3s linear forwards;
+        }
+
+        /* Button loading state */
+        #submit-btn:disabled {
+            opacity: 0.78;
+            cursor: not-allowed;
+            transform: none !important;
+        }
+    </style>
 </head>
 
 <body class="bg-gray-50 dark:bg-slate-900 font-sans transition-colors duration-300">
+
+    <!-- Theme toggle -->
     <div class="absolute top-5 right-5 z-10">
         <label for="theme-toggle" class="cursor-pointer">
             <input type="checkbox" id="theme-toggle" class="sr-only peer">
-            <div
-                class="relative w-14 h-8 bg-gray-300 peer-checked:bg-indigo-600 dark:bg-slate-700 rounded-full transition-colors duration-300">
-                <div
-                    class="absolute w-6 h-6 bg-white rounded-full left-1 top-1 peer-checked:translate-x-6 transition-transform duration-300 ease-in-out">
-                </div>
+            <div class="relative w-14 h-8 bg-gray-300 peer-checked:bg-indigo-600 dark:bg-slate-700 rounded-full transition-colors duration-300">
+                <div class="absolute w-6 h-6 bg-white rounded-full left-1 top-1 peer-checked:translate-x-6 transition-transform duration-300 ease-in-out"></div>
             </div>
         </label>
     </div>
+
+    <!-- ===== SUCCESS OVERLAY ===== -->
+    <div id="success-overlay">
+        <div id="success-card">
+            <!-- Animated checkmark -->
+            <div id="check-circle">
+                <svg width="40" height="40" viewBox="0 0 40 40" fill="none">
+                    <path id="check-path" d="M10 21 L17 28 L30 13"
+                          stroke="white" stroke-width="3.5"
+                          stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+            </div>
+
+            <h3 style="font-size:1.65rem; font-weight:800; color:#1e1b4b; margin:0 0 10px;">
+                ¡Cuenta creada!
+            </h3>
+            <p style="color:#6b7280; font-size:0.95rem; line-height:1.65; margin:0 0 6px;">
+                Tu cuenta ha sido registrada exitosamente en Dorja.
+            </p>
+            <p id="success-username-msg" style="color:#4f46e5; font-size:0.9rem; font-weight:700; margin:0 0 22px;"></p>
+
+            <!-- Achievement badge -->
+            <div style="display:flex; align-items:center; justify-content:center; gap:9px; background:#f0fdf4; border:1.5px solid #bbf7d0; border-radius:12px; padding:11px 18px; margin-bottom:26px;">
+                <svg width="20" height="20" fill="none" viewBox="0 0 24 24">
+                    <path d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+                          stroke="#16a34a" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+                <span style="color:#15803d; font-size:0.85rem; font-weight:700;">
+                    Logro desbloqueado: ¡Bienvenido a Dorja!
+                </span>
+            </div>
+
+            <!-- Redirect progress bar -->
+            <div style="background:#e0e7ff; border-radius:999px; height:6px; overflow:hidden; margin-bottom:14px;">
+                <div id="redirect-bar"></div>
+            </div>
+            <p id="redirect-text" style="color:#9ca3af; font-size:0.82rem; margin:0 0 20px;">
+                Redirigiendo al inicio de sesión en <span id="countdown">3</span>s…
+            </p>
+
+            <a href="login.html"
+               style="display:block; width:100%; padding:12px; background:linear-gradient(135deg,#6366f1,#4338ca); color:#fff; border-radius:12px; font-weight:700; font-size:0.97rem; text-decoration:none; box-shadow:0 4px 16px rgba(99,102,241,0.35); transition:opacity .2s;"
+               onmouseover="this.style.opacity='.88'" onmouseout="this.style.opacity='1'">
+                Ir al Login ahora
+            </a>
+        </div>
+    </div>
+
+    <!-- ===== MAIN FORM ===== -->
     <main class="flex items-center justify-center min-h-screen py-16 px-4">
         <div class="w-full max-w-2xl">
             <form id="signup-form"
-                class="bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 shadow-2xl rounded-2xl p-10">
+                  class="bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 shadow-2xl rounded-2xl p-10">
                 <h2 class="text-4xl font-bold mb-2 text-center text-gray-800 dark:text-white">Crear una Cuenta</h2>
-                <p class="text-center text-gray-500 dark:text-slate-400 mb-8">Completa tus datos para unirte a Dorja.
-                </p>
+                <p class="text-center text-gray-500 dark:text-slate-400 mb-8">Completa tus datos para unirte a Dorja.</p>
 
+                <!-- Error banner -->
                 <div id="error-container"
-                    class="hidden items-center gap-3 p-3 mb-6 rounded-lg bg-red-50 dark:bg-red-500/10 border border-red-200 dark:border-red-500/30">
-                    <svg class="w-5 h-5 text-red-600 dark:text-red-400" xmlns="http://www.w3.org/2000/svg"
-                        viewBox="0 0 20 20" fill="currentColor">
-                        <path fill-rule="evenodd"
-                            d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.28 7.22a.75.75 0 00-1.06 1.06L8.94 10l-1.72 1.72a.75.75 0 101.06 1.06L10 11.06l1.72 1.72a.75.75 0 101.06-1.06L11.06 10l1.72-1.72a.75.75 0 00-1.06-1.06L10 8.94 8.28 7.22z"
-                            clip-rule="evenodd" />
+                     class="items-center gap-3 p-3 mb-6 rounded-lg bg-red-50 dark:bg-red-500/10 border border-red-200 dark:border-red-500/30">
+                    <svg class="w-5 h-5 flex-shrink-0 text-red-500" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.28 7.22a.75.75 0 00-1.06 1.06L8.94 10l-1.72 1.72a.75.75 0 101.06 1.06L10 11.06l1.72 1.72a.75.75 0 101.06-1.06L11.06 10l1.72-1.72a.75.75 0 00-1.06-1.06L10 8.94 8.28 7.22z" clip-rule="evenodd"/>
                     </svg>
-                    <p id="error-message" class="text-sm font-medium text-red-800 dark:text-red-300"></p>
+                    <p id="error-message" class="text-sm font-medium text-red-700 dark:text-red-300"></p>
                 </div>
 
+                <!-- Fields grid -->
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-5">
                     <div>
-                        <label class="block text-gray-600 dark:text-slate-300 text-sm font-bold mb-2"
-                            for="username">Nombre de Usuario</label>
-                        <input
-                            class="dark:text-white bg-gray-100 dark:bg-slate-700 border-2 border-transparent focus:border-indigo-500 focus:ring-0 rounded-lg w-full py-3 px-4"
-                            id="username" type="text" required>
+                        <label class="block text-gray-600 dark:text-slate-300 text-sm font-bold mb-2" for="username">Nombre de Usuario</label>
+                        <input class="dark:text-white bg-gray-100 dark:bg-slate-700 border-2 border-transparent focus:border-indigo-500 focus:ring-0 rounded-lg w-full py-3 px-4 transition-all outline-none"
+                               id="username" type="text" placeholder="ej. juan_123" required>
                     </div>
                     <div>
-                        <label class="text-white block text-gray-600 dark:text-slate-300 text-sm font-bold mb-2"
-                            for="nombre">Nombre(s)</label>
-                        <input
-                            class="dark:text-white bg-gray-100 dark:bg-slate-700 border-2 border-transparent focus:border-indigo-500 focus:ring-0 rounded-lg w-full py-3 px-4"
-                            id="nombre" type="text" required>
+                        <label class="block text-gray-600 dark:text-slate-300 text-sm font-bold mb-2" for="nombre">Nombre(s)</label>
+                        <input class="dark:text-white bg-gray-100 dark:bg-slate-700 border-2 border-transparent focus:border-indigo-500 focus:ring-0 rounded-lg w-full py-3 px-4 transition-all outline-none"
+                               id="nombre" type="text" placeholder="ej. Juan Carlos" required>
                     </div>
                     <div>
-                        <label class="block text-gray-600 dark:text-slate-300 text-sm font-bold mb-2"
-                            for="apellidoPaterno">Apellido Paterno</label>
-                        <input
-                            class="dark:text-white bg-gray-100 dark:bg-slate-700 border-2 border-transparent focus:border-indigo-500 focus:ring-0 rounded-lg w-full py-3 px-4"
-                            id="apellidoPaterno" type="text" required>
+                        <label class="block text-gray-600 dark:text-slate-300 text-sm font-bold mb-2" for="apellidoPaterno">Apellido Paterno</label>
+                        <input class="dark:text-white bg-gray-100 dark:bg-slate-700 border-2 border-transparent focus:border-indigo-500 focus:ring-0 rounded-lg w-full py-3 px-4 transition-all outline-none"
+                               id="apellidoPaterno" type="text" placeholder="ej. García" required>
                     </div>
                     <div>
-                        <label class="block text-gray-600 dark:text-slate-300 text-sm font-bold mb-2"
-                            for="apellidoMaterno">Apellido Materno</label>
-                        <input
-                            class="dark:text-white bg-gray-100 dark:bg-slate-700 border-2 border-transparent focus:border-indigo-500 focus:ring-0 rounded-lg w-full py-3 px-4"
-                            id="apellidoMaterno" type="text" required>
+                        <label class="block text-gray-600 dark:text-slate-300 text-sm font-bold mb-2" for="apellidoMaterno">Apellido Materno</label>
+                        <input class="dark:text-white bg-gray-100 dark:bg-slate-700 border-2 border-transparent focus:border-indigo-500 focus:ring-0 rounded-lg w-full py-3 px-4 transition-all outline-none"
+                               id="apellidoMaterno" type="text" placeholder="ej. López" required>
                     </div>
                     <div class="md:col-span-2">
-                        <label class="block text-gray-600 dark:text-slate-300 text-sm font-bold mb-2"
-                            for="email">Email</label>
-                        <input
-                            class="dark:text-white bg-gray-100 dark:bg-slate-700 border-2 border-transparent focus:border-indigo-500 focus:ring-0 rounded-lg w-full py-3 px-4"
-                            id="email" type="email" required>
+                        <label class="block text-gray-600 dark:text-slate-300 text-sm font-bold mb-2" for="email">Email</label>
+                        <input class="dark:text-white bg-gray-100 dark:bg-slate-700 border-2 border-transparent focus:border-indigo-500 focus:ring-0 rounded-lg w-full py-3 px-4 transition-all outline-none"
+                               id="email" type="email" placeholder="ej. juan@correo.com" required>
                     </div>
                     <div>
-                        <label class="block text-gray-600 dark:text-slate-300 text-sm font-bold mb-2"
-                            for="password">Contraseña</label>
-                        <input
-                            class="dark:text-white bg-gray-100 dark:bg-slate-700 border-2 border-transparent focus:border-indigo-500 focus:ring-0 rounded-lg w-full py-3 px-4"
-                            id="password" type="password" required>
+                        <label class="block text-gray-600 dark:text-slate-300 text-sm font-bold mb-2" for="password">Contraseña</label>
+                        <input class="dark:text-white bg-gray-100 dark:bg-slate-700 border-2 border-transparent focus:border-indigo-500 focus:ring-0 rounded-lg w-full py-3 px-4 transition-all outline-none"
+                               id="password" type="password" placeholder="Mín. 6 caracteres" required>
                     </div>
                     <div>
-                        <label class="block text-gray-600 dark:text-slate-300 text-sm font-bold mb-2"
-                            for="confirmPassword">Repetir Contraseña</label>
-                        <input
-                            class="dark:text-white bg-gray-100 dark:bg-slate-700 border-2 border-transparent focus:border-indigo-500 focus:ring-0 rounded-lg w-full py-3 px-4"
-                            id="confirmPassword" type="password" required>
+                        <label class="block text-gray-600 dark:text-slate-300 text-sm font-bold mb-2" for="confirmPassword">Repetir Contraseña</label>
+                        <input class="dark:text-white bg-gray-100 dark:bg-slate-700 border-2 border-transparent focus:border-indigo-500 focus:ring-0 rounded-lg w-full py-3 px-4 transition-all outline-none"
+                               id="confirmPassword" type="password" placeholder="Repite tu contraseña" required>
                     </div>
                 </div>
+
+                <!-- Submit -->
                 <div class="flex flex-col gap-5 mt-8">
-                    <button
-                        class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 px-4 rounded-lg transition-transform transform hover:scale-105"
-                        type="submit">Crear Cuenta</button>
+                    <button id="submit-btn"
+                            class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 px-4 rounded-lg transition-all transform hover:scale-[1.02] flex items-center justify-center gap-2"
+                            type="submit">
+                        <svg id="spinner" class="hidden animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
+                        </svg>
+                        <span id="btn-text">Crear Cuenta</span>
+                    </button>
                     <p class="text-center text-sm text-gray-500 dark:text-slate-400">
-                        ¿Ya tienes una cuenta? <a class="font-bold text-indigo-600 dark:text-indigo-400 hover:underline"
-                            href="login.html">Inicia Sesión</a>
+                        ¿Ya tienes una cuenta?
+                        <a class="font-bold text-indigo-600 dark:text-indigo-400 hover:underline" href="login.html">Inicia Sesión</a>
                     </p>
                 </div>
             </form>
         </div>
     </main>
+
     <script src="./api.js"></script>
     <script src="js/signup.js"></script>
     <script src="./js/theme-toggle.js"></script>

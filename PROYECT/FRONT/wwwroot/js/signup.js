@@ -1,98 +1,115 @@
 document.addEventListener('DOMContentLoaded', () => {
-    const signupForm = document.getElementById('signup-form');
-    
-    if (!signupForm) {
-        console.error('No se encontró el formulario de registro');
-        return;
-    }
-
-    // Referencias a elementos
+    // ── Elements ────────────────────────────────────────────────────────────
+    const signupForm     = document.getElementById('signup-form');
     const errorContainer = document.getElementById('error-container');
-    const errorMessageElement = document.getElementById('error-message');
-    const submitButton = signupForm.querySelector('button[type="submit"]');
+    const errorMessage   = document.getElementById('error-message');
+    const submitBtn      = document.getElementById('submit-btn');
+    const btnText        = document.getElementById('btn-text');
+    const spinner        = document.getElementById('spinner');
 
-    // Validar que existan los elementos necesarios
-    if (!errorContainer || !errorMessageElement || !submitButton) {
-        console.error('Elementos esenciales del formulario no encontrados');
+    // Success overlay
+    const overlay        = document.getElementById('success-overlay');
+    const usernameMsg    = document.getElementById('success-username-msg');
+    const redirectBar    = document.getElementById('redirect-bar');
+    const countdownEl    = document.getElementById('countdown');
+
+    if (!signupForm) {
+        console.error('Formulario de registro no encontrado');
         return;
     }
 
-    // Función para mostrar errores
-    const displayError = (message) => {
-        errorMessageElement.textContent = message;
-        errorContainer.classList.remove('opacity-0');
-        errorContainer.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    // ── Error helpers ────────────────────────────────────────────────────────
+    const showError = (msg) => {
+        errorMessage.textContent = msg;
+        errorContainer.classList.add('visible');
+        // Shake the form
+        signupForm.classList.remove('shake');
+        void signupForm.offsetWidth; // reflow
+        signupForm.classList.add('shake');
+        errorContainer.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
     };
 
-    // Función para ocultar errores
     const hideError = () => {
-        errorContainer.classList.add('opacity-0');
+        errorContainer.classList.remove('visible');
     };
 
-    // Función para gestionar estado del formulario
-    const setFormState = (disabled, buttonText = null) => {
-        const inputs = signupForm.querySelectorAll('input');
-        inputs.forEach(input => input.disabled = disabled);
-        
-        submitButton.disabled = disabled;
-        if (buttonText) {
-            submitButton.textContent = buttonText;
-        }
+    // ── Button state helpers ─────────────────────────────────────────────────
+    const setLoading = (loading) => {
+        submitBtn.disabled = loading;
+        spinner.classList.toggle('hidden', !loading);
+        btnText.textContent = loading ? 'Creando cuenta…' : 'Crear Cuenta';
+        signupForm.querySelectorAll('input').forEach(i => i.disabled = loading);
     };
 
-    // Función para validar campos
-    const validateFields = () => {
+    // ── Success overlay ──────────────────────────────────────────────────────
+    const showSuccess = (username) => {
+        usernameMsg.textContent = `¡Hola, ${username}! 🎉`;
+        overlay.classList.add('visible');
+
+        // Animate progress bar and countdown
+        let seconds = 3;
+        countdownEl.textContent = seconds;
+
+        // Trigger bar animation via JS so it syncs with timer
+        redirectBar.style.transition = `width ${seconds}s linear`;
+        redirectBar.style.width = '100%';
+
+        const tick = setInterval(() => {
+            seconds--;
+            if (countdownEl) countdownEl.textContent = seconds;
+            if (seconds <= 0) {
+                clearInterval(tick);
+                window.location.href = 'login.html';
+            }
+        }, 1000);
+    };
+
+    // ── Field validation ─────────────────────────────────────────────────────
+    const validate = () => {
         const fields = [
-            { id: 'username', name: 'Nombre de Usuario' },
-            { id: 'nombre', name: 'Nombre(s)' },
-            { id: 'apellidoPaterno', name: 'Apellido Paterno' },
-            { id: 'apellidoMaterno', name: 'Apellido Materno' },
-            { id: 'email', name: 'Email' },
-            { id: 'password', name: 'Contraseña' },
-            { id: 'confirmPassword', name: 'Confirmar Contraseña' }
+            { id: 'username',        label: 'Nombre de Usuario' },
+            { id: 'nombre',          label: 'Nombre(s)' },
+            { id: 'apellidoPaterno', label: 'Apellido Paterno' },
+            { id: 'apellidoMaterno', label: 'Apellido Materno' },
+            { id: 'email',           label: 'Email' },
+            { id: 'password',        label: 'Contraseña' },
+            { id: 'confirmPassword', label: 'Confirmar Contraseña' },
         ];
 
-        // Validar campos vacíos
-        for (const field of fields) {
-            const input = document.getElementById(field.id);
-            if (!input?.value.trim()) {
-                displayError(`El campo "${field.name}" no puede estar vacío.`);
-                input?.focus();
+        for (const { id, label } of fields) {
+            const el = document.getElementById(id);
+            if (!el?.value.trim()) {
+                showError(`El campo "${label}" no puede estar vacío.`);
+                el?.focus();
                 return false;
             }
         }
 
-        // Validar formato de email
         const email = document.getElementById('email').value;
-        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-        if (!emailRegex.test(email)) {
-            displayError('Por favor, ingresa un email válido.');
+        if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+            showError('Por favor, ingresa un email válido.');
             document.getElementById('email').focus();
             return false;
         }
 
-        // Validar contraseñas
-        const password = document.getElementById('password').value;
+        const password        = document.getElementById('password').value;
         const confirmPassword = document.getElementById('confirmPassword').value;
-        
-        if (password !== confirmPassword) {
-            displayError('Las contraseñas no coinciden.');
-            document.getElementById('confirmPassword').focus();
-            return false;
-        }
 
-        // Validar fortaleza de contraseña (opcional)
         if (password.length < 6) {
-            displayError('La contraseña debe tener al menos 6 caracteres.');
+            showError('La contraseña debe tener al menos 6 caracteres.');
             document.getElementById('password').focus();
             return false;
         }
 
-        // Validar nombre de usuario (solo caracteres alfanuméricos)
+        if (password !== confirmPassword) {
+            showError('Las contraseñas no coinciden.');
+            document.getElementById('confirmPassword').focus();
+            return false;
+        }
+
         const username = document.getElementById('username').value;
-        const usernameRegex = /^[a-zA-Z0-9_]+$/;
-        if (!usernameRegex.test(username)) {
-            displayError('El nombre de usuario solo puede contener letras, números y guiones bajos.');
+        if (!/^[a-zA-Z0-9_]+$/.test(username)) {
+            showError('El nombre de usuario solo puede contener letras, números y guiones bajos (_).');
             document.getElementById('username').focus();
             return false;
         }
@@ -100,97 +117,78 @@ document.addEventListener('DOMContentLoaded', () => {
         return true;
     };
 
-    // Función para obtener datos del formulario
-    const getFormData = () => {
-        return {
-            username: document.getElementById('username').value.trim(),
-            nombre: document.getElementById('nombre').value.trim(),
-            apellidoPaterno: document.getElementById('apellidoPaterno').value.trim(),
-            apellidoMaterno: document.getElementById('apellidoMaterno').value.trim(),
-            email: document.getElementById('email').value.trim(),
-            password: document.getElementById('password').value
-        };
-    };
-
-    // Manejar envío del formulario
+    // ── Submit handler ───────────────────────────────────────────────────────
     signupForm.addEventListener('submit', async (e) => {
         e.preventDefault();
-        
-        // Ocultar errores anteriores
         hideError();
 
-        // Validar campos
-        if (!validateFields()) {
-            return;
-        }
+        if (!validate()) return;
 
-        // Deshabilitar formulario
-        setFormState(true, 'Creando cuenta...');
+        setLoading(true);
 
         try {
-            const formData = getFormData();
+            const formData = {
+                username:        document.getElementById('username').value.trim(),
+                nombre:          document.getElementById('nombre').value.trim(),
+                apellidoPaterno: document.getElementById('apellidoPaterno').value.trim(),
+                apellidoMaterno: document.getElementById('apellidoMaterno').value.trim(),
+                email:           document.getElementById('email').value.trim(),
+                password:        document.getElementById('password').value,
+            };
+
             const result = await window.api.signup(formData);
 
             if (result.success) {
-                // Check if achievement was granted
-                if (result.achievementGranted && result.userId) {
-                    // Store achievement info to show popup after login
+                // Store achievement for later display on home/dashboard
+                if (result.achievementGranted) {
                     sessionStorage.setItem('pendingAchievement', JSON.stringify({
-                        nombre: 'Crear cuenta',
+                        nombre:      'Crear cuenta',
                         descripcion: 'Has creado tu cuenta en Dorja. ¡Bienvenido!',
-                        icono: 'fa-user-plus'
+                        icono:       'fa-user-plus'
                     }));
                 }
-                alert('¡Registro exitoso! Ahora puedes iniciar sesión.');
-                window.location.href = 'login.html';
+                showSuccess(formData.username);
             } else {
-                displayError(result.message || 'Error durante el registro.');
+                showError(result.message || 'Error durante el registro. Inténtalo de nuevo.');
+                setLoading(false);
             }
-        } catch (error) {
-            console.error('Error en el registro:', error);
-            
-            // Mensajes de error más específicos
-            const errorMessage = typeof error === 'string' ? error : error.message || error;
-            
-            if (errorMessage.includes('username') || errorMessage.includes('usuario')) {
-                displayError('El nombre de usuario ya está en uso. Por favor, elige otro.');
-            } else if (errorMessage.includes('email') || errorMessage.includes('correo')) {
-                displayError('El email ya está registrado. ¿Ya tienes una cuenta?');
-            } else if (errorMessage.includes('UNIQUE constraint failed')) {
-                displayError('El nombre de usuario o email ya están registrados.');
+        } catch (err) {
+            console.error('Error en el registro:', err);
+            const msg = typeof err === 'string' ? err : err?.message ?? '';
+
+            if (msg.includes('username') || msg.includes('usuario')) {
+                showError('El nombre de usuario ya está en uso. Por favor, elige otro.');
+            } else if (msg.includes('email') || msg.includes('correo') || msg.includes('Email ya')) {
+                showError('El email ya está registrado. ¿Ya tienes una cuenta?');
+            } else if (msg.includes('UNIQUE')) {
+                showError('El nombre de usuario o email ya están registrados.');
             } else {
-                displayError(errorMessage || 'Error inesperado durante el registro.');
+                showError(msg || 'Error inesperado durante el registro. Inténtalo de nuevo.');
             }
-        } finally {
-            // Restaurar formulario
-            setFormState(false, 'Crear Cuenta');
+
+            setLoading(false);
         }
     });
 
-    // Limpiar errores al escribir en cualquier campo
-    const formInputs = signupForm.querySelectorAll('input');
-    formInputs.forEach(input => {
+    // ── Real-time inline validation ──────────────────────────────────────────
+    signupForm.querySelectorAll('input').forEach(input => {
         input.addEventListener('input', () => {
             hideError();
-            
-            // Validación en tiempo real para contraseñas
+
             if (input.id === 'password' || input.id === 'confirmPassword') {
-                const password = document.getElementById('password').value;
-                const confirmPassword = document.getElementById('confirmPassword').value;
-                
-                if (password && confirmPassword && password !== confirmPassword) {
-                    displayError('Las contraseñas no coinciden.');
-                } else {
-                    hideError();
+                const pw  = document.getElementById('password').value;
+                const cpw = document.getElementById('confirmPassword').value;
+                if (pw && cpw && pw !== cpw) {
+                    showError('Las contraseñas no coinciden.');
                 }
             }
         });
     });
 
-    // Manejar tecla Enter
-    document.addEventListener('keypress', (e) => {
-        if (e.key === 'Enter' && !submitButton.disabled) {
-            signupForm.dispatchEvent(new Event('submit'));
+    // ── Overlay: clicking backdrop closes and does not redirect yet ──────────
+    overlay?.addEventListener('click', (e) => {
+        if (e.target === overlay) {
+            // Do nothing — user must click button or wait for countdown
         }
     });
 });
