@@ -1,4 +1,4 @@
-﻿using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using DorjaModelado.Repositories;
 using DorjaModelado;
@@ -140,6 +140,17 @@ namespace BACK.Controllers
                 return BadRequest(new { message = "Email, Username y Password son obligatorios" });
             }
 
+            // Validate rol
+            var validRoles = new[] { "estudiante", "maestro" };
+            if (string.IsNullOrWhiteSpace(users.Rol) || !Array.Exists(validRoles, r => r == users.Rol.ToLower()))
+            {
+                users.Rol = "estudiante"; // Default rol
+            }
+            else
+            {
+                users.Rol = users.Rol.ToLower();
+            }
+
             // Check if email already exists
             var existingByEmail = await _usersRepository.GetByEmail(users.Email);
             if (existingByEmail != null)
@@ -157,9 +168,9 @@ namespace BACK.Controllers
             // Set default values for new user
             users.Password = HashPassword(users.Password);
             users.FechaRegistro = DateTime.Now;
-            users.UltimaConexion = null; // Will be set on first login
+            users.UltimaConexion = null;
             users.PuntosTotales = 0;
-            users.NivelActual = 1; // Start at level 1
+            users.NivelActual = 1;
             users.ProfilePhotoPath = string.Empty;
             users.CoverPhotoPath = string.Empty;
 
@@ -182,6 +193,7 @@ namespace BACK.Controllers
             return Ok(new { 
                 message = "Usuario registrado correctamente",
                 userId = createdUser?.Id,
+                rol = createdUser?.Rol ?? users.Rol,
                 achievementGranted = createdUser != null
             });
         }
@@ -237,9 +249,88 @@ namespace BACK.Controllers
                     existing.Email,
                     existing.Nombre,
                     existing.ApellidoPaterno,
-                    existing.ApellidoMaterno
+                    existing.ApellidoMaterno,
+                    existing.Rol
                 }
             });
+        }
+
+        // --------------------------  STUDENTS LIST  ----------------------------
+
+        [HttpGet("students")]
+        public async Task<IActionResult> GetAllStudents()
+        {
+            try
+            {
+                var students = await _usersRepository.GetAllStudents();
+                return Ok(students.Select(s => new
+                {
+                    s.Id,
+                    s.Username,
+                    s.Nombre,
+                    s.ApellidoPaterno,
+                    s.ApellidoMaterno,
+                    s.Email,
+                    s.PuntosTotales,
+                    s.NivelActual,
+                    s.UltimaConexion,
+                    s.FechaRegistro,
+                    s.Rol
+                }));
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = $"Error al obtener estudiantes: {ex.Message}" });
+            }
+        }
+
+        // --------------------------  STUDENT PROGRESS SUMMARY  ----------------------------
+
+        [HttpGet("{userId}/progress-summary")]
+        public async Task<IActionResult> GetStudentProgressSummary(int userId)
+        {
+            try
+            {
+                var user = await _usersRepository.GetDetails(userId);
+                if (user == null)
+                    return NotFound(new { message = "Usuario no encontrado" });
+
+                // Get all problems
+                var allProblemas = await _problemaRepository.GetAllProblemas();
+                var totalProblemas = allProblemas.Count();
+
+                // Get user progress
+                var progresos = await _progresoProblemaRepository.GetByUserId(userId);
+                var completados = progresos.Where(p => p.Completado).ToList();
+                var completedCount = completados.Count;
+                var completionPercentage = totalProblemas > 0
+                    ? Math.Round((double)completedCount / totalProblemas * 100, 1)
+                    : 0;
+
+                // Calculate streak
+                var streak = await CalculateStreak(userId, user);
+
+                return Ok(new
+                {
+                    userId = user.Id,
+                    username = user.Username,
+                    nombre = user.Nombre,
+                    apellidoPaterno = user.ApellidoPaterno,
+                    apellidoMaterno = user.ApellidoMaterno,
+                    puntosTotales = user.PuntosTotales,
+                    nivelActual = user.NivelActual,
+                    ultimaConexion = user.UltimaConexion,
+                    fechaRegistro = user.FechaRegistro,
+                    totalProblemas,
+                    completedCount,
+                    completionPercentage,
+                    streak
+                });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = $"Error al obtener resumen de progreso: {ex.Message}" });
+            }
         }
 
         // Helper class for login request

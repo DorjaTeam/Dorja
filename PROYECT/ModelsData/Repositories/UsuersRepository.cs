@@ -1,4 +1,4 @@
-﻿using Dapper;
+using Dapper;
 using DorjaData;
 using Microsoft.Data.Sqlite;
 using System.Collections.Generic;
@@ -26,18 +26,42 @@ namespace DorjaModelado.Repositories
             var sql = @"SELECT id, username, nombre, apellidoPaterno, apellidoMaterno,
                         email, password, fechaRegistro, ultimaConexion, puntosTotales, nivelActual,
                         COALESCE(profilePhotoPath, '') as ProfilePhotoPath, 
-                        COALESCE(coverPhotoPath, '') as CoverPhotoPath
+                        COALESCE(coverPhotoPath, '') as CoverPhotoPath,
+                        COALESCE(rol, 'estudiante') as Rol
                         FROM users";
 
             var users = await db.QueryAsync<Users>(sql, new { });
             
-            // Ensure photo paths are never null
             foreach (var user in users)
             {
                 if (user.ProfilePhotoPath == null) user.ProfilePhotoPath = string.Empty;
                 if (user.CoverPhotoPath == null) user.CoverPhotoPath = string.Empty;
+                if (user.Rol == null) user.Rol = "estudiante";
             }
             
+            return users;
+        }
+
+        public async Task<IEnumerable<Users>> GetAllStudents()
+        {
+            var db = dbConnection();
+            var sql = @"SELECT id, username, nombre, apellidoPaterno, apellidoMaterno,
+                        email, password, fechaRegistro, ultimaConexion, puntosTotales, nivelActual,
+                        COALESCE(profilePhotoPath, '') as ProfilePhotoPath,
+                        COALESCE(coverPhotoPath, '') as CoverPhotoPath,
+                        COALESCE(rol, 'estudiante') as Rol
+                        FROM users
+                        WHERE COALESCE(rol, 'estudiante') = 'estudiante'";
+
+            var users = await db.QueryAsync<Users>(sql, new { });
+
+            foreach (var user in users)
+            {
+                if (user.ProfilePhotoPath == null) user.ProfilePhotoPath = string.Empty;
+                if (user.CoverPhotoPath == null) user.CoverPhotoPath = string.Empty;
+                user.Rol = "estudiante";
+            }
+
             return users;
         }
 
@@ -47,17 +71,18 @@ namespace DorjaModelado.Repositories
             var sql = @"SELECT id, username, nombre, apellidoPaterno, apellidoMaterno,
                        email, password, fechaRegistro, ultimaConexion, puntosTotales, nivelActual,
                        COALESCE(profilePhotoPath, '') as ProfilePhotoPath, 
-                       COALESCE(coverPhotoPath, '') as CoverPhotoPath
+                       COALESCE(coverPhotoPath, '') as CoverPhotoPath,
+                       COALESCE(rol, 'estudiante') as Rol
                        FROM users
                        WHERE id = @id";
 
             var user = await db.QueryFirstOrDefaultAsync<Users>(sql, new { id });
             
-            // Ensure photo paths are never null
             if (user != null)
             {
                 if (user.ProfilePhotoPath == null) user.ProfilePhotoPath = string.Empty;
                 if (user.CoverPhotoPath == null) user.CoverPhotoPath = string.Empty;
+                if (user.Rol == null) user.Rol = "estudiante";
             }
             
             return user;
@@ -68,10 +93,10 @@ namespace DorjaModelado.Repositories
             var db = dbConnection();
             var sql = @"INSERT INTO users (username, nombre, apellidoPaterno, apellidoMaterno,
                                    email, password, fechaRegistro, ultimaConexion, puntosTotales, nivelActual,
-                                   profilePhotoPath, coverPhotoPath)
+                                   profilePhotoPath, coverPhotoPath, rol)
                         VALUES (@Username, @Nombre, @ApellidoPaterno, @ApellidoMaterno,
                                 @Email, @Password, @FechaRegistro, @UltimaConexion, @PuntosTotales, @NivelActual,
-                                @ProfilePhotoPath, @CoverPhotoPath)";
+                                @ProfilePhotoPath, @CoverPhotoPath, @Rol)";
 
             var result = await db.ExecuteAsync(sql, usuario);
             return result > 0;
@@ -82,6 +107,7 @@ namespace DorjaModelado.Repositories
             // Ensure photo paths are never null before updating
             if (usuario.ProfilePhotoPath == null) usuario.ProfilePhotoPath = string.Empty;
             if (usuario.CoverPhotoPath == null) usuario.CoverPhotoPath = string.Empty;
+            if (usuario.Rol == null) usuario.Rol = "estudiante";
             
             var db = dbConnection();
             var sql = @"UPDATE users SET
@@ -96,7 +122,8 @@ namespace DorjaModelado.Repositories
                         puntosTotales = @PuntosTotales,
                         nivelActual = @NivelActual,
                         profilePhotoPath = @ProfilePhotoPath,
-                        coverPhotoPath = @CoverPhotoPath
+                        coverPhotoPath = @CoverPhotoPath,
+                        rol = @Rol
                         WHERE id = @Id";
 
             var result = await db.ExecuteAsync(sql, usuario);
@@ -118,16 +145,17 @@ namespace DorjaModelado.Repositories
             var sql = @"SELECT id, username, nombre, apellidoPaterno, apellidoMaterno,
                         email, password, fechaRegistro, ultimaConexion, puntosTotales, nivelActual,
                         COALESCE(profilePhotoPath, '') as ProfilePhotoPath, 
-                        COALESCE(coverPhotoPath, '') as CoverPhotoPath
+                        COALESCE(coverPhotoPath, '') as CoverPhotoPath,
+                        COALESCE(rol, 'estudiante') as Rol
                         FROM users WHERE email = @Email";
 
             var user = await db.QueryFirstOrDefaultAsync<Users>(sql, new { Email = email });
             
-            // Ensure photo paths are never null
             if (user != null)
             {
                 if (user.ProfilePhotoPath == null) user.ProfilePhotoPath = string.Empty;
                 if (user.CoverPhotoPath == null) user.CoverPhotoPath = string.Empty;
+                if (user.Rol == null) user.Rol = "estudiante";
             }
             
             return user;
@@ -139,16 +167,17 @@ namespace DorjaModelado.Repositories
             var sql = @"SELECT id, username, nombre, apellidoPaterno, apellidoMaterno,
                         email, password, fechaRegistro, ultimaConexion, puntosTotales, nivelActual,
                         COALESCE(profilePhotoPath, '') as ProfilePhotoPath, 
-                        COALESCE(coverPhotoPath, '') as CoverPhotoPath
+                        COALESCE(coverPhotoPath, '') as CoverPhotoPath,
+                        COALESCE(rol, 'estudiante') as Rol
                         FROM users WHERE username = @Username";
 
             var user = await db.QueryFirstOrDefaultAsync<Users>(sql, new { Username = username });
             
-            // Ensure photo paths are never null
             if (user != null)
             {
                 if (user.ProfilePhotoPath == null) user.ProfilePhotoPath = string.Empty;
                 if (user.CoverPhotoPath == null) user.CoverPhotoPath = string.Empty;
+                if (user.Rol == null) user.Rol = "estudiante";
             }
             
             return user;

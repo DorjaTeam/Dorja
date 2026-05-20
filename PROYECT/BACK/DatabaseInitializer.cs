@@ -129,6 +129,16 @@ namespace BACK
                     Console.WriteLine($"⚠️ WARNING: Error with certificados table: {ex.Message}");
                 }
 
+                try
+                {
+                    CreateCalificacionesTable(connection);
+                    Console.WriteLine("✅ Calificaciones table OK");
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine($"⚠️ WARNING: Error with calificaciones table: {ex.Message}");
+                }
+
                 Console.WriteLine("✅ All tables processed");
 
                 // Seed initial data
@@ -176,7 +186,8 @@ namespace BACK
                     profilePhotoPath TEXT DEFAULT '',
                     coverPhotoPath TEXT DEFAULT '',
                     profilePhotoBlob BLOB,
-                    coverPhotoBlob BLOB
+                    coverPhotoBlob BLOB,
+                    rol TEXT DEFAULT 'estudiante'
                 )";
             command.ExecuteNonQuery();
             
@@ -185,6 +196,7 @@ namespace BACK
             AddColumnIfNotExists(connection, "users", "coverPhotoPath", "TEXT DEFAULT ''");
             AddColumnIfNotExists(connection, "users", "profilePhotoBlob", "BLOB");
             AddColumnIfNotExists(connection, "users", "coverPhotoBlob", "BLOB");
+            AddColumnIfNotExists(connection, "users", "rol", "TEXT DEFAULT 'estudiante'");
         }
         
         private static void AddColumnIfNotExists(SqliteConnection connection, string tableName, string columnName, string columnDefinition)
@@ -334,6 +346,23 @@ namespace BACK
                     fechaGenerado TEXT,
                     FOREIGN KEY (user_id) REFERENCES users(id),
                     FOREIGN KEY (nivel_id) REFERENCES niveles(id)
+                )";
+            command.ExecuteNonQuery();
+        }
+
+        private static void CreateCalificacionesTable(SqliteConnection connection)
+        {
+            var command = connection.CreateCommand();
+            command.CommandText = @"
+                CREATE TABLE IF NOT EXISTS calificaciones (
+                    id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    maestro_id INTEGER NOT NULL,
+                    estudiante_id INTEGER NOT NULL,
+                    valor REAL NOT NULL DEFAULT 0,
+                    comentario TEXT DEFAULT '',
+                    fecha TEXT NOT NULL,
+                    FOREIGN KEY (maestro_id) REFERENCES users(id),
+                    FOREIGN KEY (estudiante_id) REFERENCES users(id)
                 )";
             command.ExecuteNonQuery();
         }

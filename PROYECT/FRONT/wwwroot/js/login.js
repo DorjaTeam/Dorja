@@ -83,11 +83,18 @@ document.addEventListener('DOMContentLoaded', () => {
                     if (result.user) {
                         sessionStorage.setItem('userId', result.user.id);
                         sessionStorage.setItem('username', result.user.username);
+                        sessionStorage.setItem('userRol', result.user.rol || 'estudiante');
                         if (result.user.nombre) {
                             sessionStorage.setItem('userName', result.user.nombre);
                         }
                     }
-                    window.location.href = 'home.html';
+                    // Redirect based on role
+                    const rol = result.user?.rol || 'estudiante';
+                    if (rol === 'maestro') {
+                        window.location.href = 'teacher-dashboard.html';
+                    } else {
+                        window.location.href = 'home.html';
+                    }
                 } else {
                     displayError(result.message || 'Nombre de usuario o contraseña incorrectos.');
                 }

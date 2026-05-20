@@ -127,6 +127,8 @@ document.addEventListener('DOMContentLoaded', () => {
         setLoading(true);
 
         try {
+            const selectedRole = document.getElementById('selected-role')?.value || 'estudiante';
+
             const formData = {
                 username:        document.getElementById('username').value.trim(),
                 nombre:          document.getElementById('nombre').value.trim(),
@@ -134,6 +136,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 apellidoMaterno: document.getElementById('apellidoMaterno').value.trim(),
                 email:           document.getElementById('email').value.trim(),
                 password:        document.getElementById('password').value,
+                rol:             selectedRole,
             };
 
             const result = await window.api.signup(formData);

@@ -106,6 +106,32 @@
             cursor: not-allowed;
             transform: none !important;
         }
+
+        /* Role selector cards */
+        .role-card {
+            position: relative;
+            background: #f3f4f6;
+            border: 2px solid transparent;
+            transition: all 0.22s ease;
+        }
+        .dark .role-card {
+            background: #334155;
+        }
+        .role-card.selected {
+            border-color: #6366f1;
+            background: #eef2ff;
+            box-shadow: 0 0 0 3px rgba(99,102,241,0.15);
+        }
+        .dark .role-card.selected {
+            background: #312e81;
+        }
+        .role-card.selected .role-check {
+            display: flex !important;
+        }
+        .role-card:hover:not(.selected) {
+            border-color: #a5b4fc;
+            transform: translateY(-2px);
+        }
     </style>
 </head>
 
@@ -207,6 +233,45 @@
                         <input class="dark:text-white bg-gray-100 dark:bg-slate-700 border-2 border-transparent focus:border-indigo-500 focus:ring-0 rounded-lg w-full py-3 px-4 transition-all outline-none"
                                id="apellidoMaterno" type="text" placeholder="ej. López" required>
                     </div>
+                    <!-- Role selector -->
+                    <div class="md:col-span-2">
+                        <label class="block text-gray-600 dark:text-slate-300 text-sm font-bold mb-3">Soy un…</label>
+                        <div class="grid grid-cols-2 gap-4" id="role-selector">
+                            <!-- Estudiante -->
+                            <button type="button" id="role-estudiante"
+                                onclick="selectRole('estudiante')"
+                                class="role-card flex flex-col items-center gap-3 p-5 rounded-xl border-2 border-transparent bg-gray-100 dark:bg-slate-700 hover:border-indigo-400 transition-all duration-200 cursor-pointer text-center selected"
+                                aria-pressed="true">
+                                <span class="role-icon text-4xl">🎓</span>
+                                <div>
+                                    <p class="font-bold text-gray-800 dark:text-white text-base">Estudiante</p>
+                                    <p class="text-xs text-gray-500 dark:text-slate-400 mt-1">Aprende y practica programación</p>
+                                </div>
+                                <span class="role-check hidden w-6 h-6 rounded-full bg-indigo-600 flex items-center justify-center">
+                                    <svg class="w-3.5 h-3.5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"/>
+                                    </svg>
+                                </span>
+                            </button>
+                            <!-- Maestro -->
+                            <button type="button" id="role-maestro"
+                                onclick="selectRole('maestro')"
+                                class="role-card flex flex-col items-center gap-3 p-5 rounded-xl border-2 border-transparent bg-gray-100 dark:bg-slate-700 hover:border-indigo-400 transition-all duration-200 cursor-pointer text-center"
+                                aria-pressed="false">
+                                <span class="role-icon text-4xl">👨‍🏫</span>
+                                <div>
+                                    <p class="font-bold text-gray-800 dark:text-white text-base">Maestro</p>
+                                    <p class="text-xs text-gray-500 dark:text-slate-400 mt-1">Gestiona y evalúa estudiantes</p>
+                                </div>
+                                <span class="role-check hidden w-6 h-6 rounded-full bg-indigo-600 flex items-center justify-center">
+                                    <svg class="w-3.5 h-3.5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"/>
+                                    </svg>
+                                </span>
+                            </button>
+                        </div>
+                        <input type="hidden" id="selected-role" value="estudiante">
+                    </div>
                     <div class="md:col-span-2">
                         <label class="block text-gray-600 dark:text-slate-300 text-sm font-bold mb-2" for="email">Email</label>
                         <input class="dark:text-white bg-gray-100 dark:bg-slate-700 border-2 border-transparent focus:border-indigo-500 focus:ring-0 rounded-lg w-full py-3 px-4 transition-all outline-none"
@@ -247,6 +312,24 @@
     <script src="./api.js"></script>
     <script src="js/signup.js"></script>
     <script src="./js/theme-toggle.js"></script>
+    <script>
+        // Role selection logic
+        function selectRole(role) {
+            const cards = document.querySelectorAll('.role-card');
+            cards.forEach(card => {
+                card.classList.remove('selected');
+                card.setAttribute('aria-pressed', 'false');
+            });
+            const selected = document.getElementById('role-' + role);
+            if (selected) {
+                selected.classList.add('selected');
+                selected.setAttribute('aria-pressed', 'true');
+            }
+            document.getElementById('selected-role').value = role;
+        }
+        // Initialize with estudiante selected
+        selectRole('estudiante');
+    </script>
 </body>
 
 </html>

@@ -1,4 +1,4 @@
-﻿// Ensure window.api is only defined once
+// Ensure window.api is only defined once
 if (typeof window.api === 'undefined') {
     // Check if we're in Electron or web browser
     const isElectron = typeof window !== 'undefined' && (window.electronAPI || (window.process && window.process.type));
@@ -111,7 +111,7 @@ if (typeof window.api === 'undefined') {
             if (result.success && result.user) {
                 return {
                     success: true,
-                    user: result.user
+                    user: result.user  // includes rol
                 };
             }
             return result;
@@ -584,6 +584,43 @@ if (typeof window.api === 'undefined') {
         getProblemCount: async () => {
             const result = await window.api._makeRequest('/Problemas/count');
             return result.data || result;
+        },
+
+        // ----- TEACHER / RBAC APIs -----
+
+        getStudents: async () => {
+            const result = await window.api._makeRequest('/Users/students');
+            if (Array.isArray(result)) return result;
+            return result.data || result || [];
+        },
+
+        getStudentProgressSummary: async (userId) => {
+            const result = await window.api._makeRequest(`/Users/${userId}/progress-summary`);
+            return result.data || result;
+        },
+
+        getCalificacionesByEstudiante: async (estudianteId) => {
+            const result = await window.api._makeRequest(`/Calificaciones/estudiante/${estudianteId}`);
+            if (Array.isArray(result)) return result;
+            return result.data || result || [];
+        },
+
+        getCalificacionesByMaestro: async (maestroId) => {
+            const result = await window.api._makeRequest(`/Calificaciones/maestro/${maestroId}`);
+            if (Array.isArray(result)) return result;
+            return result.data || result || [];
+        },
+
+        saveCalificacion: async (data) => {
+            return await window.api._makeRequest('/Calificaciones', {
+                method: 'POST',
+                body: {
+                    maestroId:    data.maestroId,
+                    estudianteId: data.estudianteId,
+                    valor:        data.valor,
+                    comentario:   data.comentario || ''
+                }
+            });
         }
     };
 } // End of window.api definition check

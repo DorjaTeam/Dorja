@@ -363,6 +363,13 @@
                 return;
             }
 
+            // Role guard: maestros deben ir a su dashboard exclusivo
+            const userRol = sessionStorage.getItem('userRol');
+            if (userRol === 'maestro') {
+                window.location.href = 'teacher-dashboard.html';
+                return;
+            }
+
             const themeToggleBtn = document.getElementById('theme-toggle-btn');
             const themeIcon = document.getElementById('theme-icon');
             const themeText = document.getElementById('theme-text');

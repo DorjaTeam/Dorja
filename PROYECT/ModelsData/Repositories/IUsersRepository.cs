@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Text;
 
@@ -7,6 +7,7 @@ namespace DorjaModelado.Repositories
     public interface IUserRepository
     {
         Task<IEnumerable<Users>> GetAllUsers();
+        Task<IEnumerable<Users>> GetAllStudents();
         Task<Users> GetDetails(int id);
         Task<bool> InsertUsers(Users usuario);
         Task<bool> UpdateUsuarios(Users usuario);

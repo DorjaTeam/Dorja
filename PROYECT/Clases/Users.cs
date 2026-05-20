@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Text;
 
@@ -21,5 +21,10 @@ namespace DorjaModelado
 
         public int PuntosTotales { get; set; }
         public int NivelActual { get; set; }
+
+        /// <summary>
+        /// Rol del usuario: "estudiante" (default) o "maestro"
+        /// </summary>
+        public string Rol { get; set; } = "estudiante";
     }
 }

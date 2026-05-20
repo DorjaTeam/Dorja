@@ -1,4 +1,4 @@
-﻿using DorjaData;
+using DorjaData;
 using DorjaData.Repositories;
 using DorjaModelado.Repositories;
 using BACK;
@@ -52,6 +52,7 @@ builder.Services.AddScoped<IProgreso_ProblemaRepository, Progreso_ProblemaReposi
 builder.Services.AddScoped<ILogrosRepository, LogrosRepository>();
 builder.Services.AddScoped<ILogros_UsuarioRepository, Logros_UsuarioRepository>();
 builder.Services.AddScoped<ICertificadosRepository, CertificadoRepository>();
+builder.Services.AddScoped<ICalificacionesRepository, CalificacionesRepository>();
 
 // REGISTRAR SERVICIOS
 builder.Services.AddScoped<ExerciseService>();
