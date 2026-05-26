@@ -1,4 +1,4 @@
-﻿using DorjaModelado;
+using DorjaModelado;
 using DorjaData;
 using Microsoft.Data.Sqlite;
 using Dapper;
@@ -40,6 +40,9 @@ namespace DorjaData.Repositories
                             completado as Completado,
                             puntuacion as Puntuacion,
                             intentos as Intentos,
+                            errores as Errores,
+                            intentos_fallidos as IntentosFallidos,
+                            tiempo_invertido as TiempoInvertido,
                             ultimo_codigo as UltimoCodigo,
                             fecha_completado as FechaCompletado
                         FROM progreso_problema 
@@ -58,6 +61,9 @@ namespace DorjaData.Repositories
                             completado as Completado,
                             puntuacion as Puntuacion,
                             intentos as Intentos,
+                            errores as Errores,
+                            intentos_fallidos as IntentosFallidos,
+                            tiempo_invertido as TiempoInvertido,
                             ultimo_codigo as UltimoCodigo,
                             fecha_completado as FechaCompletado
                         FROM progreso_problema 
@@ -76,6 +82,9 @@ namespace DorjaData.Repositories
                             completado as Completado,
                             puntuacion as Puntuacion,
                             intentos as Intentos,
+                            errores as Errores,
+                            intentos_fallidos as IntentosFallidos,
+                            tiempo_invertido as TiempoInvertido,
                             ultimo_codigo as UltimoCodigo,
                             fecha_completado as FechaCompletado
                         FROM progreso_problema 
@@ -114,9 +123,9 @@ namespace DorjaData.Repositories
                 await db.ExecuteAsync("PRAGMA foreign_keys = ON");
                 
                 var sql = @"INSERT INTO progreso_problema 
-                            (user_id, problema_id, completado, puntuacion, intentos, ultimo_codigo, fecha_completado) 
+                            (user_id, problema_id, completado, puntuacion, intentos, errores, intentos_fallidos, tiempo_invertido, ultimo_codigo, fecha_completado) 
                             VALUES 
-                            (@UserId, @ProblemaId, @Completado, @Puntuacion, @Intentos, @UltimoCodigo, @FechaCompletado)";
+                            (@UserId, @ProblemaId, @Completado, @Puntuacion, @Intentos, @Errores, @IntentosFallidos, @TiempoInvertido, @UltimoCodigo, @FechaCompletado)";
                 var result = await db.ExecuteAsync(sql, progreso_problema);
                 
                 if (result > 0)
@@ -178,6 +187,9 @@ namespace DorjaData.Repositories
                                 completado = @Completado,
                                 puntuacion = @Puntuacion,
                                 intentos = @Intentos,
+                                errores = @Errores,
+                                intentos_fallidos = @IntentosFallidos,
+                                tiempo_invertido = @TiempoInvertido,
                                 ultimo_codigo = @UltimoCodigo,
                                 fecha_completado = @FechaCompletado
                             WHERE id = @Id";

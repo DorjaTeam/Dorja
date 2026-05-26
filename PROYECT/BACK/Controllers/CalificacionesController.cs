@@ -3,6 +3,7 @@ using DorjaModelado;
 using DorjaModelado.Repositories;
 using System;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Authorization;
 
 namespace BACK.Controllers
 {
@@ -22,6 +23,7 @@ namespace BACK.Controllers
         }
 
         // GET api/Calificaciones/estudiante/{estudianteId}
+        [Authorize]
         [HttpGet("estudiante/{estudianteId}")]
         public async Task<IActionResult> GetByEstudiante(int estudianteId)
         {
@@ -37,6 +39,7 @@ namespace BACK.Controllers
         }
 
         // GET api/Calificaciones/maestro/{maestroId}
+        [Authorize(Roles = "maestro")]
         [HttpGet("maestro/{maestroId}")]
         public async Task<IActionResult> GetByMaestro(int maestroId)
         {
@@ -52,6 +55,7 @@ namespace BACK.Controllers
         }
 
         // GET api/Calificaciones/maestro/{maestroId}/estudiante/{estudianteId}
+        [Authorize(Roles = "maestro")]
         [HttpGet("maestro/{maestroId}/estudiante/{estudianteId}")]
         public async Task<IActionResult> GetByMaestroAndEstudiante(int maestroId, int estudianteId)
         {
@@ -69,6 +73,7 @@ namespace BACK.Controllers
         }
 
         // POST api/Calificaciones
+        [Authorize(Roles = "maestro")]
         [HttpPost]
         public async Task<IActionResult> SaveCalificacion([FromBody] CalificacionRequest request)
         {
@@ -130,6 +135,7 @@ namespace BACK.Controllers
         }
 
         // DELETE api/Calificaciones/{id}
+        [Authorize(Roles = "maestro")]
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteCalificacion(int id)
         {

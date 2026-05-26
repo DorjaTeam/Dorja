@@ -170,7 +170,7 @@ class CurriculumManager {
         }
     }
 
-    async verificarSolucion(codigoUsuario, problemaId) {
+    async verificarSolucion(codigoUsuario, problemaId, metrics = null) {
         try {
             console.log('🔄 Verificando solución para problema:', problemaId, 'usuario:', this.currentUser);
 
@@ -184,7 +184,7 @@ class CurriculumManager {
                 return { correcto: false, mensaje: "Error: API de verificación no disponible" };
             }
 
-            const resultado = await window.api.verificarSolucion(this.currentUser, problemaId, codigoUsuario);
+            const resultado = await window.api.verificarSolucion(this.currentUser, problemaId, codigoUsuario, 'python', metrics);
             console.log('✅ Resultado verificación recibido:', resultado);
 
             // Handle different response formats from API
@@ -220,9 +220,12 @@ class CurriculumManager {
 
             console.log('✅ Resultado final procesado:', finalResult);
 
-            // Check if solution is correct to trigger certificate check
+            // Check if solution is correct to trigger certificate checks
             if (finalResult.correcto || finalResult.IsCorrect) {
                 this.checkFirstExerciseCompletion();
+                
+                // Need the actual temaId for this, but we can check the whole progress
+                setTimeout(() => this.checkTopicsCompletion(), 2000);
             }
 
             return finalResult;
@@ -276,6 +279,40 @@ class CurriculumManager {
         } catch (error) {
             console.error('❌ Error al verificar primer ejercicio:', error);
             // No lanzar el error para no interrumpir el flujo normal
+        }
+    }
+
+    async checkTopicsCompletion() {
+        try {
+            if (!window.api || !window.api.getStudentProgressSummary) return;
+
+            const summary = await window.api.getStudentProgressSummary(this.currentUser);
+            if (!summary || !summary.topicsProgress) return;
+
+            for (const topic of summary.topicsProgress) {
+                // If a topic is fully completed
+                if (topic.porcentaje === 100 && topic.completados > 0 && topic.total > 0) {
+                    // Check if certificate already exists locally to avoid spamming
+                    const certKey = `cert_topic_${this.currentUser}_${topic.temaId}`;
+                    if (!localStorage.getItem(certKey)) {
+                        console.log(`🎉 Tema ${topic.temaId} completado. Generando certificado de nivel...`);
+                        localStorage.setItem(certKey, "true");
+                        
+                        if (typeof window.problemsRenderer?.generarCertificadoNivel === 'function') {
+                            window.problemsRenderer.generarCertificadoNivel(topic.temaId);
+                        } else if (typeof window.generateLevelCertificatePDF === 'function') {
+                            // Fallback
+                            const userData = await window.api.getUserById(this.currentUser);
+                            if (userData) {
+                                // Assume default Nivel 1 for now if we can't find it
+                                window.generateLevelCertificatePDF(userData, "Nivel de Python", 1, topic.completados);
+                            }
+                        }
+                    }
+                }
+            }
+        } catch (error) {
+            console.error('❌ Error al verificar completion de temas:', error);
         }
     }
 

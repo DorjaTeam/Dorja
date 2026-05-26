@@ -6,6 +6,17 @@
 'use strict';
 
 // ── State ────────────────────────────────────────────────────────────────────
+const TeacherState = {
+    // Utilities for avatars
+    getAvatarColor: (id) => {
+        const colors = ['#6366f1', '#8b5cf6', '#ec4899', '#f43f5e', '#f97316', '#10b981', '#0ea5e9', '#3b82f6', '#14b8a6'];
+        return colors[(id || 0) % colors.length];
+    },
+    getInitials: (nombre, apellido) => {
+        return ((nombre?.[0] ?? '') + (apellido?.[0] ?? '')).toUpperCase() || 'U';
+    }
+};
+
 const State = {
     teacherId:   null,
     teacherName: '',
@@ -21,20 +32,25 @@ const AVATAR_COLORS = [
     '#6366f1','#8b5cf6','#ec4899','#f59e0b',
     '#10b981','#3b82f6','#ef4444','#14b8a6',
 ];
-function avatarColor(id) { return AVATAR_COLORS[id % AVATAR_COLORS.length]; }
-function initials(nombre, apellido) {
-    return ((nombre?.[0] ?? '') + (apellido?.[0] ?? '')).toUpperCase() || '?';
-}
+// Removing local initials function since it's in renderer.js
 
-// ── Toast ─────────────────────────────────────────────────────────────────────
+// ── Toast ────────────────────────────────────────────────----------------─────
 function showToast(msg, type = 'success') {
     const container = document.getElementById('toast-container');
     if (!container) return;
     const t = document.createElement('div');
     t.className = `toast ${type}`;
-    t.innerHTML = `<span>${type === 'success' ? '✅' : '❌'}</span><span>${msg}</span>`;
+    let icon = '✅';
+    if (type === 'error') icon = '❌';
+    if (type === 'info') icon = 'ℹ️';
+    t.innerHTML = `<span>${icon}</span><span>${msg}</span>`;
     container.appendChild(t);
-    setTimeout(() => t.remove(), 3500);
+    setTimeout(() => {
+        t.style.opacity = '0';
+        t.style.transform = 'translateX(60px)';
+        t.style.transition = 'all 0.3s ease';
+        setTimeout(() => t.remove(), 300);
+    }, 3500);
 }
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
@@ -82,14 +98,44 @@ function initTeacherUI() {
     if (avatarEl) avatarEl.textContent = State.teacherName[0]?.toUpperCase() ?? 'M';
 }
 
+// ── Backend readiness check ───────────────────────────────────────────────────
+async function waitForBackend(maxRetries = 15, intervalMs = 1500) {
+    for (let i = 0; i < maxRetries; i++) {
+        try {
+            const result = await window.api._makeRequest('/Users');
+            if (result !== undefined) return true;
+        } catch (e) {
+            console.log(`⏳ Backend no disponible aún (intento ${i + 1}/${maxRetries})...`);
+        }
+        await new Promise(r => setTimeout(r, intervalMs));
+    }
+    return false;
+}
+
 // ── Load students ─────────────────────────────────────────────────────────────
 async function loadStudents() {
+    const tbody = document.getElementById('students-tbody');
     try {
-        const tbody = document.getElementById('students-tbody');
         if (tbody) {
-            tbody.innerHTML = `<tr><td colspan="7">
-                <div class="empty-state"><div class="icon">⏳</div><p>Cargando estudiantes…</p></div>
-            </td></tr>`;
+            tbody.innerHTML = `
+                <tr>
+                    <td colspan="7">
+                        <div class="empty-state" style="padding: 40px 20px;">
+                            <div class="icon pulse-glow" style="font-size: 2rem; color: var(--accent); margin-bottom: 16px;"><i class="fas fa-circle-notch fa-spin"></i></div>
+                            <p style="font-size: 1.1rem; font-weight: 600; color: var(--text);">Sincronizando base de datos...</p>
+                            <p style="font-size: 0.85rem; color: var(--text-muted); margin-top: 8px;">Cargando estudiantes y progreso en tiempo real</p>
+                        </div>
+                    </td>
+                </tr>
+                <tr><td colspan="7" style="padding: 0;"><div class="skeleton-box skeleton-text" style="height: 48px; margin: 4px;"></div></td></tr>
+                <tr><td colspan="7" style="padding: 0;"><div class="skeleton-box skeleton-text" style="height: 48px; margin: 4px;"></div></td></tr>
+            `;
+        }
+
+        // Wait for backend to be ready before loading data
+        const backendReady = await waitForBackend();
+        if (!backendReady) {
+            throw new Error('El servidor no respondió después de varios intentos.');
         }
 
         // 1. Fetch students list
@@ -98,24 +144,29 @@ async function loadStudents() {
         State.filtered = [...State.students];
 
         // 2. Fetch teacher's grades
-        const gradesArr = await window.api.getCalificacionesByMaestro(State.teacherId);
-        State.grades = {};
-        if (Array.isArray(gradesArr)) {
-            gradesArr.forEach(g => {
-                State.grades[g.estudianteId || g.EstudianteId] = {
-                    valor:      g.valor      ?? g.Valor      ?? 0,
-                    comentario: g.comentario ?? g.Comentario ?? '',
-                };
-            });
+        try {
+            const gradesArr = await window.api.getCalificacionesByMaestro(State.teacherId);
+            State.grades = {};
+            if (Array.isArray(gradesArr)) {
+                gradesArr.forEach(g => {
+                    State.grades[g.estudianteId || g.EstudianteId] = {
+                        valor:      g.valor      ?? g.Valor      ?? 0,
+                        comentario: g.comentario ?? g.Comentario ?? '',
+                    };
+                });
+            }
+        } catch (gradeErr) {
+            console.warn('⚠ No se pudieron cargar calificaciones:', gradeErr);
+            State.grades = {};
         }
 
         // 3. Fetch progress summaries in parallel (limit concurrency)
         State.progress = {};
-        await Promise.all(State.students.map(async s => {
+        await Promise.allSettled(State.students.map(async s => {
             try {
                 const p = await window.api.getStudentProgressSummary(s.id ?? s.Id);
                 State.progress[s.id ?? s.Id] = p;
-            } catch { /* ignore */ }
+            } catch { /* ignore per-student errors */ }
         }));
 
         // 4. Render
@@ -124,12 +175,16 @@ async function loadStudents() {
 
     } catch (err) {
         console.error('Error loading students:', err);
-        const tbody = document.getElementById('students-tbody');
+        showToast('Error de conexión al cargar estudiantes', 'error');
         if (tbody) {
             tbody.innerHTML = `<tr><td colspan="7">
-                <div class="empty-state">
-                    <div class="icon">⚠️</div>
-                    <p>Error al cargar estudiantes. Verifica que el servidor esté activo.</p>
+                <div class="empty-state" style="padding: 40px;">
+                    <div class="icon" style="color: var(--danger); font-size: 2.5rem; margin-bottom: 16px;"><i class="fas fa-exclamation-triangle"></i></div>
+                    <p style="font-size: 1.1rem; font-weight: 600; color: var(--text);">Fallo al cargar los estudiantes</p>
+                    <p style="font-size: 0.85rem; color: var(--text-muted); margin-top: 8px; max-width: 400px; margin-left: auto; margin-right: auto;">
+                        ${err.message || 'Verifica que el servidor esté activo y que tengas una conexión a internet estable.'}
+                    </p>
+                    <button class="btn btn-primary hover-lift" style="margin-top: 24px;" onclick="loadStudents()"><i class="fas fa-sync-alt" style="margin-right:8px;"></i> Reintentar conexión</button>
                 </div>
             </td></tr>`;
         }
@@ -143,9 +198,10 @@ function renderTable() {
 
     if (State.filtered.length === 0) {
         tbody.innerHTML = `<tr><td colspan="7">
-            <div class="empty-state">
-                <div class="icon">👥</div>
-                <p>No se encontraron estudiantes registrados.</p>
+            <div class="empty-state" style="padding: 60px 20px;">
+                <div class="icon" style="font-size: 3rem; color: rgba(255,255,255,0.1); margin-bottom: 16px;"><i class="fas fa-users-slash"></i></div>
+                <p style="font-size: 1.1rem; font-weight: 600; color: var(--text);">Aún no hay estudiantes asignados</p>
+                <p style="font-size: 0.85rem; color: var(--text-muted); margin-top: 8px;">Cuando los estudiantes se registren aparecerán aquí automáticamente.</p>
             </div>
         </td></tr>`;
         return;
@@ -163,11 +219,12 @@ function renderTable() {
         const apPat   = s.apellidoPaterno ?? s.ApellidoPaterno ?? '';
         const username= s.username     ?? s.Username     ?? '';
         const active  = isRecentlyActive(ultima);
-        const color   = avatarColor(sid);
-        const inits   = initials(nombre, apPat);
+        const color   = TeacherState.getAvatarColor(sid);
+        const inits   = TeacherState.getInitials(nombre, apPat);
         const gradeVal= grade ? grade.valor.toFixed(1) : '—';
+        const gradeBadgeClass = !grade ? 'badge-grade-none' : (grade.valor >= 6 ? 'badge-grade-pass' : 'badge-grade-fail');
 
-        return `<tr onclick="openModal(${sid})" title="Ver perfil completo">
+        return `<tr onclick="openModal(${sid})" title="Ver perfil completo" style="cursor: pointer;">
             <td>
                 <div class="student-cell">
                     <div class="student-avatar" style="background:${color}">${inits}</div>
@@ -177,11 +234,11 @@ function renderTable() {
                     </div>
                 </div>
             </td>
-            <td><span class="level-badge">⚡ Nivel ${nivel}</span></td>
-            <td>${pts.toLocaleString('es-MX')}</td>
+            <td><span class="badge-level">🏅 Nivel ${nivel}</span></td>
+            <td>${pts.toLocaleString('es-MX')} xp</td>
             <td>
-                <div class="progress-bar-wrap">
-                    <div class="progress-bar-bg">
+                <div class="progress-bar-wrap" style="width: 120px;">
+                    <div class="progress-bar-bg" style="height: 6px;">
                         <div class="progress-bar-fill" style="width:${pct}%"></div>
                     </div>
                     <span class="progress-label">${pct}%</span>
@@ -197,11 +254,9 @@ function renderTable() {
                 </div>
             </td>
             <td>
-                <span style="font-weight:700;font-size:1rem;color:${grade ? 'var(--accent2)' : 'var(--text-muted)'}">
+                <span class="${gradeBadgeClass}">
                     ${gradeVal}
                 </span>
-                ${grade ? '<span style="font-size:0.72rem;color:var(--text-muted)">/10</span>' : ''}
-            </td>
             <td onclick="event.stopPropagation()">
                 <button class="btn btn-ghost btn-sm" onclick="openModal(${sid})">Ver perfil</button>
             </td>
@@ -282,6 +337,26 @@ async function openModal(studentId) {
     document.getElementById('modal-progress-bar').style.width     = `${pct}%`;
     document.getElementById('modal-progress-pct').textContent     = `${pct}%`;
 
+    // Render detailed topics progress
+    const topicsContainer = document.getElementById('modal-topics-progress');
+    if (topicsContainer) {
+        if (prog && prog.topicsProgress && prog.topicsProgress.length > 0) {
+            topicsContainer.innerHTML = prog.topicsProgress.map(t => `
+                <div style="margin-bottom: 8px;">
+                    <div style="display: flex; justify-content: space-between; font-size: 0.8rem; margin-bottom: 2px;">
+                        <span>Tema ${t.temaId}</span>
+                        <span>${t.completados}/${t.total} (${t.porcentaje.toFixed(1)}%)</span>
+                    </div>
+                    <div class="progress-bar-bg" style="height:6px; background-color: var(--glass-border);">
+                        <div class="progress-bar-fill" style="width:${t.porcentaje}%; background-color: var(--primary);"></div>
+                    </div>
+                </div>
+            `).join('');
+        } else {
+            topicsContainer.innerHTML = `<div style="font-size: 0.8rem; color: var(--text-muted);">Sin datos detallados.</div>`;
+        }
+    }
+
     // Pre-fill grade fields
     document.getElementById('modal-grade-value').value   = grade ? grade.valor   : '';
     document.getElementById('modal-grade-comment').value = grade ? grade.comentario : '';
@@ -354,17 +429,109 @@ async function saveGrade() {
 // ── Sidebar navigation ────────────────────────────────────────────────────────
 function showSection(section) {
     document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
-    event?.currentTarget?.classList.add('active');
+    
+    // Set active link visually
+    const btn = document.getElementById(`nav-${section}`) || event?.currentTarget;
+    if (btn) btn.classList.add('active');
 
     const titles = {
         dashboard: ['Dashboard', 'Resumen general de tus estudiantes'],
         students:  ['Estudiantes', 'Lista completa de todos los estudiantes'],
         grades:    ['Calificaciones', 'Calificaciones asignadas por ti'],
+        messages:  ['Mensajes', 'Mensajes académicos y certificados de tus estudiantes']
     };
     const [title, subtitle] = titles[section] ?? ['Dashboard', ''];
     document.getElementById('page-title').textContent    = title;
     document.getElementById('page-subtitle').textContent = subtitle;
+
+    const dashContainer = document.getElementById('dashboard-container');
+    const msgContainer = document.getElementById('messages-container');
+
+    if (section === 'messages') {
+        if (dashContainer) dashContainer.style.display = 'none';
+        if (msgContainer) msgContainer.style.display = 'block';
+        loadMessages();
+    } else {
+        if (dashContainer) dashContainer.style.display = 'block';
+        if (msgContainer) msgContainer.style.display = 'none';
+    }
 }
+
+// ── Load messages received by teacher ────────────────────────────────────────
+async function loadMessages() {
+    const tbody = document.getElementById('messages-tbody');
+    if (!tbody) return;
+
+    tbody.innerHTML = `<tr><td colspan="5">
+        <div class="empty-state"><div class="icon">⏳</div><p>Cargando mensajes del servidor…</p></div>
+    </td></tr>`;
+
+    try {
+        const messages = await window.api.getTeacherMessages(State.teacherId);
+        if (!messages || messages.length === 0) {
+            tbody.innerHTML = `<tr><td colspan="5">
+                <div class="empty-state">
+                    <div class="icon">📧</div>
+                    <p>No has recibido ningún mensaje académico todavía.</p>
+                </div>
+            </td></tr>`;
+            return;
+        }
+
+        tbody.innerHTML = messages.map(m => {
+            const studentName = m.nombreEstudiante || m.NombreEstudiante || 'Estudiante';
+            const email = m.correoEstudiante || m.CorreoEstudiante || '';
+            const subject = m.asunto || m.Asunto || '';
+            const messageText = m.mensaje || m.Mensaje || '';
+            const dateStr = formatDate(m.fechaEnvio || m.FechaEnvio);
+            const hasPdf = m.tienePdf || m.TienePdf;
+            
+            // Render download button if there is a PDF
+            let pdfBtn = '—';
+            if (hasPdf && m.pdfBase64) {
+                pdfBtn = `<button class="btn btn-primary btn-sm" onclick="downloadBase64Pdf('${m.pdfBase64}', 'Certificado_${studentName.replace(/ /g, "_")}.pdf')">
+                    📥 Descargar
+                </button>`;
+            }
+
+            return `<tr>
+                <td>
+                    <div style="font-weight: 600; color: var(--text);">${studentName}</div>
+                    <div style="font-size: 0.75rem; color: var(--text-muted);">${email}</div>
+                </td>
+                <td style="font-weight: 600; color: var(--accent2);">${subject}</td>
+                <td style="white-space: pre-wrap; font-size: 0.85rem; line-height: 1.4; color: var(--text);">${messageText}</td>
+                <td style="font-size: 0.8rem; color: var(--text-muted);">${dateStr}</td>
+                <td>${pdfBtn}</td>
+            </tr>`;
+        }).join('');
+
+    } catch (err) {
+        console.error('Error loading messages:', err);
+        tbody.innerHTML = `<tr><td colspan="5">
+            <div class="empty-state">
+                <div class="icon">⚠️</div>
+                <p>Error al cargar mensajes del servidor.</p>
+            </div>
+        </td></tr>`;
+    }
+}
+
+// ── Download base64 PDF ──────────────────────────────────────────────────────
+window.downloadBase64Pdf = function(base64Data, filename) {
+    try {
+        const link = document.createElement('a');
+        link.href = base64Data;
+        link.download = filename;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        showToast('Descarga de certificado iniciada ✓', 'success');
+    } catch (err) {
+        console.error('Download base64 PDF error:', err);
+        showToast('No se pudo descargar el certificado.', 'error');
+    }
+};
 
 // ── Logout ────────────────────────────────────────────────────────────────────
 function logout() {

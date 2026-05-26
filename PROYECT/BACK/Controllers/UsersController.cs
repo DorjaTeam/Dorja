@@ -5,7 +5,13 @@ using DorjaModelado;
 using DorjaData.Repositories;
 using System.Text;
 using System.Linq;
-
+using Google.Apis.Auth;
+using Microsoft.Extensions.Configuration;
+using System.Security.Claims;
+using Microsoft.IdentityModel.Tokens;
+using System.IdentityModel.Tokens.Jwt;
+using Microsoft.AspNetCore.RateLimiting;
+using BACK.Services;
 
 namespace BACK.Controllers
 {
@@ -18,19 +24,25 @@ namespace BACK.Controllers
         private readonly ILogros_UsuarioRepository _logrosUsuarioRepository;
         private readonly IProblemaRepository _problemaRepository;
         private readonly IProgreso_ProblemaRepository _progresoProblemaRepository;
+        private readonly IConfiguration _configuration;
+        private readonly IEmailService _emailService;
 
         public UsersController(
             IUserRepository usersRepository, 
             ILogrosRepository logrosRepository, 
             ILogros_UsuarioRepository logrosUsuarioRepository,
             IProblemaRepository problemaRepository,
-            IProgreso_ProblemaRepository progresoProblemaRepository)
+            IProgreso_ProblemaRepository progresoProblemaRepository,
+            IConfiguration configuration,
+            IEmailService emailService)
         {
             _usersRepository = usersRepository;
             _logrosRepository = logrosRepository;
             _logrosUsuarioRepository = logrosUsuarioRepository;
             _problemaRepository = problemaRepository;
             _progresoProblemaRepository = progresoProblemaRepository;
+            _configuration = configuration;
+            _emailService = emailService;
         }
 
         [HttpGet]
@@ -115,17 +127,42 @@ namespace BACK.Controllers
         }
 
         [HttpDelete]
-        public async Task<IActionResult> DeleteUsers(int id)
+        [Microsoft.AspNetCore.Authorization.Authorize]
+        public async Task<IActionResult> DeleteUsers([FromQuery] int id)
         {
-            await _usersRepository.DeleteUsuarios(new Users { Id = id });
+            try
+            {
+                // Verify that the user attempting to delete the account is the owner
+                var userIdClaim = User.Claims.FirstOrDefault(c => 
+                    c.Type == ClaimTypes.NameIdentifier || 
+                    c.Type == System.IdentityModel.Tokens.Jwt.JwtRegisteredClaimNames.Sub ||
+                    c.Type == "id")?.Value;
+                    
+                if (string.IsNullOrEmpty(userIdClaim) || int.Parse(userIdClaim) != id)
+                {
+                    return Unauthorized(new { message = "No tienes permiso para eliminar esta cuenta" });
+                }
 
-            return NoContent();
+                var deleted = await _usersRepository.DeleteUsuarios(new Users { Id = id });
+                
+                if (!deleted)
+                {
+                    return StatusCode(500, new { message = "Error al intentar eliminar la cuenta o la cuenta ya no existe" });
+                }
+
+                return Ok(new { success = true, message = "Cuenta eliminada exitosamente" });
+            }
+            catch (Exception ex)
+            {
+                System.IO.File.WriteAllText(@"c:\Users\apoin\Dorja-1\error.txt", ex.ToString());
+                return StatusCode(500, new { message = "Excepción en servidor: " + ex.Message, detail = ex.ToString() });
+            }
         }
 
-        // --------------------------  SIGNUP  ----------------------------
+        // --------------------------  LOGIN / SIGNUP  ----------------------------
 
         [HttpPost("signup")]
-
+        [EnableRateLimiting("AuthLimit")]
         public async Task<IActionResult> Signup([FromBody] Users users)
         {
             if (users == null)
@@ -188,6 +225,31 @@ namespace BACK.Controllers
             if (createdUser != null)
             {
                 await GrantLogroIfNotExists(createdUser.Id, "Crear cuenta");
+                
+                // Enviar correo de bienvenida
+                try {
+                    string welcomeBody = $@"
+                    <div style='font-family: -apple-system, BlinkMacSystemFont, ""Segoe UI"", Roboto, Helvetica, Arial, sans-serif; max-width: 600px; margin: 0 auto; background-color: #ffffff; border-radius: 16px; overflow: hidden; box-shadow: 0 4px 24px rgba(73,41,164,0.08); border: 1px solid #eef2f6;'>
+                        <div style='background: linear-gradient(135deg, #1a0f3c, #4929a4); padding: 40px 20px; text-align: center;'>
+                            <div style='width: 64px; height: 64px; background: linear-gradient(135deg, #4929a4, #8a5df5); border: 1px solid rgba(255,255,255,0.2); border-radius: 16px; display: inline-flex; align-items: center; justify-content: center; color: white; font-size: 28px; font-weight: 800; margin-bottom: 20px; box-shadow: 0 8px 16px rgba(0,0,0,0.2);'>D</div>
+                            <h2 style='margin: 0; color: #ffffff; font-size: 28px; font-weight: 800; letter-spacing: -0.5px;'>¡Bienvenido a Dorja!</h2>
+                        </div>
+                        <div style='padding: 40px 30px; color: #334155;'>
+                            <p style='font-size: 18px; margin-bottom: 20px;'>Hola <strong>{users.Nombre}</strong>,</p>
+                            <p style='font-size: 16px; line-height: 1.6; margin-bottom: 20px; color: #475569;'>Nos emociona darte la bienvenida a nuestra plataforma educativa.</p>
+                            <p style='font-size: 16px; line-height: 1.6; margin-bottom: 30px; color: #475569;'>Tu cuenta como <strong>{users.Rol}</strong> ha sido creada exitosamente. Explora los retos, suma puntos y sube de nivel.</p>
+                            <div style='text-align: center; margin: 40px 0;'>
+                                <a href='http://localhost:5246' style='background-color: #4929a4; color: white; padding: 14px 32px; text-decoration: none; border-radius: 8px; font-weight: 600; font-size: 16px; display: inline-block;'>Ir a la plataforma</a>
+                            </div>
+                        </div>
+                        <div style='background-color: #f8fafc; padding: 24px; text-align: center; border-top: 1px solid #eef2f6;'>
+                            <p style='margin: 0; color: #94a3b8; font-size: 13px;'>© 2026 Dorja. Todos los derechos reservados.</p>
+                        </div>
+                    </div>";
+                    await _emailService.SendEmailAsync(users.Email, users.Nombre, "¡Bienvenido a Dorja!", welcomeBody);
+                } catch (Exception ex) {
+                    Console.WriteLine("Error enviando correo de bienvenida: " + ex.Message);
+                }
             }
 
             return Ok(new { 
@@ -201,6 +263,7 @@ namespace BACK.Controllers
         // --------------------------  LOGIN  ----------------------------
 
         [HttpPost("login")]
+        [EnableRateLimiting("AuthLimit")]
         public async Task<IActionResult> Login([FromBody] LoginRequest request)
         {
             if (request == null)
@@ -238,7 +301,8 @@ namespace BACK.Controllers
                 return Unauthorized(new { message = "Email/Username o contraseña incorrectos" });
             }
 
-            // Aquí podrías generar un token JWT (si quieres seguridad avanzada)
+            var token = GenerateJwtToken(existing);
+
             return Ok(new
             {
                 message = "Inicio de sesión exitoso",
@@ -251,7 +315,8 @@ namespace BACK.Controllers
                     existing.ApellidoPaterno,
                     existing.ApellidoMaterno,
                     existing.Rol
-                }
+                },
+                token
             });
         }
 
@@ -307,6 +372,25 @@ namespace BACK.Controllers
                     ? Math.Round((double)completedCount / totalProblemas * 100, 1)
                     : 0;
 
+                // Topic specific percentages
+                var topicsProgress = new List<object>();
+                var problemasPorTema = allProblemas.GroupBy(p => p.TemaId);
+                foreach (var temaGroup in problemasPorTema)
+                {
+                    var temaId = temaGroup.Key;
+                    var problemasEnTema = temaGroup.ToList();
+                    var totalEnTema = problemasEnTema.Count;
+                    var completadosEnTema = completados.Count(c => problemasEnTema.Any(pt => pt.Id == c.ProblemaId));
+                    var pct = totalEnTema > 0 ? Math.Round((double)completadosEnTema / totalEnTema * 100, 1) : 0;
+                    
+                    topicsProgress.Add(new {
+                        temaId = temaId,
+                        total = totalEnTema,
+                        completados = completadosEnTema,
+                        porcentaje = pct
+                    });
+                }
+
                 // Calculate streak
                 var streak = await CalculateStreak(userId, user);
 
@@ -324,7 +408,8 @@ namespace BACK.Controllers
                     totalProblemas,
                     completedCount,
                     completionPercentage,
-                    streak
+                    streak,
+                    topicsProgress
                 });
             }
             catch (Exception ex)
@@ -339,6 +424,208 @@ namespace BACK.Controllers
             public string? Username { get; set; }
             public string? Email { get; set; }
             public string? Password { get; set; }
+        }
+
+        public class ForgotPasswordRequest
+        {
+            public string Email { get; set; } = string.Empty;
+        }
+
+        [HttpPost("forgot-password")]
+        public async Task<IActionResult> ForgotPassword([FromBody] ForgotPasswordRequest request)
+        {
+            if (string.IsNullOrWhiteSpace(request.Email))
+                return BadRequest(new { message = "El email es obligatorio" });
+
+            var user = await _usersRepository.GetByEmail(request.Email);
+            if (user == null)
+                return Ok(new { success = true, message = "Si el correo está registrado, recibirás un enlace de recuperación." });
+
+            string chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+            var random = new Random();
+            string newPassword = new string(Enumerable.Repeat(chars, 8).Select(s => s[random.Next(s.Length)]).ToArray());
+
+            user.Password = HashPassword(newPassword);
+            await _usersRepository.UpdateUsuarios(user);
+
+            string emailBody = $@"
+            <div style='font-family: -apple-system, BlinkMacSystemFont, ""Segoe UI"", Roboto, Helvetica, Arial, sans-serif; max-width: 600px; margin: 0 auto; background-color: #ffffff; border-radius: 16px; overflow: hidden; box-shadow: 0 4px 24px rgba(73,41,164,0.08); border: 1px solid #eef2f6;'>
+                <div style='background: linear-gradient(135deg, #1a0f3c, #4929a4); padding: 40px 20px; text-align: center;'>
+                    <div style='width: 64px; height: 64px; background: linear-gradient(135deg, #4929a4, #8a5df5); border: 1px solid rgba(255,255,255,0.2); border-radius: 16px; display: inline-flex; align-items: center; justify-content: center; color: white; font-size: 28px; font-weight: 800; margin-bottom: 20px; box-shadow: 0 8px 16px rgba(0,0,0,0.2);'>D</div>
+                    <h2 style='margin: 0; color: #ffffff; font-size: 26px; font-weight: 800; letter-spacing: -0.5px;'>Recuperación de Contraseña</h2>
+                </div>
+                <div style='padding: 40px 30px; color: #334155;'>
+                    <p style='font-size: 18px; margin-bottom: 20px;'>Hola <strong>{user.Nombre}</strong>,</p>
+                    <p style='font-size: 16px; line-height: 1.6; margin-bottom: 20px; color: #475569;'>Se ha solicitado la recuperación de contraseña para tu cuenta en Dorja.</p>
+                    <p style='font-size: 16px; margin-bottom: 15px; color: #475569;'>Tu nueva contraseña temporal es:</p>
+                    <div style='background-color: #f8fafc; border: 1px dashed #cbd5e1; padding: 20px; text-align: center; font-size: 28px; font-weight: 800; letter-spacing: 4px; border-radius: 12px; margin: 24px 0; color: #1a0f3c;'>
+                        {newPassword}
+                    </div>
+                    <p style='font-size: 15px; line-height: 1.6; color: #64748b; margin-top: 20px;'>Te recomendamos iniciar sesión y cambiar tu contraseña lo antes posible en la sección de Configuración de tu perfil.</p>
+                </div>
+                <div style='background-color: #f8fafc; padding: 24px; text-align: center; border-top: 1px solid #eef2f6;'>
+                    <p style='margin: 0; color: #94a3b8; font-size: 13px;'>© 2026 Dorja. Todos los derechos reservados.</p>
+                </div>
+            </div>";
+
+            try {
+                await _emailService.SendEmailAsync(user.Email, user.Nombre, "[Dorja] Recuperación de Contraseña", emailBody);
+            } catch (Exception ex) {
+                Console.WriteLine("Error enviando correo de recuperación: " + ex.Message);
+            }
+
+            return Ok(new { success = true, message = "Si el correo está registrado, recibirás una contraseña temporal." });
+        }
+
+        public class GoogleLoginRequest
+        {
+            public string Token { get; set; } = string.Empty;
+            public string? Rol { get; set; }
+        }
+
+        [HttpPost("google-login")]
+        [EnableRateLimiting("AuthLimit")]
+        public async Task<IActionResult> GoogleLogin([FromBody] GoogleLoginRequest request)
+        {
+            if (string.IsNullOrWhiteSpace(request.Token))
+            {
+                return BadRequest(new { message = "Token es obligatorio" });
+            }
+
+            try
+            {
+                // Validate the token without enforcing a specific Client ID for now
+                // Alternatively, specify ValidationSettings with your ClientId
+                var payload = await GoogleJsonWebSignature.ValidateAsync(request.Token);
+                
+                if (payload == null)
+                {
+                    return Unauthorized(new { message = "Token de Google inválido" });
+                }
+
+                // Check if user exists by Google ID
+                var existingUser = await _usersRepository.GetByGoogleId(payload.Subject);
+                
+                // If not found by Google ID, check by Email (for existing users linking their account)
+                if (existingUser == null)
+                {
+                    existingUser = await _usersRepository.GetByEmail(payload.Email);
+                    
+                    if (existingUser != null)
+                    {
+                        // Link the account
+                        existingUser.GoogleId = payload.Subject;
+                        await _usersRepository.UpdateUsuarios(existingUser);
+                    }
+                }
+
+                bool isNewUser = false;
+
+                if (existingUser == null)
+                {
+                    // Si el usuario es nuevo pero no se ha proporcionado un rol,
+                    // detenemos el flujo y le pedimos al frontend que solicite el rol.
+                    if (string.IsNullOrWhiteSpace(request.Rol))
+                    {
+                        return StatusCode(202, new { 
+                            requiresRole = true, 
+                            message = "Por favor selecciona un rol para continuar",
+                            success = true // Para que el frontend no lo trate como un error grave
+                        });
+                    }
+
+                    // Create new user
+                    isNewUser = true;
+                    var newUser = new Users
+                    {
+                        Username = payload.Email.Split('@')[0] + "_" + Guid.NewGuid().ToString().Substring(0, 4),
+                        Email = payload.Email,
+                        Nombre = payload.GivenName ?? "Usuario",
+                        ApellidoPaterno = payload.FamilyName ?? "",
+                        ApellidoMaterno = "",
+                        Password = HashPassword(Guid.NewGuid().ToString()), // Generar contraseña aleatoria
+                        FechaRegistro = DateTime.Now,
+                        UltimaConexion = DateTime.Now,
+                        PuntosTotales = 0,
+                        NivelActual = 1,
+                        GoogleId = payload.Subject,
+                        ProfilePhotoPath = payload.Picture ?? string.Empty,
+                        CoverPhotoPath = string.Empty,
+                        Rol = request.Rol.ToLower() == "maestro" ? "maestro" : "estudiante"
+                    };
+
+                    var created = await _usersRepository.InsertUsers(newUser);
+                    if (!created)
+                    {
+                        return StatusCode(500, new { message = "Error al crear el usuario con Google" });
+                    }
+
+                    existingUser = await _usersRepository.GetByEmail(newUser.Email);
+                    if (existingUser != null)
+                    {
+                        await GrantLogroIfNotExists(existingUser.Id, "Crear cuenta");
+                        
+                        // Enviar correo de bienvenida
+                        try {
+                            string welcomeBody = $@"
+                            <div style='font-family: -apple-system, BlinkMacSystemFont, ""Segoe UI"", Roboto, Helvetica, Arial, sans-serif; max-width: 600px; margin: 0 auto; background-color: #ffffff; border-radius: 16px; overflow: hidden; box-shadow: 0 4px 24px rgba(73,41,164,0.08); border: 1px solid #eef2f6;'>
+                                <div style='background: linear-gradient(135deg, #1a0f3c, #4929a4); padding: 40px 20px; text-align: center;'>
+                                    <div style='width: 64px; height: 64px; background: linear-gradient(135deg, #4929a4, #8a5df5); border: 1px solid rgba(255,255,255,0.2); border-radius: 16px; display: inline-flex; align-items: center; justify-content: center; color: white; font-size: 28px; font-weight: 800; margin-bottom: 20px; box-shadow: 0 8px 16px rgba(0,0,0,0.2);'>D</div>
+                                    <h2 style='margin: 0; color: #ffffff; font-size: 28px; font-weight: 800; letter-spacing: -0.5px;'>¡Bienvenido a Dorja!</h2>
+                                </div>
+                                <div style='padding: 40px 30px; color: #334155;'>
+                                    <p style='font-size: 18px; margin-bottom: 20px;'>Hola <strong>{existingUser.Nombre}</strong>,</p>
+                                    <p style='font-size: 16px; line-height: 1.6; margin-bottom: 20px; color: #475569;'>Nos emociona darte la bienvenida a nuestra plataforma educativa.</p>
+                                    <p style='font-size: 16px; line-height: 1.6; margin-bottom: 30px; color: #475569;'>Tu cuenta como <strong>{existingUser.Rol}</strong> ha sido creada usando Google exitosamente. ¡Comienza a aprender hoy mismo!</p>
+                                </div>
+                                <div style='background-color: #f8fafc; padding: 24px; text-align: center; border-top: 1px solid #eef2f6;'>
+                                    <p style='margin: 0; color: #94a3b8; font-size: 13px;'>© 2026 Dorja. Todos los derechos reservados.</p>
+                                </div>
+                            </div>";
+                            await _emailService.SendEmailAsync(existingUser.Email, existingUser.Nombre, "¡Bienvenido a Dorja!", welcomeBody);
+                        } catch (Exception ex) {
+                            Console.WriteLine("Error enviando correo de bienvenida Google: " + ex.Message);
+                        }
+                    }
+                }
+                else
+                {
+                    // Update last connection
+                    existingUser.UltimaConexion = DateTime.Now;
+                    await _usersRepository.UpdateUsuarios(existingUser);
+                }
+
+                if (existingUser == null)
+                {
+                    return StatusCode(500, new { message = "Error al obtener el usuario tras inicio de sesión" });
+                }
+
+                return Ok(new
+                {
+                    message = "Inicio de sesión con Google exitoso",
+                    isNewUser = isNewUser,
+                    user = new
+                    {
+                        existingUser.Id,
+                        existingUser.Username,
+                        existingUser.Email,
+                        existingUser.Nombre,
+                        existingUser.ApellidoPaterno,
+                        existingUser.ApellidoMaterno,
+                        existingUser.Rol,
+                        existingUser.ProfilePhotoPath
+                    },
+                    token = GenerateJwtToken(existingUser)
+                });
+            }
+            catch (InvalidJwtException)
+            {
+                return Unauthorized(new { message = "Token JWT de Google no válido" });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = $"Error en el servidor: {ex.Message}" });
+            }
         }
 
         // --------------------------  IMAGE UPLOAD  ----------------------------
@@ -742,6 +1029,35 @@ namespace BACK.Controllers
                 Console.WriteLine($"Error calculating completion percentage for user {userId}: {ex.Message}");
                 return 0;
             }
+        }
+        // Helper method para generar el JWT
+        private string GenerateJwtToken(Users user)
+        {
+            var jwtSettings = _configuration.GetSection("JwtSettings");
+            var secretKey = jwtSettings["Secret"] ?? "ClaveSecretaDorjaSuperSeguraParaJWT_ReemplazarEnProd!";
+            var key = Encoding.ASCII.GetBytes(secretKey);
+
+            var claims = new[]
+            {
+                new Claim(JwtRegisteredClaimNames.Sub, user.Id.ToString()),
+                new Claim(JwtRegisteredClaimNames.Email, user.Email ?? ""),
+                new Claim(ClaimTypes.Role, user.Rol ?? "estudiante"),
+                new Claim(ClaimTypes.NameIdentifier, user.Id.ToString())
+            };
+
+            var tokenDescriptor = new SecurityTokenDescriptor
+            {
+                Subject = new ClaimsIdentity(claims),
+                Expires = DateTime.UtcNow.AddHours(24),
+                Issuer = jwtSettings["Issuer"],
+                Audience = jwtSettings["Audience"],
+                SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha256Signature)
+            };
+
+            var tokenHandler = new JwtSecurityTokenHandler();
+            var token = tokenHandler.CreateToken(tokenDescriptor);
+
+            return tokenHandler.WriteToken(token);
         }
     }
 }

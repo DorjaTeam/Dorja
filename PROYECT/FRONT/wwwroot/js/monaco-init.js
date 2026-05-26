@@ -100,6 +100,27 @@ public class Program
             formatOnType: true
         });
 
+        // ── Fade-in Transition & Skeleton removal ──
+        const editorContainer = document.getElementById('editor');
+        const skeleton = document.getElementById('editor-skeleton');
+        
+        // Wait a small tick to ensure Monaco has painted
+        setTimeout(() => {
+            if (skeleton) skeleton.remove();
+            if (editorContainer) editorContainer.style.opacity = '1';
+        }, 300);
+
+        // ── Resize Observer for dynamic resizing ──
+        if (window.ResizeObserver) {
+            const ro = new ResizeObserver(() => {
+                if (editor) {
+                    // Small debounce to prevent performance hit during rapid resize
+                    requestAnimationFrame(() => editor.layout());
+                }
+            });
+            ro.observe(editorContainer.parentElement);
+        }
+
         // Asignar el editor a window para que esté disponible globalmente
         window.monacoEditor = editor;
         window.currentLanguage = currentLanguage;

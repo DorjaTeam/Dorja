@@ -1,13 +1,15 @@
 <!DOCTYPE html>
-<html lang="es" class="">
-
+<html lang="es">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Registro - Dorja</title>
-    <link href="css/output.css" rel="stylesheet">
+    <title>Crear Cuenta — Dorja</title>
+    <meta name="description" content="Regístrate en Dorja para comenzar tu viaje en las matemáticas de la programación.">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="css/dorja-design-system.css" rel="stylesheet">
+
     <style>
-        /* --- Feedback animations --- */
         @keyframes shake {
             0%, 100% { transform: translateX(0); }
             20% { transform: translateX(-7px); }
@@ -15,142 +17,322 @@
             60% { transform: translateX(-4px); }
             80% { transform: translateX(4px); }
         }
-        @keyframes slideDown {
-            from { opacity: 0; transform: translateY(-8px); }
-            to   { opacity: 1; transform: translateY(0); }
-        }
         @keyframes popIn {
-            0%   { opacity: 0; transform: scale(0.80); }
+            0%   { opacity: 0; transform: scale(0.82); }
             70%  { transform: scale(1.04); }
             100% { opacity: 1; transform: scale(1); }
         }
-        @keyframes drawCheck {
-            to { stroke-dashoffset: 0; }
-        }
-        @keyframes fillBar {
-            from { width: 0%; }
-            to   { width: 100%; }
-        }
+        @keyframes drawCheck { to { stroke-dashoffset: 0; } }
+        @keyframes fillBar { from { width: 0%; } to { width: 100%; } }
 
         .shake { animation: shake 0.42s ease; }
 
-        #error-container {
-            display: none;
-            animation: slideDown 0.25s ease;
-        }
-        #error-container.visible {
-            display: flex;
-        }
-
-        /* Success overlay */
+        /* ── Success Overlay ── */
         #success-overlay {
             display: none;
             position: fixed;
             inset: 0;
             z-index: 9999;
-            background: rgba(10, 10, 30, 0.60);
-            backdrop-filter: blur(5px);
-            -webkit-backdrop-filter: blur(5px);
+            background: rgba(4, 3, 14, 0.88);
+            backdrop-filter: blur(14px);
             align-items: center;
             justify-content: center;
+            padding: 20px;
         }
-        #success-overlay.visible {
-            display: flex;
-        }
+        #success-overlay.visible { display: flex; }
+
         #success-card {
-            background: #fff;
-            border-radius: 24px;
-            padding: 48px 44px 40px;
-            max-width: 420px;
-            width: 92%;
+            background: var(--surface-1);
+            border: 1px solid var(--glass-border-2);
+            border-radius: var(--radius-xl);
+            padding: 48px 40px 40px;
+            max-width: 440px;
+            width: 100%;
             text-align: center;
-            box-shadow: 0 40px 100px rgba(0,0,0,0.30);
-            animation: popIn 0.45s cubic-bezier(.34,1.56,.64,1) both;
-        }
-        .dark #success-card {
-            background: #1e293b;
+            box-shadow: var(--shadow-xl), 0 0 60px rgba(73,41,164,0.25);
+            animation: popIn 0.5s cubic-bezier(.34,1.56,.64,1) both;
         }
 
-        /* Check circle */
         #check-circle {
-            width: 80px;
-            height: 80px;
+            width: 76px;
+            height: 76px;
             border-radius: 50%;
-            background: linear-gradient(135deg, #6366f1 0%, #4338ca 100%);
+            background: linear-gradient(135deg, var(--primary), var(--accent));
             margin: 0 auto 22px;
             display: flex;
             align-items: center;
             justify-content: center;
-            box-shadow: 0 8px 32px rgba(99,102,241,0.45);
+            box-shadow: var(--shadow-glow-lg);
         }
+
         #check-path {
             stroke-dasharray: 36;
             stroke-dashoffset: 36;
             animation: drawCheck 0.55s ease 0.3s forwards;
         }
 
-        /* Progress bar */
         #redirect-bar {
             height: 100%;
             width: 0%;
-            background: linear-gradient(90deg, #6366f1, #4338ca);
+            background: linear-gradient(90deg, var(--primary), var(--accent));
             border-radius: 999px;
         }
-        #redirect-bar.animating {
-            animation: fillBar 3s linear forwards;
+        #redirect-bar.animating { animation: fillBar 3s linear forwards; }
+
+        /* ── Error banner ── */
+        #error-container {
+            display: none;
+            align-items: center;
+            gap: 10px;
+            padding: 12px 16px;
+            border-radius: var(--radius);
+            background: var(--danger-soft);
+            border: 1px solid var(--danger-border);
+            color: #fca5a5;
+            margin-bottom: 24px;
+            font-size: var(--text-sm);
+        }
+        #error-container.visible { display: flex; }
+
+        /* ── Page layout ── */
+        .signup-page {
+            display: grid;
+            grid-template-columns: 1fr;
+            min-height: 100vh;
+        }
+        @media (min-width: 1024px) {
+            .signup-page { grid-template-columns: 0.7fr 1.3fr; }
         }
 
-        /* Button loading state */
-        #submit-btn:disabled {
-            opacity: 0.78;
-            cursor: not-allowed;
-            transform: none !important;
-        }
-
-        /* Role selector cards */
-        .role-card {
+        /* ── Left brand sidebar ── */
+        .signup-branding {
+            display: none;
+            flex-direction: column;
+            justify-content: center;
+            padding: 56px 40px;
+            background: linear-gradient(160deg, #0d0820 0%, #1a0f3c 40%, #4929a4 100%);
             position: relative;
-            background: #f3f4f6;
-            border: 2px solid transparent;
-            transition: all 0.22s ease;
+            overflow: hidden;
         }
-        .dark .role-card {
-            background: #334155;
+        @media (min-width: 1024px) { .signup-branding { display: flex; } }
+
+        .signup-brand-orb {
+            position: absolute;
+            border-radius: 50%;
+            filter: blur(60px);
+            pointer-events: none;
         }
+        .signup-brand-orb-1 { width: 350px; height: 350px; background: rgba(73,41,164,0.5); top: -100px; left: -80px; }
+        .signup-brand-orb-2 { width: 250px; height: 250px; background: rgba(138,93,245,0.3); bottom: 20px; right: -60px; }
+
+        .signup-brand-grid {
+            position: absolute; inset: 0;
+            background-image:
+                linear-gradient(rgba(255,255,255,0.03) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(255,255,255,0.03) 1px, transparent 1px);
+            background-size: 44px 44px;
+            pointer-events: none;
+        }
+
+        .signup-brand-content { position: relative; z-index: 10; }
+
+        .signup-brand-logo {
+            width: 56px; height: 56px;
+            border-radius: 14px;
+            background: rgba(255,255,255,0.12);
+            border: 1px solid rgba(255,255,255,0.18);
+            display: flex; align-items: center; justify-content: center;
+            font-size: 1.6rem; font-weight: 900; color: white;
+            margin-bottom: 24px;
+            backdrop-filter: blur(8px);
+            box-shadow: 0 4px 20px rgba(0,0,0,0.2);
+        }
+
+        .signup-brand-title {
+            font-size: 2.2rem;
+            font-weight: 900;
+            letter-spacing: -1px;
+            color: white;
+            margin-bottom: 12px;
+            line-height: 1.15;
+        }
+
+        .signup-brand-sub {
+            font-size: 0.95rem;
+            color: rgba(255,255,255,0.6);
+            line-height: 1.6;
+            margin-bottom: 36px;
+        }
+
+        .signup-steps {
+            list-style: none;
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        .signup-step {
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
+        }
+
+        .step-num {
+            width: 28px; height: 28px;
+            border-radius: 50%;
+            background: rgba(255,255,255,0.15);
+            border: 1px solid rgba(255,255,255,0.2);
+            display: flex; align-items: center; justify-content: center;
+            font-size: 0.75rem; font-weight: 700; color: white;
+            flex-shrink: 0; margin-top: 2px;
+        }
+
+        .step-content .step-title {
+            font-size: 0.9rem; font-weight: 700; color: white;
+            margin-bottom: 2px;
+        }
+
+        .step-content .step-desc {
+            font-size: 0.8rem; color: rgba(255,255,255,0.55); line-height: 1.4;
+        }
+
+        /* ── Right form panel ── */
+        .signup-form-pane {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 48px 28px;
+            background: var(--bg-base);
+        }
+
+        .signup-card-wrap {
+            width: 100%;
+            max-width: 560px;
+            animation: slideUp 0.55s var(--ease-spring);
+        }
+
+        .signup-card {
+            background: var(--surface-1);
+            backdrop-filter: blur(var(--blur-xl));
+            -webkit-backdrop-filter: blur(var(--blur-xl));
+            border: 1px solid var(--glass-border-2);
+            border-radius: var(--radius-xl);
+            padding: 40px;
+            box-shadow: var(--shadow-xl), 0 0 50px rgba(73,41,164,0.08), var(--shadow-inset);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .signup-card::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, rgba(138,93,245,0.5), transparent);
+        }
+
+        .signup-header {
+            text-align: center;
+            margin-bottom: 32px;
+        }
+
+        .signup-header h2 {
+            font-size: 1.85rem;
+            font-weight: 800;
+            letter-spacing: -0.8px;
+            margin-bottom: 6px;
+            background: linear-gradient(135deg, var(--text), var(--accent));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .signup-header p {
+            color: var(--text-muted);
+            font-size: var(--text-sm);
+        }
+
+        /* Role cards */
+        .role-selector-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 12px;
+            margin-bottom: 4px;
+        }
+
+        @media (max-width: 480px) {
+            .role-selector-grid { grid-template-columns: 1fr; }
+        }
+
+        .role-card {
+            background: var(--glass-1);
+            border: 1.5px solid var(--glass-border);
+            border-radius: var(--radius);
+            padding: 18px 14px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 8px;
+            cursor: pointer;
+            transition: var(--transition);
+            text-align: center;
+            color: var(--text);
+            font-family: inherit;
+            position: relative;
+        }
+
         .role-card.selected {
-            border-color: #6366f1;
-            background: #eef2ff;
-            box-shadow: 0 0 0 3px rgba(99,102,241,0.15);
+            border-color: rgba(138,93,245,0.5);
+            background: rgba(73,41,164,0.15);
+            box-shadow: 0 0 0 3px rgba(138,93,245,0.15);
         }
-        .dark .role-card.selected {
-            background: #312e81;
-        }
-        .role-card.selected .role-check {
-            display: flex !important;
-        }
+
+        .role-card.selected .role-check { display: flex !important; }
+
         .role-card:hover:not(.selected) {
-            border-color: #a5b4fc;
+            border-color: rgba(138,93,245,0.3);
+            background: var(--glass-2);
             transform: translateY(-2px);
         }
+
+        .role-icon { font-size: 2rem; }
+        .role-title { font-weight: 700; font-size: var(--text-sm); }
+        .role-desc { font-size: var(--text-xs); color: var(--text-muted); line-height: 1.4; }
+
+        .role-check {
+            position: absolute;
+            top: 9px; right: 9px;
+            width: 20px; height: 20px;
+            border-radius: 50%;
+            background: var(--accent);
+            display: none;
+            align-items: center;
+            justify-content: center;
+        }
+
+        /* Input with icon shorthand for signup */
+        .sf-input {
+            position: relative;
+        }
+        .sf-input .sf-icon {
+            position: absolute;
+            left: 14px; top: 50%;
+            transform: translateY(-50%);
+            color: var(--text-faint);
+            pointer-events: none;
+            font-size: 0.9rem;
+            transition: color var(--dur-normal);
+        }
+        .sf-input input { padding-left: 40px; }
+        .sf-input:focus-within .sf-icon { color: var(--accent); }
     </style>
 </head>
 
-<body class="bg-gray-50 dark:bg-slate-900 font-sans transition-colors duration-300">
+<body>
 
-    <!-- Theme toggle -->
-    <div class="absolute top-5 right-5 z-10">
-        <label for="theme-toggle" class="cursor-pointer">
-            <input type="checkbox" id="theme-toggle" class="sr-only peer">
-            <div class="relative w-14 h-8 bg-gray-300 peer-checked:bg-indigo-600 dark:bg-slate-700 rounded-full transition-colors duration-300">
-                <div class="absolute w-6 h-6 bg-white rounded-full left-1 top-1 peer-checked:translate-x-6 transition-transform duration-300 ease-in-out"></div>
-            </div>
-        </label>
-    </div>
-
-    <!-- ===== SUCCESS OVERLAY ===== -->
+    <!-- ═══ SUCCESS OVERLAY ═══ -->
     <div id="success-overlay">
         <div id="success-card">
-            <!-- Animated checkmark -->
             <div id="check-circle">
                 <svg width="40" height="40" viewBox="0 0 40 40" fill="none">
                     <path id="check-path" d="M10 21 L17 28 L30 13"
@@ -159,164 +341,229 @@
                 </svg>
             </div>
 
-            <h3 style="font-size:1.65rem; font-weight:800; color:#1e1b4b; margin:0 0 10px;">
-                ¡Cuenta creada!
-            </h3>
-            <p style="color:#6b7280; font-size:0.95rem; line-height:1.65; margin:0 0 6px;">
+            <h3 style="font-size:1.6rem; font-weight:800; color:var(--text); margin:0 0 10px;">¡Cuenta creada!</h3>
+            <p style="color:var(--text-muted); font-size:var(--text-sm); line-height:1.65; margin:0 0 6px;">
                 Tu cuenta ha sido registrada exitosamente en Dorja.
             </p>
-            <p id="success-username-msg" style="color:#4f46e5; font-size:0.9rem; font-weight:700; margin:0 0 22px;"></p>
+            <p id="success-username-msg" style="color:var(--accent); font-size:var(--text-sm); font-weight:700; margin:0 0 24px;"></p>
 
-            <!-- Achievement badge -->
-            <div style="display:flex; align-items:center; justify-content:center; gap:9px; background:#f0fdf4; border:1.5px solid #bbf7d0; border-radius:12px; padding:11px 18px; margin-bottom:26px;">
-                <svg width="20" height="20" fill="none" viewBox="0 0 24 24">
-                    <path d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
-                          stroke="#16a34a" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                </svg>
-                <span style="color:#15803d; font-size:0.85rem; font-weight:700;">
+            <div style="display:flex; align-items:center; justify-content:center; gap:9px; background:var(--success-soft); border:1px solid var(--success-border); border-radius:var(--radius); padding:11px 18px; margin-bottom:28px;">
+                <i class="fas fa-check-circle" style="color:var(--success);"></i>
+                <span style="color:var(--success); font-size:var(--text-sm); font-weight:700;">
                     Logro desbloqueado: ¡Bienvenido a Dorja!
                 </span>
             </div>
 
-            <!-- Redirect progress bar -->
-            <div style="background:#e0e7ff; border-radius:999px; height:6px; overflow:hidden; margin-bottom:14px;">
+            <div style="background:rgba(255,255,255,0.07); border-radius:999px; height:5px; overflow:hidden; margin-bottom:12px;">
                 <div id="redirect-bar"></div>
             </div>
-            <p id="redirect-text" style="color:#9ca3af; font-size:0.82rem; margin:0 0 20px;">
+            <p id="redirect-text" style="color:var(--text-muted); font-size:var(--text-xs); margin:0 0 22px;">
                 Redirigiendo al inicio de sesión en <span id="countdown">3</span>s…
             </p>
 
-            <a href="login.html"
-               style="display:block; width:100%; padding:12px; background:linear-gradient(135deg,#6366f1,#4338ca); color:#fff; border-radius:12px; font-weight:700; font-size:0.97rem; text-decoration:none; box-shadow:0 4px 16px rgba(99,102,241,0.35); transition:opacity .2s;"
-               onmouseover="this.style.opacity='.88'" onmouseout="this.style.opacity='1'">
+            <a href="login.html" class="btn btn-primary btn-block" style="padding: 13px;">
                 Ir al Login ahora
             </a>
         </div>
     </div>
 
-    <!-- ===== MAIN FORM ===== -->
-    <main class="flex items-center justify-center min-h-screen py-16 px-4">
-        <div class="w-full max-w-2xl">
-            <form id="signup-form"
-                  class="bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 shadow-2xl rounded-2xl p-10">
-                <h2 class="text-4xl font-bold mb-2 text-center text-gray-800 dark:text-white">Crear una Cuenta</h2>
-                <p class="text-center text-gray-500 dark:text-slate-400 mb-8">Completa tus datos para unirte a Dorja.</p>
+    <!-- ═══ MAIN PAGE ═══ -->
+    <div class="signup-page">
 
-                <!-- Error banner -->
-                <div id="error-container"
-                     class="items-center gap-3 p-3 mb-6 rounded-lg bg-red-50 dark:bg-red-500/10 border border-red-200 dark:border-red-500/30">
-                    <svg class="w-5 h-5 flex-shrink-0 text-red-500" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
-                        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.28 7.22a.75.75 0 00-1.06 1.06L8.94 10l-1.72 1.72a.75.75 0 101.06 1.06L10 11.06l1.72 1.72a.75.75 0 101.06-1.06L11.06 10l1.72-1.72a.75.75 0 00-1.06-1.06L10 8.94 8.28 7.22z" clip-rule="evenodd"/>
-                    </svg>
-                    <p id="error-message" class="text-sm font-medium text-red-700 dark:text-red-300"></p>
-                </div>
+        <!-- Left brand sidebar -->
+        <aside class="signup-branding">
+            <div class="signup-brand-orb signup-brand-orb-1"></div>
+            <div class="signup-brand-orb signup-brand-orb-2"></div>
+            <div class="signup-brand-grid"></div>
 
-                <!-- Fields grid -->
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-5">
-                    <div>
-                        <label class="block text-gray-600 dark:text-slate-300 text-sm font-bold mb-2" for="username">Nombre de Usuario</label>
-                        <input class="dark:text-white bg-gray-100 dark:bg-slate-700 border-2 border-transparent focus:border-indigo-500 focus:ring-0 rounded-lg w-full py-3 px-4 transition-all outline-none"
-                               id="username" type="text" placeholder="ej. juan_123" required>
-                    </div>
-                    <div>
-                        <label class="block text-gray-600 dark:text-slate-300 text-sm font-bold mb-2" for="nombre">Nombre(s)</label>
-                        <input class="dark:text-white bg-gray-100 dark:bg-slate-700 border-2 border-transparent focus:border-indigo-500 focus:ring-0 rounded-lg w-full py-3 px-4 transition-all outline-none"
-                               id="nombre" type="text" placeholder="ej. Juan Carlos" required>
-                    </div>
-                    <div>
-                        <label class="block text-gray-600 dark:text-slate-300 text-sm font-bold mb-2" for="apellidoPaterno">Apellido Paterno</label>
-                        <input class="dark:text-white bg-gray-100 dark:bg-slate-700 border-2 border-transparent focus:border-indigo-500 focus:ring-0 rounded-lg w-full py-3 px-4 transition-all outline-none"
-                               id="apellidoPaterno" type="text" placeholder="ej. García" required>
-                    </div>
-                    <div>
-                        <label class="block text-gray-600 dark:text-slate-300 text-sm font-bold mb-2" for="apellidoMaterno">Apellido Materno</label>
-                        <input class="dark:text-white bg-gray-100 dark:bg-slate-700 border-2 border-transparent focus:border-indigo-500 focus:ring-0 rounded-lg w-full py-3 px-4 transition-all outline-none"
-                               id="apellidoMaterno" type="text" placeholder="ej. López" required>
-                    </div>
-                    <!-- Role selector -->
-                    <div class="md:col-span-2">
-                        <label class="block text-gray-600 dark:text-slate-300 text-sm font-bold mb-3">Soy un…</label>
-                        <div class="grid grid-cols-2 gap-4" id="role-selector">
-                            <!-- Estudiante -->
-                            <button type="button" id="role-estudiante"
-                                onclick="selectRole('estudiante')"
-                                class="role-card flex flex-col items-center gap-3 p-5 rounded-xl border-2 border-transparent bg-gray-100 dark:bg-slate-700 hover:border-indigo-400 transition-all duration-200 cursor-pointer text-center selected"
-                                aria-pressed="true">
-                                <span class="role-icon text-4xl">🎓</span>
-                                <div>
-                                    <p class="font-bold text-gray-800 dark:text-white text-base">Estudiante</p>
-                                    <p class="text-xs text-gray-500 dark:text-slate-400 mt-1">Aprende y practica programación</p>
-                                </div>
-                                <span class="role-check hidden w-6 h-6 rounded-full bg-indigo-600 flex items-center justify-center">
-                                    <svg class="w-3.5 h-3.5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"/>
-                                    </svg>
-                                </span>
-                            </button>
-                            <!-- Maestro -->
-                            <button type="button" id="role-maestro"
-                                onclick="selectRole('maestro')"
-                                class="role-card flex flex-col items-center gap-3 p-5 rounded-xl border-2 border-transparent bg-gray-100 dark:bg-slate-700 hover:border-indigo-400 transition-all duration-200 cursor-pointer text-center"
-                                aria-pressed="false">
-                                <span class="role-icon text-4xl">👨‍🏫</span>
-                                <div>
-                                    <p class="font-bold text-gray-800 dark:text-white text-base">Maestro</p>
-                                    <p class="text-xs text-gray-500 dark:text-slate-400 mt-1">Gestiona y evalúa estudiantes</p>
-                                </div>
-                                <span class="role-check hidden w-6 h-6 rounded-full bg-indigo-600 flex items-center justify-center">
-                                    <svg class="w-3.5 h-3.5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"/>
-                                    </svg>
-                                </span>
-                            </button>
+            <div class="signup-brand-content">
+                <img src="./assets/images/dorja-logo-icon.png" alt="Dorja Logo" style="width: 80px; height: 80px; filter: drop-shadow(0 0 20px rgba(255,255,255,0.3)); margin-bottom: 24px;" onerror="this.outerHTML='<div class=\'signup-brand-logo\'>D</div>'">
+                <h2 class="signup-brand-title">Únete a<br>Dorja hoy</h2>
+                <p class="signup-brand-sub">Crea tu cuenta en segundos y comienza tu camino hacia la excelencia en programación.</p>
+
+                <ol class="signup-steps">
+                    <li class="signup-step">
+                        <div class="step-num">1</div>
+                        <div class="step-content">
+                            <div class="step-title">Completa tu perfil</div>
+                            <div class="step-desc">Ingresa tus datos básicos para identificarte</div>
                         </div>
-                        <input type="hidden" id="selected-role" value="estudiante">
-                    </div>
-                    <div class="md:col-span-2">
-                        <label class="block text-gray-600 dark:text-slate-300 text-sm font-bold mb-2" for="email">Email</label>
-                        <input class="dark:text-white bg-gray-100 dark:bg-slate-700 border-2 border-transparent focus:border-indigo-500 focus:ring-0 rounded-lg w-full py-3 px-4 transition-all outline-none"
-                               id="email" type="email" placeholder="ej. juan@correo.com" required>
-                    </div>
-                    <div>
-                        <label class="block text-gray-600 dark:text-slate-300 text-sm font-bold mb-2" for="password">Contraseña</label>
-                        <input class="dark:text-white bg-gray-100 dark:bg-slate-700 border-2 border-transparent focus:border-indigo-500 focus:ring-0 rounded-lg w-full py-3 px-4 transition-all outline-none"
-                               id="password" type="password" placeholder="Mín. 6 caracteres" required>
-                    </div>
-                    <div>
-                        <label class="block text-gray-600 dark:text-slate-300 text-sm font-bold mb-2" for="confirmPassword">Repetir Contraseña</label>
-                        <input class="dark:text-white bg-gray-100 dark:bg-slate-700 border-2 border-transparent focus:border-indigo-500 focus:ring-0 rounded-lg w-full py-3 px-4 transition-all outline-none"
-                               id="confirmPassword" type="password" placeholder="Repite tu contraseña" required>
-                    </div>
-                </div>
+                    </li>
+                    <li class="signup-step">
+                        <div class="step-num">2</div>
+                        <div class="step-content">
+                            <div class="step-title">Elige tu rol</div>
+                            <div class="step-desc">¿Eres estudiante o maestro?</div>
+                        </div>
+                    </li>
+                    <li class="signup-step">
+                        <div class="step-num">3</div>
+                        <div class="step-content">
+                            <div class="step-title">¡Empieza a aprender!</div>
+                            <div class="step-desc">Accede a los 50 ejercicios prácticos</div>
+                        </div>
+                    </li>
+                </ol>
+            </div>
+        </aside>
 
-                <!-- Submit -->
-                <div class="flex flex-col gap-5 mt-8">
-                    <button id="submit-btn"
-                            class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 px-4 rounded-lg transition-all transform hover:scale-[1.02] flex items-center justify-center gap-2"
-                            type="submit">
-                        <svg id="spinner" class="hidden animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
-                        </svg>
-                        <span id="btn-text">Crear Cuenta</span>
+        <!-- Right form panel -->
+        <main class="signup-form-pane">
+            <div class="signup-card-wrap">
+                <div class="signup-card">
+                    <form id="signup-form">
+                        <div class="signup-header">
+                            <h2>Crear una Cuenta</h2>
+                            <p>Completa tus datos para unirte a Dorja.</p>
+                        </div>
+
+                        <!-- Error -->
+                        <div id="error-container">
+                            <i class="fas fa-exclamation-triangle" style="flex-shrink:0;"></i>
+                            <span id="error-message"></span>
+                        </div>
+
+                        <!-- Name fields grid -->
+                        <div class="grid-2" style="gap: 14px;">
+                            <div class="form-group">
+                                <label for="username">Nombre de Usuario</label>
+                                <div class="sf-input">
+                                    <i class="fas fa-at sf-icon"></i>
+                                    <input class="input-field" id="username" type="text" placeholder="ej. juan_123" required>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label for="nombre">Nombre(s)</label>
+                                <div class="sf-input">
+                                    <i class="fas fa-user sf-icon"></i>
+                                    <input class="input-field" id="nombre" type="text" placeholder="ej. Juan Carlos" required>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label for="apellidoPaterno">Apellido Paterno</label>
+                                <input class="input-field" id="apellidoPaterno" type="text" placeholder="ej. García" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="apellidoMaterno">Apellido Materno</label>
+                                <input class="input-field" id="apellidoMaterno" type="text" placeholder="ej. López" required>
+                            </div>
+                        </div>
+
+                        <!-- Role selector -->
+                        <div class="form-group" style="margin-top: 6px;">
+                            <label style="margin-bottom: 10px; display: block;">Soy un…</label>
+                            <div class="role-selector-grid" id="role-selector">
+                                <button type="button" id="role-estudiante"
+                                    onclick="selectRole('estudiante')"
+                                    class="role-card selected"
+                                    aria-pressed="true">
+                                    <span class="role-icon">🎓</span>
+                                    <p class="role-title">Estudiante</p>
+                                    <p class="role-desc">Aprende y practica programación</p>
+                                    <span class="role-check" style="display: none;">
+                                        <svg width="11" height="11" fill="none" viewBox="0 0 24 24" stroke="white" stroke-width="3">
+                                            <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/>
+                                        </svg>
+                                    </span>
+                                </button>
+                                <button type="button" id="role-maestro"
+                                    onclick="selectRole('maestro')"
+                                    class="role-card"
+                                    aria-pressed="false">
+                                    <span class="role-icon">👨‍🏫</span>
+                                    <p class="role-title">Maestro</p>
+                                    <p class="role-desc">Gestiona y evalúa estudiantes</p>
+                                    <span class="role-check" style="display: none;">
+                                        <svg width="11" height="11" fill="none" viewBox="0 0 24 24" stroke="white" stroke-width="3">
+                                            <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/>
+                                        </svg>
+                                    </span>
+                                </button>
+                            </div>
+                            <input type="hidden" id="selected-role" value="estudiante">
+                        </div>
+
+                        <!-- Email & passwords -->
+                        <div class="form-group">
+                            <label for="email">Correo Electrónico</label>
+                            <div class="sf-input">
+                                <i class="fas fa-envelope sf-icon"></i>
+                                <input class="input-field" id="email" type="email" placeholder="ej. juan@correo.com" required>
+                            </div>
+                        </div>
+
+                        <div class="grid-2" style="gap: 14px;">
+                            <div class="form-group">
+                                <label for="password">Contraseña</label>
+                                <div class="sf-input">
+                                    <i class="fas fa-lock sf-icon"></i>
+                                    <input class="input-field" id="password" type="password" placeholder="Mín. 6 caracteres" required>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label for="confirmPassword">Repetir Contraseña</label>
+                                <div class="sf-input">
+                                    <i class="fas fa-lock sf-icon"></i>
+                                    <input class="input-field" id="confirmPassword" type="password" placeholder="Repite tu contraseña" required>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Submit -->
+                        <div style="margin-top: 28px; display: flex; flex-direction: column; gap: 16px;">
+                            <button id="submit-btn" class="btn btn-primary btn-block" type="submit" style="padding: 13px; gap: 10px;">
+                                <div id="spinner" style="display:none; width:15px; height:15px; border:2px solid rgba(255,255,255,0.35); border-top-color:white; border-radius:50%; animation:spin 0.7s linear infinite;"></div>
+                                <span id="btn-text">Crear Cuenta</span>
+                            </button>
+
+                            <div class="divider-text">O continúa con</div>
+
+                            <div id="google-login-button" style="display: flex; justify-content: center;"></div>
+
+                            <p class="text-center" style="font-size: var(--text-sm); color: var(--text-muted); margin: 0;">
+                                ¿Ya tienes una cuenta?
+                                <a href="login.html" style="color: var(--accent); font-weight: 700; text-decoration: none;">Inicia Sesión</a>
+                            </p>
+                        </div>
+
+                    </form>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Role selection modal (for Google flow - kept for backward compat) -->
+    <div id="role-selection-modal" style="display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.75); z-index: 9999; justify-content: center; align-items: center; backdrop-filter: blur(10px);">
+        <div class="modal glass-modal" style="max-width: 580px; text-align: center;">
+            <div class="modal-header" style="justify-content: center; border-bottom: none;">
+                <div>
+                    <div class="modal-title" style="font-size: var(--text-2xl);">¿Cómo quieres usar Dorja?</div>
+                    <div class="modal-subtitle">Selecciona tu rol para personalizar tu experiencia.</div>
+                </div>
+            </div>
+            <div class="modal-body">
+                <div style="display: flex; gap: 16px; flex-wrap: wrap;">
+                    <button id="role-maestro-btn" class="role-card" style="flex:1; min-width:200px; padding: 24px 16px;">
+                        <div class="role-card-icon" style="font-size: 2rem; padding: 14px; border-radius: var(--radius); background: var(--accent-soft); border: 1px solid rgba(138,93,245,0.2);">👨‍🏫</div>
+                        <p class="role-title" style="font-size: var(--text-lg);">Maestro</p>
+                        <p class="role-desc">Gestionar estudiantes, ver progreso, añadir calificaciones.</p>
                     </button>
-                    <p class="text-center text-sm text-gray-500 dark:text-slate-400">
-                        ¿Ya tienes una cuenta?
-                        <a class="font-bold text-indigo-600 dark:text-indigo-400 hover:underline" href="login.html">Inicia Sesión</a>
-                    </p>
+                    <button id="role-estudiante-btn" class="role-card" style="flex:1; min-width:200px; padding: 24px 16px;">
+                        <div class="role-card-icon" style="font-size: 2rem; padding: 14px; border-radius: var(--radius); background: var(--accent-soft); border: 1px solid rgba(138,93,245,0.2);">🎓</div>
+                        <p class="role-title" style="font-size: var(--text-lg);">Estudiante</p>
+                        <p class="role-desc">Tomar cursos, guardar progreso, obtener certificados.</p>
+                    </button>
                 </div>
-            </form>
+                <div id="role-selection-loading" style="display: none; margin-top: 24px; color: var(--text-muted); font-size: var(--text-sm);">
+                    <i class="fas fa-spinner fa-spin" style="margin-right: 8px;"></i> Configurando tu cuenta…
+                </div>
+            </div>
         </div>
-    </main>
+    </div>
 
-    <script src="./api.js"></script>
-    <script src="js/signup.js"></script>
-    <script src="./js/theme-toggle.js"></script>
     <script>
-        // Role selection logic
         function selectRole(role) {
-            const cards = document.querySelectorAll('.role-card');
-            cards.forEach(card => {
+            document.querySelectorAll('.role-card').forEach(card => {
                 card.classList.remove('selected');
                 card.setAttribute('aria-pressed', 'false');
             });
@@ -327,9 +574,13 @@
             }
             document.getElementById('selected-role').value = role;
         }
-        // Initialize with estudiante selected
         selectRole('estudiante');
     </script>
-</body>
 
+    <script src="./api.js"></script>
+    <script src="js/signup.js"></script>
+    <script src="./js/theme-toggle.js"></script>
+    <script src="https://accounts.google.com/gsi/client" async defer></script>
+    <script src="./js/google-auth.js"></script>
+</body>
 </html>

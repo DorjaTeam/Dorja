@@ -1,9 +1,15 @@
+using BACK.Middlewares;
 using DorjaData;
 using DorjaData.Repositories;
 using DorjaModelado.Repositories;
 using BACK;
 using BACK.Services;
 using Microsoft.Extensions.FileProviders;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.IdentityModel.Tokens;
+using Microsoft.AspNetCore.RateLimiting;
+using System.Threading.RateLimiting;
+using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -23,6 +29,63 @@ builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
+// REGISTRAR AUTENTICACIÓN JWT
+var jwtSettings = builder.Configuration.GetSection("JwtSettings");
+var secretKey = jwtSettings["Secret"] ?? "ClaveSecretaDorjaSuperSeguraParaJWT_ReemplazarEnProd!";
+var key = Encoding.ASCII.GetBytes(secretKey);
+
+builder.Services.AddAuthentication(options =>
+{
+    options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+    options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+})
+.AddJwtBearer(options =>
+{
+    options.RequireHttpsMetadata = false;
+    options.SaveToken = true;
+    options.TokenValidationParameters = new TokenValidationParameters
+    {
+        ValidateIssuerSigningKey = true,
+        IssuerSigningKey = new SymmetricSecurityKey(key),
+        ValidateIssuer = true,
+        ValidIssuer = jwtSettings["Issuer"],
+        ValidateAudience = true,
+        ValidAudience = jwtSettings["Audience"],
+        ValidateLifetime = true,
+        ClockSkew = TimeSpan.Zero
+    };
+});
+
+// REGISTRAR RATE LIMITING
+builder.Services.AddRateLimiter(options =>
+{
+    options.RejectionStatusCode = 429;
+    
+    // Política Global (100 peticiones por minuto)
+    options.GlobalLimiter = PartitionedRateLimiter.Create<HttpContext, string>(httpContext =>
+        RateLimitPartition.GetFixedWindowLimiter(
+            partitionKey: httpContext.Connection.RemoteIpAddress?.ToString() ?? "unknown",
+            factory: partition => new FixedWindowRateLimiterOptions
+            {
+                AutoReplenishment = true,
+                PermitLimit = 100,
+                QueueLimit = 0,
+                Window = TimeSpan.FromMinutes(1)
+            }));
+            
+    // Política para Auth (Login/Signup - 5 peticiones por minuto)
+    options.AddPolicy("AuthLimit", httpContext =>
+        RateLimitPartition.GetFixedWindowLimiter(
+            partitionKey: httpContext.Connection.RemoteIpAddress?.ToString() ?? "unknown",
+            factory: partition => new FixedWindowRateLimiterOptions
+            {
+                AutoReplenishment = true,
+                PermitLimit = 5,
+                QueueLimit = 0,
+                Window = TimeSpan.FromMinutes(1)
+            }));
+});
+
 
 // REGISTRAR CONFIGURACIÓN SQLITE
 var connectionString = builder.Configuration.GetConnectionString("DorjaConnection") 
@@ -34,8 +97,16 @@ if (!Path.IsPathRooted(dbPath))
 {
     // Make path absolute relative to the backend directory
     dbPath = Path.Combine(Directory.GetCurrentDirectory(), dbPath);
-    connectionString = $"Data Source={dbPath}";
-    Console.WriteLine($"📁 Using absolute database path: {dbPath}");
+    connectionString = $"Data Source={dbPath};Foreign Keys=True;";
+    Console.WriteLine($"🔍 Using absolute database path: {dbPath}");
+}
+else
+{
+    // Make sure Foreign Keys are enabled even if path was already rooted
+    if (!connectionString.Contains("Foreign Keys=True", StringComparison.OrdinalIgnoreCase))
+    {
+        connectionString += ";Foreign Keys=True;";
+    }
 }
 
 // Store the normalized connection string for use throughout the app
@@ -53,8 +124,11 @@ builder.Services.AddScoped<ILogrosRepository, LogrosRepository>();
 builder.Services.AddScoped<ILogros_UsuarioRepository, Logros_UsuarioRepository>();
 builder.Services.AddScoped<ICertificadosRepository, CertificadoRepository>();
 builder.Services.AddScoped<ICalificacionesRepository, CalificacionesRepository>();
+builder.Services.AddScoped<IMensajesContactoRepository, MensajesContactoRepository>();
 
-// REGISTRAR SERVICIOS
+// REGISTRAR SERVICIOS Y CONFIGURACIÓN DE CORREO
+builder.Services.Configure<EmailSettings>(builder.Configuration.GetSection("EmailSettings"));
+builder.Services.AddScoped<IEmailService, EmailService>();
 builder.Services.AddScoped<ExerciseService>();
 
 // Initialize SQLite database (this will auto-fix incomplete databases)
@@ -73,7 +147,14 @@ catch (Exception dbEx)
 
 var app = builder.Build();
 
+app.UseMiddleware<GlobalExceptionMiddleware>();
+
+app.UseRateLimiter(); // ACTIVAR RATE LIMITING
+
 app.UseCors(MyAllowSpecificOrigins);
+
+app.UseAuthentication();
+app.UseAuthorization();
 
 if (app.Environment.IsDevelopment())
 {

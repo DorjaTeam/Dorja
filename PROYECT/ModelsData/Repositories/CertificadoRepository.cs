@@ -1,4 +1,4 @@
-﻿using Dapper;
+using Dapper;
 using DorjaModelado;
 using Microsoft.Data.Sqlite;
 using System;
@@ -34,7 +34,7 @@ namespace DorjaData.Repositories
         {
             var db = dbConnection();
             var sql = @"SELECT id as idCertificados, user_id as Id_User, nivel_id as Nivel_Id, 
-                       rutaPDF as rutaPDF, fechaGenerado as fechaGenerado 
+                       tema_id as Tema_Id, rutaPDF as rutaPDF, fechaGenerado as fechaGenerado 
                        FROM certificados";
             return await db.QueryAsync<Certificados>(sql);
         }
@@ -43,7 +43,7 @@ namespace DorjaData.Repositories
         {
             var db = dbConnection();
             var sql = @"SELECT id as idCertificados, user_id as Id_User, nivel_id as Nivel_Id, 
-                       rutaPDF as rutaPDF, fechaGenerado as fechaGenerado 
+                       tema_id as Tema_Id, rutaPDF as rutaPDF, fechaGenerado as fechaGenerado 
                        FROM certificados WHERE id = @Id";
             return await db.QueryFirstOrDefaultAsync<Certificados>(sql, new { Id = id });
         }
@@ -51,8 +51,8 @@ namespace DorjaData.Repositories
         public async Task<bool> InsertCertificados(Certificados certificados)
         {
             var db = dbConnection();
-            var sql = @"INSERT INTO certificados (user_id, nivel_id, rutaPDF, fechaGenerado) 
-                        VALUES (@Id_User, @Nivel_Id, @rutaPDF, @fechaGenerado)";
+            var sql = @"INSERT INTO certificados (user_id, nivel_id, tema_id, rutaPDF, fechaGenerado) 
+                        VALUES (@Id_User, @Nivel_Id, @Tema_Id, @rutaPDF, @fechaGenerado)";
             var result = await db.ExecuteAsync(sql, certificados);
             return result > 0;
         }
@@ -63,6 +63,7 @@ namespace DorjaData.Repositories
             var sql = @"UPDATE certificados SET 
                             user_id = @Id_User,
                             nivel_id = @Nivel_Id,
+                            tema_id = @Tema_Id,
                             rutaPDF = @rutaPDF,
                             fechaGenerado = @fechaGenerado
                         WHERE id = @idCertificados";

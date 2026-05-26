@@ -79,255 +79,288 @@ function getCertificateHTML(nombreCompleto, fecha) {
 <head>
     <meta charset="UTF-8">
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Outfit:wght@700;800;900&display=swap');
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
 
         body {
-            font-family: 'Georgia', serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            font-family: 'Inter', sans-serif;
+            background: #ffffff;
             display: flex;
             justify-content: center;
             align-items: center;
-            padding: 20px;
+            padding: 40px;
+            color: #1a0f3c;
         }
 
         .certificate-container {
-            background: white;
+            background: #ffffff;
             width: 100%;
-            max-width: 900px;
-            padding: 60px;
-            border: 20px solid #2c3e50;
-            border-image: linear-gradient(45deg, #667eea, #764ba2) 1;
+            max-width: 1050px;
+            padding: 70px 80px;
+            border-radius: 24px;
             position: relative;
+            box-shadow: 0 0 0 1px rgba(73, 41, 164, 0.1);
+            overflow: hidden;
         }
 
-        .certificate-border {
-            border: 3px solid #f39c12;
-            padding: 40px;
-            position: relative;
-        }
-
-        .corner-decoration {
+        .certificate-container::before {
+            content: '';
             position: absolute;
-            width: 80px;
-            height: 80px;
-            border: 3px solid #f39c12;
+            top: 0; left: 0; right: 0; height: 12px;
+            background: linear-gradient(90deg, #4929a4, #8a5df5, #a855f7);
         }
 
-        .corner-decoration.top-left {
-            top: -3px;
-            left: -3px;
-            border-right: none;
-            border-bottom: none;
+        /* Watermark */
+        .watermark {
+            position: absolute;
+            top: 50%; left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 200px;
+            color: rgba(73, 41, 164, 0.03);
+            font-family: 'Outfit', sans-serif;
+            font-weight: 900;
+            z-index: 0;
+            white-space: nowrap;
+            pointer-events: none;
         }
 
-        .corner-decoration.top-right {
-            top: -3px;
-            right: -3px;
-            border-left: none;
-            border-bottom: none;
-        }
-
-        .corner-decoration.bottom-left {
-            bottom: -3px;
-            left: -3px;
-            border-right: none;
-            border-top: none;
-        }
-
-        .corner-decoration.bottom-right {
-            bottom: -3px;
-            right: -3px;
-            border-left: none;
-            border-top: none;
-        }
+        .content-wrapper { position: relative; z-index: 1; }
 
         .header {
-            text-align: center;
-            margin-bottom: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 60px;
+            border-bottom: 1px solid rgba(73, 41, 164, 0.1);
+            padding-bottom: 30px;
         }
 
-        .logo {
-            width: 100px;
-            height: 100px;
-            margin: 0 auto 20px;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            border-radius: 50%;
+        .brand {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .logo-box {
+            width: 64px; height: 64px;
+            background: linear-gradient(135deg, #4929a4, #8a5df5);
+            border-radius: 16px;
             display: flex;
             align-items: center;
             justify-content: center;
             color: white;
-            font-size: 48px;
-            font-weight: bold;
+            font-size: 32px;
+            font-weight: 900;
+            font-family: 'Outfit', sans-serif;
+            box-shadow: 0 10px 20px rgba(73, 41, 164, 0.2);
+        }
+
+        .institution {
+            display: flex;
+            flex-direction: column;
         }
 
         .institution-name {
+            font-family: 'Outfit', sans-serif;
             font-size: 28px;
-            color: #2c3e50;
-            font-weight: bold;
-            margin-bottom: 5px;
+            color: #1a0f3c;
+            font-weight: 900;
+            letter-spacing: -0.5px;
         }
 
-        .institution-subtitle {
-            font-size: 16px;
-            color: #7f8c8d;
-            margin-bottom: 10px;
+        .institution-sub {
+            font-size: 14px;
+            color: #64748b;
+            font-weight: 500;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .cert-id {
+            font-size: 13px;
+            color: #94a3b8;
+            font-family: monospace;
+            text-align: right;
+        }
+
+        .main-content {
+            text-align: center;
         }
 
         .certificate-title {
-            font-size: 42px;
-            color: #667eea;
-            text-transform: uppercase;
-            letter-spacing: 4px;
-            margin: 30px 0;
-            font-weight: bold;
+            font-family: 'Outfit', sans-serif;
+            font-size: 52px;
+            color: #1a0f3c;
+            letter-spacing: -1.5px;
+            font-weight: 900;
+            margin-bottom: 30px;
         }
 
-        .certificate-text {
-            text-align: center;
+        .cert-text {
             font-size: 18px;
-            color: #34495e;
-            line-height: 1.8;
-            margin: 30px 0;
+            color: #64748b;
+            margin-bottom: 20px;
         }
 
         .student-name {
-            font-size: 36px;
-            color: #2c3e50;
-            font-weight: bold;
-            margin: 30px 0;
-            padding: 10px 0;
-            border-bottom: 2px solid #f39c12;
-            display: inline-block;
+            font-family: 'Outfit', sans-serif;
+            font-size: 48px;
+            color: #4929a4;
+            font-weight: 800;
+            margin: 20px 0;
+            padding-bottom: 10px;
         }
 
-        .achievement {
-            margin: 40px 0;
-            font-size: 18px;
-            color: #34495e;
-            line-height: 2;
-            text-align: center;
+        .achievement-box {
+            margin: 40px auto;
+            max-width: 600px;
+            padding: 30px;
+            background: rgba(138, 93, 245, 0.04);
+            border-radius: 16px;
+            border: 1px solid rgba(138, 93, 245, 0.1);
         }
 
-        .achievement strong {
-            color: #667eea;
-            font-size: 20px;
+        .achievement-box strong {
+            display: block;
+            font-family: 'Outfit', sans-serif;
+            font-size: 24px;
+            color: #1a0f3c;
+            margin-bottom: 12px;
+        }
+
+        .achievement-box p {
+            font-size: 16px;
+            color: #475569;
+            line-height: 1.6;
         }
 
         .footer {
             display: flex;
-            justify-content: space-around;
-            margin-top: 60px;
-            padding-top: 40px;
+            justify-content: space-between;
+            align-items: flex-end;
+            margin-top: 80px;
         }
 
-        .signature-block {
-            text-align: center;
-            flex: 1;
-            margin: 0 20px;
+        .signature-section {
+            text-align: left;
         }
 
         .signature-line {
-            border-top: 2px solid #2c3e50;
-            margin-bottom: 10px;
-            padding-top: 10px;
+            width: 240px;
+            border-bottom: 2px solid #1a0f3c;
+            margin-bottom: 12px;
+            height: 40px;
         }
 
         .signature-name {
-            font-weight: bold;
-            color: #2c3e50;
-            font-size: 16px;
+            font-family: 'Outfit', sans-serif;
+            font-size: 18px;
+            font-weight: 800;
+            color: #1a0f3c;
         }
 
-        .signature-title {
-            color: #7f8c8d;
+        .signature-role {
             font-size: 14px;
+            color: #64748b;
         }
 
-        .date-location {
-            text-align: center;
-            margin-top: 30px;
-            color: #7f8c8d;
+        .date-section {
+            text-align: right;
+        }
+
+        .date-value {
+            font-family: 'Outfit', sans-serif;
+            font-size: 18px;
+            font-weight: 800;
+            color: #1a0f3c;
+        }
+
+        .date-label {
             font-size: 14px;
+            color: #64748b;
         }
-
+        
         .seal {
             position: absolute;
-            bottom: 100px;
-            right: 80px;
+            bottom: 60px;
+            right: 60px;
+            width: 140px;
+            height: 140px;
+            border-radius: 50%;
+            border: 2px dashed rgba(73, 41, 164, 0.2);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transform: rotate(-15deg);
+        }
+        .seal-inner {
             width: 120px;
             height: 120px;
-            border: 3px solid #e74c3c;
+            background: rgba(73, 41, 164, 0.05);
             border-radius: 50%;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 14px;
-            color: #e74c3c;
-            font-weight: bold;
             text-align: center;
-            transform: rotate(-15deg);
-            opacity: 0.3;
+            font-family: 'Outfit', sans-serif;
+            font-weight: 800;
+            font-size: 14px;
+            color: #4929a4;
+            text-transform: uppercase;
+            line-height: 1.2;
         }
     </style>
 </head>
 <body>
     <div class="certificate-container">
-        <div class="certificate-border">
-            <div class="corner-decoration top-left"></div>
-            <div class="corner-decoration top-right"></div>
-            <div class="corner-decoration bottom-left"></div>
-            <div class="corner-decoration bottom-right"></div>
-
+        <div class="watermark">DORJA</div>
+        
+        <div class="content-wrapper">
             <div class="header">
-                <div class="logo">🎓</div>
-                <div class="institution-name">PLATAFORMA EDUCATIVA DORJA</div>
-                <div class="institution-subtitle">Aprendiendo Programación Paso a Paso</div>
+                <div class="brand">
+                    <div class="logo-box">D</div>
+                    <div class="institution">
+                        <div class="institution-name">DORJA</div>
+                        <div class="institution-sub">Plataforma Educativa de Programación</div>
+                    </div>
+                </div>
+                <div class="cert-id">
+                    ID: ${Math.random().toString(36).substr(2, 9).toUpperCase()}<br>
+                    EMISIÓN: ${fecha}
+                </div>
             </div>
 
-            <div style="text-align: center;">
+            <div class="main-content">
                 <div class="certificate-title">Certificado de Logro</div>
                 
-                <div class="certificate-text">
-                    Por medio del presente se certifica que
-                </div>
-
+                <div class="cert-text">Por medio del presente se certifica que</div>
+                
                 <div class="student-name">${nombreCompleto}</div>
-
-                <div class="certificate-text">
-                    Ha completado exitosamente
-                </div>
-
-                <div class="achievement">
-                    <strong>🏆 Su Primer Ejercicio de Programación 🏆</strong><br>
-                    Demostrando dedicación, esfuerzo y las habilidades necesarias<br>
-                    para iniciar su camino en el desarrollo de software.
-                </div>
-
-                <div class="certificate-text">
-                    Este logro marca el inicio de un emocionante viaje de aprendizaje<br>
-                    en el mundo de la programación.
+                
+                <div class="cert-text">Ha completado exitosamente</div>
+                
+                <div class="achievement-box">
+                    <strong>Su Primer Ejercicio de Programación</strong>
+                    <p>Demostrando dedicación, esfuerzo y las habilidades necesarias para iniciar su camino en el desarrollo de software.</p>
                 </div>
             </div>
 
             <div class="footer">
-                <div class="signature-block">
-                    <div class="signature-line">
-                        <div class="signature-name">Plataforma Dorja</div>
-                        <div class="signature-title">Sistema Educativo</div>
-                    </div>
+                <div class="signature-section">
+                    <div class="signature-line"></div>
+                    <div class="signature-name">Plataforma Dorja</div>
+                    <div class="signature-role">Dirección Académica</div>
+                </div>
+                
+                <div class="date-section">
+                    <div class="date-value">${fecha}</div>
+                    <div class="date-label">Fecha de Expedición</div>
                 </div>
             </div>
 
-            <div class="date-location">
-                ${fecha}
-            </div>
-
             <div class="seal">
-                SELLO<br>OFICIAL
+                <div class="seal-inner">Sello<br>Oficial<br>Dorja</div>
             </div>
         </div>
     </div>
@@ -469,7 +502,22 @@ async function generateLevelCertificatePDF(data) {
         };
 
         // Generar y descargar el PDF
-        await html2pdf().set(options).from(tempDiv).save();
+        const worker = html2pdf().set(options).from(tempDiv);
+        
+        // Descargar localmente
+        await worker.save();
+        
+        // Obtener Base64 para guardarlo en BD
+        try {
+            const base64Pdf = await worker.outputPdf('datauristring');
+            if (window.api && window.api.saveCertificate && data.userId && data.temaId) {
+                console.log('📤 Subiendo certificado al servidor...');
+                await window.api.saveCertificate(data.userId, data.temaId, base64Pdf);
+                console.log('✅ Certificado guardado en base de datos');
+            }
+        } catch (uploadError) {
+            console.error('❌ Error guardando certificado en servidor:', uploadError);
+        }
 
         // Limpiar el elemento temporal
         setTimeout(() => {
@@ -481,7 +529,7 @@ async function generateLevelCertificatePDF(data) {
         console.log('✅ Certificado de nivel PDF generado y descargado exitosamente');
 
         // Mostrar mensaje de éxito
-        showSuccessMessage('¡Certificado descargado! 🎉');
+        showSuccessMessage('¡Certificado generado exitosamente! 🎉');
 
     } catch (error) {
         console.error('❌ Error al generar el PDF:', error);
@@ -509,206 +557,162 @@ function getLevelCertificateHTML(nombreCompleto, temaNombre, fecha, nivelId, pro
 <head>
     <meta charset="UTF-8">
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Outfit:wght@700;800;900&display=swap');
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
 
         body {
-            font-family: 'Georgia', serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            font-family: 'Inter', sans-serif;
+            background: #ffffff;
             display: flex;
             justify-content: center;
             align-items: center;
-            padding: 20px;
+            padding: 40px;
+            color: #1a0f3c;
         }
 
         .certificate-container {
-            background: white;
+            background: #ffffff;
             width: 100%;
-            max-width: 900px;
-            padding: 60px;
-            border: 20px solid #2c3e50;
-            border-image: linear-gradient(45deg, #667eea, #764ba2) 1;
+            max-width: 1050px;
+            padding: 70px 80px;
+            border-radius: 24px;
             position: relative;
+            box-shadow: 0 0 0 1px rgba(73, 41, 164, 0.1);
+            overflow: hidden;
         }
 
-        .certificate-border {
-            border: 3px solid #f39c12;
-            padding: 40px;
-            position: relative;
-        }
-
-        .corner-decoration {
+        .certificate-container::before {
+            content: '';
             position: absolute;
-            width: 80px;
-            height: 80px;
-            border: 3px solid #f39c12;
+            top: 0; left: 0; right: 0; height: 12px;
+            background: linear-gradient(90deg, #4929a4, #8a5df5, #a855f7);
         }
 
-        .corner-decoration.top-left {
-            top: -3px;
-            left: -3px;
-            border-right: none;
-            border-bottom: none;
+        /* Watermark */
+        .watermark {
+            position: absolute;
+            top: 50%; left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 200px;
+            color: rgba(73, 41, 164, 0.03);
+            font-family: 'Outfit', sans-serif;
+            font-weight: 900;
+            z-index: 0;
+            white-space: nowrap;
+            pointer-events: none;
         }
 
-        .corner-decoration.top-right {
-            top: -3px;
-            right: -3px;
-            border-left: none;
-            border-bottom: none;
-        }
-
-        .corner-decoration.bottom-left {
-            bottom: -3px;
-            left: -3px;
-            border-right: none;
-            border-top: none;
-        }
-
-        .corner-decoration.bottom-right {
-            bottom: -3px;
-            right: -3px;
-            border-left: none;
-            border-top: none;
-        }
+        .content-wrapper { position: relative; z-index: 1; }
 
         .header {
-            text-align: center;
-            margin-bottom: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 50px;
+            border-bottom: 1px solid rgba(73, 41, 164, 0.1);
+            padding-bottom: 20px;
         }
 
-        .logo {
-            width: 100px;
-            height: 100px;
-            margin: 0 auto 20px;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            border-radius: 50%;
+        .brand {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .logo-box {
+            width: 64px; height: 64px;
+            background: linear-gradient(135deg, #4929a4, #8a5df5);
+            border-radius: 16px;
             display: flex;
             align-items: center;
             justify-content: center;
             color: white;
-            font-size: 48px;
-            font-weight: bold;
+            font-size: 32px;
+            font-weight: 900;
+            font-family: 'Outfit', sans-serif;
+            box-shadow: 0 10px 20px rgba(73, 41, 164, 0.2);
+        }
+
+        .institution {
+            display: flex;
+            flex-direction: column;
         }
 
         .institution-name {
+            font-family: 'Outfit', sans-serif;
             font-size: 28px;
-            color: #2c3e50;
-            font-weight: bold;
-            margin-bottom: 5px;
+            color: #1a0f3c;
+            font-weight: 900;
+            letter-spacing: -0.5px;
         }
 
-        .institution-subtitle {
-            font-size: 16px;
-            color: #7f8c8d;
-            margin-bottom: 10px;
+        .institution-sub {
+            font-size: 14px;
+            color: #64748b;
+            font-weight: 500;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .cert-id {
+            font-size: 13px;
+            color: #94a3b8;
+            font-family: monospace;
+            text-align: right;
+        }
+
+        .main-content {
+            text-align: center;
         }
 
         .certificate-title {
-            font-size: 42px;
-            color: #667eea;
-            text-transform: uppercase;
-            letter-spacing: 4px;
-            margin: 30px 0;
-            font-weight: bold;
+            font-family: 'Outfit', sans-serif;
+            font-size: 46px;
+            color: #1a0f3c;
+            letter-spacing: -1.5px;
+            font-weight: 900;
+            margin-bottom: 20px;
         }
 
-        .certificate-text {
-            text-align: center;
+        .cert-text {
             font-size: 18px;
-            color: #34495e;
-            line-height: 1.8;
-            margin: 30px 0;
+            color: #64748b;
+            margin-bottom: 10px;
         }
 
         .student-name {
-            font-size: 36px;
-            color: #2c3e50;
-            font-weight: bold;
-            margin: 30px 0;
-            padding: 10px 0;
-            border-bottom: 2px solid #f39c12;
-            display: inline-block;
+            font-family: 'Outfit', sans-serif;
+            font-size: 42px;
+            color: #4929a4;
+            font-weight: 800;
+            margin: 10px 0;
+            padding-bottom: 5px;
         }
 
-        .achievement {
-            margin: 40px 0;
-            font-size: 18px;
-            color: #34495e;
-            line-height: 2;
-            text-align: center;
-        }
-
-        .achievement strong {
-            color: #667eea;
-            font-size: 20px;
-        }
-
-        .level-info {
-            background: linear-gradient(135deg, #f0f4ff 0%, #e0e7ff 100%);
-            padding: 25px;
-            border-radius: 10px;
-            margin: 30px 0;
-            text-align: center;
-            border: 2px solid #667eea;
-        }
-
-        .level-info h3 {
-            font-size: 26px;
-            color: #667eea;
-            margin-bottom: 20px;
-            font-weight: bold;
-        }
-
-        .info-grid {
-            display: flex;
-            justify-content: space-around;
+        /* Grid layout for detailed info */
+        .info-panels {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
             gap: 20px;
-            margin-top: 15px;
+            margin: 30px auto;
+            max-width: 800px;
+            text-align: left;
         }
 
-        .info-item {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 5px;
+        .info-card {
+            background: rgba(138, 93, 245, 0.04);
+            border-radius: 16px;
+            border: 1px solid rgba(138, 93, 245, 0.1);
+            padding: 24px;
         }
 
-        .info-label {
-            font-size: 14px;
-            color: #7f8c8d;
-            font-weight: 600;
-        }
-
-        .info-value {
-            font-size: 20px;
-            color: #2c3e50;
-            font-weight: bold;
-        }
-
-        .user-info {
-            background: linear-gradient(135deg, #fff5f5 0%, #ffe0e0 100%);
-            padding: 25px;
-            border-radius: 10px;
-            margin: 30px 0;
-            border: 2px solid #f39c12;
-        }
-
-        .user-info h4 {
-            font-size: 22px;
-            color: #e74c3c;
-            margin-bottom: 15px;
-            text-align: center;
-            font-weight: bold;
-        }
-
-        .user-details {
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
+        .info-card h4 {
+            font-family: 'Outfit', sans-serif;
+            color: #1a0f3c;
+            font-size: 18px;
+            margin-bottom: 16px;
+            font-weight: 800;
         }
 
         .detail-row {
@@ -716,160 +720,191 @@ function getLevelCertificateHTML(nombreCompleto, temaNombre, fecha, nivelId, pro
             justify-content: space-between;
             align-items: center;
             padding: 8px 0;
-            border-bottom: 1px solid #f39c12;
+            border-bottom: 1px solid rgba(73, 41, 164, 0.05);
         }
-
-        .detail-row:last-child {
-            border-bottom: none;
-        }
+        .detail-row:last-child { border-bottom: none; }
 
         .detail-label {
-            font-size: 15px;
-            color: #7f8c8d;
-            font-weight: 600;
+            font-size: 14px;
+            color: #64748b;
+            font-weight: 500;
         }
 
         .detail-value {
-            font-size: 16px;
-            color: #2c3e50;
-            font-weight: bold;
+            font-size: 15px;
+            color: #1a0f3c;
+            font-weight: 700;
+        }
+
+        .achievement-box {
+            margin: 20px auto;
+            max-width: 600px;
+            text-align: center;
+        }
+
+        .achievement-box strong {
+            display: block;
+            font-family: 'Outfit', sans-serif;
+            font-size: 20px;
+            color: #4929a4;
+            margin-bottom: 8px;
+        }
+
+        .achievement-box p {
+            font-size: 15px;
+            color: #475569;
+            line-height: 1.6;
         }
 
         .footer {
             display: flex;
-            justify-content: space-around;
-            margin-top: 60px;
-            padding-top: 40px;
+            justify-content: space-between;
+            align-items: flex-end;
+            margin-top: 50px;
         }
 
-        .signature-block {
-            text-align: center;
-            flex: 1;
-            margin: 0 20px;
+        .signature-section {
+            text-align: left;
         }
 
         .signature-line {
-            border-top: 2px solid #2c3e50;
-            margin-bottom: 10px;
-            padding-top: 10px;
+            width: 240px;
+            border-bottom: 2px solid #1a0f3c;
+            margin-bottom: 12px;
+            height: 40px;
         }
 
         .signature-name {
-            font-weight: bold;
-            color: #2c3e50;
-            font-size: 16px;
+            font-family: 'Outfit', sans-serif;
+            font-size: 18px;
+            font-weight: 800;
+            color: #1a0f3c;
         }
 
-        .signature-title {
-            color: #7f8c8d;
+        .signature-role {
             font-size: 14px;
+            color: #64748b;
         }
 
-        .date-location {
-            text-align: center;
-            margin-top: 30px;
-            color: #7f8c8d;
+        .date-section {
+            text-align: right;
+        }
+
+        .date-value {
+            font-family: 'Outfit', sans-serif;
+            font-size: 18px;
+            font-weight: 800;
+            color: #1a0f3c;
+        }
+
+        .date-label {
             font-size: 14px;
+            color: #64748b;
         }
-
+        
         .seal {
             position: absolute;
-            bottom: 100px;
-            right: 80px;
+            bottom: 60px;
+            right: 60px;
+            width: 140px;
+            height: 140px;
+            border-radius: 50%;
+            border: 2px dashed rgba(73, 41, 164, 0.2);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transform: rotate(-15deg);
+        }
+        .seal-inner {
             width: 120px;
             height: 120px;
-            border: 3px solid #e74c3c;
+            background: rgba(73, 41, 164, 0.05);
             border-radius: 50%;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 14px;
-            color: #e74c3c;
-            font-weight: bold;
             text-align: center;
-            transform: rotate(-15deg);
-            opacity: 0.3;
+            font-family: 'Outfit', sans-serif;
+            font-weight: 800;
+            font-size: 14px;
+            color: #4929a4;
+            text-transform: uppercase;
+            line-height: 1.2;
         }
     </style>
 </head>
 <body>
     <div class="certificate-container">
-        <div class="certificate-border">
-            <div class="corner-decoration top-left"></div>
-            <div class="corner-decoration top-right"></div>
-            <div class="corner-decoration bottom-left"></div>
-            <div class="corner-decoration bottom-right"></div>
-
+        <div class="watermark">DORJA</div>
+        
+        <div class="content-wrapper">
             <div class="header">
-                <div class="logo">🎓</div>
-                <div class="institution-name">DORJA</div>
-                <div class="institution-subtitle">Plataforma Educativa de Programación</div>
+                <div class="brand">
+                    <div class="logo-box">D</div>
+                    <div class="institution">
+                        <div class="institution-name">DORJA</div>
+                        <div class="institution-sub">Plataforma Educativa de Programación</div>
+                    </div>
+                </div>
+                <div class="cert-id">
+                    ID: ${Math.random().toString(36).substr(2, 9).toUpperCase()}<br>
+                    EMISIÓN: ${fecha}
+                </div>
             </div>
 
-            <div style="text-align: center;">
+            <div class="main-content">
                 <div class="certificate-title">Certificado de Nivel Completado</div>
-                
-                <div class="certificate-text">
-                    Por medio del presente se certifica que
-                </div>
-
+                <div class="cert-text">Por medio del presente se certifica que</div>
                 <div class="student-name">${nombreCompleto}</div>
-
-                <div class="certificate-text">
-                    Ha completado exitosamente el nivel
-                </div>
-
-                <div class="level-info">
-                    <h3>${temaNombre}</h3>
-                    <div class="info-grid">
-                        <div class="info-item">
-                            <span class="info-label">Categoría/Nivel:</span>
-                            <span class="info-value">Nivel ${nivelId}</span>
+                <div class="cert-text">Ha completado exitosamente el nivel</div>
+                
+                <div class="info-panels">
+                    <div class="info-card">
+                        <h4>Módulo Completado</h4>
+                        <div class="detail-row">
+                            <span class="detail-label">Tema:</span>
+                            <span class="detail-value">${temaNombre}</span>
                         </div>
-                        <div class="info-item">
-                            <span class="info-label">Ejercicios Completados:</span>
-                            <span class="info-value">${problemasCompletados}/10</span>
+                        <div class="detail-row">
+                            <span class="detail-label">Nivel:</span>
+                            <span class="detail-value">${nivelId}</span>
                         </div>
+                        <div class="detail-row">
+                            <span class="detail-label">Ejercicios:</span>
+                            <span class="detail-value">${problemasCompletados}/10</span>
+                        </div>
+                    </div>
+                    
+                    <div class="info-card">
+                        <h4>Datos del Estudiante</h4>
+                        ${nombre ? \`<div class="detail-row"><span class="detail-label">Nombre:</span><span class="detail-value">\${nombre}</span></div>\` : ''}
+                        ${apellidoPaterno ? \`<div class="detail-row"><span class="detail-label">Apellido Paterno:</span><span class="detail-value">\${apellidoPaterno}</span></div>\` : ''}
+                        ${apellidoMaterno ? \`<div class="detail-row"><span class="detail-label">Apellido Materno:</span><span class="detail-value">\${apellidoMaterno}</span></div>\` : ''}
+                        ${email ? \`<div class="detail-row"><span class="detail-label">Email:</span><span class="detail-value">\${email}</span></div>\` : ''}
                     </div>
                 </div>
 
-                <div class="user-info">
-                    <h4>Datos del Estudiante</h4>
-                    <div class="user-details">
-                        ${nombre ? `<div class="detail-row"><span class="detail-label">Nombre:</span><span class="detail-value">${nombre}</span></div>` : ''}
-                        ${apellidoPaterno ? `<div class="detail-row"><span class="detail-label">Apellido Paterno:</span><span class="detail-value">${apellidoPaterno}</span></div>` : ''}
-                        ${apellidoMaterno ? `<div class="detail-row"><span class="detail-label">Apellido Materno:</span><span class="detail-value">${apellidoMaterno}</span></div>` : ''}
-                        ${email ? `<div class="detail-row"><span class="detail-label">Email:</span><span class="detail-value">${email}</span></div>` : ''}
-                    </div>
-                </div>
-
-                <div class="achievement">
-                    <strong>🏆 Nivel Completado con Éxito 🏆</strong><br>
-                    Demostrando dedicación, esfuerzo y las habilidades necesarias<br>
-                    para avanzar en su camino de aprendizaje en programación.
-                </div>
-
-                <div class="certificate-text">
-                    Este logro representa un paso importante en su desarrollo<br>
-                    como programador en la plataforma Dorja.
+                <div class="achievement-box">
+                    <strong>Nivel Completado con Éxito</strong>
+                    <p>Demostrando dedicación, esfuerzo y las habilidades necesarias para avanzar en su camino de aprendizaje en programación.</p>
                 </div>
             </div>
 
             <div class="footer">
-                <div class="signature-block">
-                    <div class="signature-line">
-                        <div class="signature-name">Plataforma Dorja</div>
-                        <div class="signature-title">Sistema Educativo</div>
-                    </div>
+                <div class="signature-section">
+                    <div class="signature-line"></div>
+                    <div class="signature-name">Plataforma Dorja</div>
+                    <div class="signature-role">Dirección Académica</div>
+                </div>
+                
+                <div class="date-section">
+                    <div class="date-value">${fecha}</div>
+                    <div class="date-label">Fecha de Expedición</div>
                 </div>
             </div>
 
-            <div class="date-location">
-                ${fecha}
-            </div>
-
             <div class="seal">
-                SELLO<br>OFICIAL
+                <div class="seal-inner">Sello<br>Oficial<br>Dorja</div>
             </div>
         </div>
     </div>
@@ -881,3 +916,71 @@ function getLevelCertificateHTML(nombreCompleto, temaNombre, fecha, nivelId, pro
 // Exportar las funciones para uso global
 window.generateCertificatePDF = generateCertificatePDF;
 window.generateLevelCertificatePDF = generateLevelCertificatePDF;
+
+/**
+ * Genera el certificado en PDF y lo retorna como string Base64 (data URI)
+ * @param {Object} userData - Datos del usuario
+ * @returns {Promise<string>} Base64 data URI string del PDF
+ */
+window.generateCertificatePDFAsBase64 = async function (userData) {
+    try {
+        console.log('🎓 Generando certificado PDF como Base64 para:', userData);
+
+        // Obtener el nombre completo del usuario
+        const nombreCompleto = `${userData.nombre} ${userData.apellidoPaterno} ${userData.apellidoMaterno}`;
+
+        // Obtener la fecha actual
+        const fecha = new Date().toLocaleDateString('es-MX', {
+            year: 'numeric',
+            month: 'long',
+            day: 'numeric'
+        });
+
+        // Generar el HTML del certificado
+        const certificateHTML = getCertificateHTML(nombreCompleto, fecha);
+
+        // Crear un elemento temporal para el certificado
+        const tempDiv = document.createElement('div');
+        tempDiv.innerHTML = certificateHTML;
+        tempDiv.style.position = 'absolute';
+        tempDiv.style.left = '-9999px';
+        tempDiv.style.width = '1200px';
+        document.body.appendChild(tempDiv);
+
+        // Esperar un momento para que el contenido se renderice
+        await new Promise(resolve => setTimeout(resolve, 500));
+
+        // Opciones para html2pdf
+        const options = {
+            margin: 0,
+            image: { type: 'jpeg', quality: 0.95 },
+            html2canvas: {
+                scale: 1.5,
+                useCORS: true,
+                letterRendering: true,
+                logging: false,
+                windowWidth: 1200
+            },
+            jsPDF: {
+                unit: 'mm',
+                format: 'a4',
+                orientation: 'landscape'
+            }
+        };
+
+        // Generar el PDF como data URL string
+        const base64Pdf = await html2pdf().from(tempDiv).set(options).outputPdf('datauristring');
+
+        // Limpiar el elemento temporal
+        if (tempDiv.parentNode) {
+            document.body.removeChild(tempDiv);
+        }
+
+        console.log('✅ Certificado PDF Base64 generado exitosamente');
+        return base64Pdf;
+
+    } catch (error) {
+        console.error('❌ Error al generar el PDF Base64:', error);
+        throw error;
+    }
+};

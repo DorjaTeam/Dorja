@@ -575,6 +575,11 @@ class ProblemsRenderer {
             this.currentProblema = problema;
             this.currentProblemaId = actualProblemaId;
             
+            // Metrics for progress tracking
+            this.currentProblemStartTime = new Date();
+            this.currentProblemErrors = 0;
+            this.currentProblemAttempts = 0;
+            
             console.log('✅ Problema cargado correctamente. ID:', this.currentProblemaId);
             
             this.renderProblem(problema);
@@ -926,7 +931,18 @@ class ProblemsRenderer {
             
             console.log('🔄 Verificando solución:', { userId: this.userId, problemaId: problemaIdToValidate, codigoLength: codigo.length });
             
-            const resultado = await window.curriculumManager.verificarSolucion(codigo, problemaIdToValidate);
+            this.currentProblemAttempts = (this.currentProblemAttempts || 0) + 1;
+            const tiempoInvertido = this.currentProblemStartTime 
+                ? Math.floor((new Date() - this.currentProblemStartTime) / 1000) 
+                : 0;
+
+            const metrics = {
+                tiempoInvertido: tiempoInvertido,
+                errores: this.currentProblemErrors || 0,
+                intentosFallidos: this.currentProblemAttempts - 1 // the current attempt isn't failed yet
+            };
+
+            const resultado = await window.curriculumManager.verificarSolucion(codigo, problemaIdToValidate, metrics);
             
             console.log('✅ Resultado verificación recibido:', resultado);
 
@@ -934,6 +950,10 @@ class ProblemsRenderer {
                 // Handle different response formats
                 const mensaje = resultado.mensaje || resultado.message || resultado.Mensaje || "Resultado desconocido";
                 const isCorrect = resultado.correcto || resultado.IsCorrect || resultado.correct || false;
+
+                if (!isCorrect) {
+                    this.currentProblemErrors = (this.currentProblemErrors || 0) + 1;
+                }
 
                 outputContent.textContent = mensaje;
 
@@ -1291,6 +1311,8 @@ class ProblemsRenderer {
                 nombreCompleto: nombreCompleto,
                 temaNombre: temaNombre,
                 nivelId: nivelId,
+                temaId: temaId,
+                userId: this.userId,
                 problemasCompletados: problemasCompletados,
                 email: email,
                 nombre: nombre,

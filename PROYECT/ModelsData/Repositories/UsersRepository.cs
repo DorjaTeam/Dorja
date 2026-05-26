@@ -8,16 +8,16 @@ namespace DorjaModelado.Repositories
 {
     public class UsersRepository : IUserRepository
     {
-        private readonly SQLiteConfiguration _connectionString;
+        private string _connectionString;
 
         public UsersRepository(SQLiteConfiguration connectionString)
         {
-            _connectionString = connectionString;
+            _connectionString = connectionString.ConnectionString;
         }
 
         protected SqliteConnection dbConnection()
         {
-            return new SqliteConnection(_connectionString.ConnectionString);
+            return new SqliteConnection(_connectionString);
         }
 
         public async Task<IEnumerable<Users>> GetAllUsers()
@@ -27,7 +27,8 @@ namespace DorjaModelado.Repositories
                         email, password, fechaRegistro, ultimaConexion, puntosTotales, nivelActual,
                         COALESCE(profilePhotoPath, '') as ProfilePhotoPath, 
                         COALESCE(coverPhotoPath, '') as CoverPhotoPath,
-                        COALESCE(rol, 'estudiante') as Rol
+                        COALESCE(rol, 'estudiante') as Rol,
+                        google_id as GoogleId
                         FROM users";
 
             var users = await db.QueryAsync<Users>(sql, new { });
@@ -49,7 +50,8 @@ namespace DorjaModelado.Repositories
                         email, password, fechaRegistro, ultimaConexion, puntosTotales, nivelActual,
                         COALESCE(profilePhotoPath, '') as ProfilePhotoPath,
                         COALESCE(coverPhotoPath, '') as CoverPhotoPath,
-                        COALESCE(rol, 'estudiante') as Rol
+                        COALESCE(rol, 'estudiante') as Rol,
+                        google_id as GoogleId
                         FROM users
                         WHERE COALESCE(rol, 'estudiante') = 'estudiante'";
 
@@ -72,7 +74,8 @@ namespace DorjaModelado.Repositories
                        email, password, fechaRegistro, ultimaConexion, puntosTotales, nivelActual,
                        COALESCE(profilePhotoPath, '') as ProfilePhotoPath, 
                        COALESCE(coverPhotoPath, '') as CoverPhotoPath,
-                       COALESCE(rol, 'estudiante') as Rol
+                       COALESCE(rol, 'estudiante') as Rol,
+                       google_id as GoogleId
                        FROM users
                        WHERE id = @id";
 
@@ -93,10 +96,10 @@ namespace DorjaModelado.Repositories
             var db = dbConnection();
             var sql = @"INSERT INTO users (username, nombre, apellidoPaterno, apellidoMaterno,
                                    email, password, fechaRegistro, ultimaConexion, puntosTotales, nivelActual,
-                                   profilePhotoPath, coverPhotoPath, rol)
+                                   profilePhotoPath, coverPhotoPath, rol, google_id)
                         VALUES (@Username, @Nombre, @ApellidoPaterno, @ApellidoMaterno,
                                 @Email, @Password, @FechaRegistro, @UltimaConexion, @PuntosTotales, @NivelActual,
-                                @ProfilePhotoPath, @CoverPhotoPath, @Rol)";
+                                @ProfilePhotoPath, @CoverPhotoPath, @Rol, @GoogleId)";
 
             var result = await db.ExecuteAsync(sql, usuario);
             return result > 0;
@@ -123,7 +126,8 @@ namespace DorjaModelado.Repositories
                         nivelActual = @NivelActual,
                         profilePhotoPath = @ProfilePhotoPath,
                         coverPhotoPath = @CoverPhotoPath,
-                        rol = @Rol
+                        rol = @Rol,
+                        google_id = @GoogleId
                         WHERE id = @Id";
 
             var result = await db.ExecuteAsync(sql, usuario);
@@ -133,10 +137,20 @@ namespace DorjaModelado.Repositories
         public async Task<bool> DeleteUsuarios(Users usuario)
         {
             var db = dbConnection();
-            var sql = @"DELETE FROM users WHERE id = @Id";
+            
+            var exists = await db.QuerySingleOrDefaultAsync<int>("SELECT COUNT(1) FROM users WHERE id = @Id", new { Id = usuario.Id });
+            if (exists == 0) return false;
 
-            var result = await db.ExecuteAsync(sql, new { usuario.Id });
-            return result > 0;
+            var sql = @"
+                DELETE FROM progreso_problema WHERE user_id = @Id;
+                DELETE FROM logros_usuario WHERE user_id = @Id;
+                DELETE FROM certificados WHERE user_id = @Id;
+                DELETE FROM calificaciones WHERE estudiante_id = @Id OR maestro_id = @Id;
+                DELETE FROM mensajes_contacto WHERE estudiante_id = @Id OR maestro_id = @Id;
+                DELETE FROM users WHERE id = @Id;
+            ";
+            await db.ExecuteAsync(sql, new { Id = usuario.Id });
+            return true;
         }
 
         public async Task<Users?> GetByEmail(string email)
@@ -146,7 +160,8 @@ namespace DorjaModelado.Repositories
                         email, password, fechaRegistro, ultimaConexion, puntosTotales, nivelActual,
                         COALESCE(profilePhotoPath, '') as ProfilePhotoPath, 
                         COALESCE(coverPhotoPath, '') as CoverPhotoPath,
-                        COALESCE(rol, 'estudiante') as Rol
+                        COALESCE(rol, 'estudiante') as Rol,
+                        google_id as GoogleId
                         FROM users WHERE email = @Email";
 
             var user = await db.QueryFirstOrDefaultAsync<Users>(sql, new { Email = email });
@@ -168,10 +183,34 @@ namespace DorjaModelado.Repositories
                         email, password, fechaRegistro, ultimaConexion, puntosTotales, nivelActual,
                         COALESCE(profilePhotoPath, '') as ProfilePhotoPath, 
                         COALESCE(coverPhotoPath, '') as CoverPhotoPath,
-                        COALESCE(rol, 'estudiante') as Rol
+                        COALESCE(rol, 'estudiante') as Rol,
+                        google_id as GoogleId
                         FROM users WHERE username = @Username";
 
             var user = await db.QueryFirstOrDefaultAsync<Users>(sql, new { Username = username });
+            
+            if (user != null)
+            {
+                if (user.ProfilePhotoPath == null) user.ProfilePhotoPath = string.Empty;
+                if (user.CoverPhotoPath == null) user.CoverPhotoPath = string.Empty;
+                if (user.Rol == null) user.Rol = "estudiante";
+            }
+            
+            return user;
+        }
+
+        public async Task<Users?> GetByGoogleId(string googleId)
+        {
+            var db = dbConnection();
+            var sql = @"SELECT id, username, nombre, apellidoPaterno, apellidoMaterno,
+                        email, password, fechaRegistro, ultimaConexion, puntosTotales, nivelActual,
+                        COALESCE(profilePhotoPath, '') as ProfilePhotoPath, 
+                        COALESCE(coverPhotoPath, '') as CoverPhotoPath,
+                        COALESCE(rol, 'estudiante') as Rol,
+                        google_id as GoogleId
+                        FROM users WHERE google_id = @GoogleId";
+
+            var user = await db.QueryFirstOrDefaultAsync<Users>(sql, new { GoogleId = googleId });
             
             if (user != null)
             {
@@ -214,6 +253,30 @@ namespace DorjaModelado.Repositories
             // Use QueryFirstOrDefaultAsync with proper type handling for BLOB
             var result = await db.QueryFirstOrDefaultAsync<byte[]>(sql, new { UserId = userId });
             return result;
+        }
+
+        public async Task<IEnumerable<Users>> GetAllTeachers()
+        {
+            var db = dbConnection();
+            var sql = @"SELECT id, username, nombre, apellidoPaterno, apellidoMaterno,
+                        email, password, fechaRegistro, ultimaConexion, puntosTotales, nivelActual,
+                        COALESCE(profilePhotoPath, '') as ProfilePhotoPath,
+                        COALESCE(coverPhotoPath, '') as CoverPhotoPath,
+                        COALESCE(rol, 'estudiante') as Rol,
+                        google_id as GoogleId
+                        FROM users
+                        WHERE COALESCE(rol, 'estudiante') = 'maestro'";
+
+            var users = await db.QueryAsync<Users>(sql, new { });
+
+            foreach (var user in users)
+            {
+                if (user.ProfilePhotoPath == null) user.ProfilePhotoPath = string.Empty;
+                if (user.CoverPhotoPath == null) user.CoverPhotoPath = string.Empty;
+                user.Rol = "maestro";
+            }
+
+            return users;
         }
     }
 }

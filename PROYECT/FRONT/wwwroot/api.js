@@ -46,20 +46,52 @@ if (typeof window.api === 'undefined') {
 
                 console.log('Making API request to:', url);
 
+                const token = localStorage.getItem('jwt_token');
+                const headers = {
+                    "Content-Type": "application/json",
+                    "Accept": "application/json",
+                    ...options.headers
+                };
+
+                if (token) {
+                    headers['Authorization'] = `Bearer ${token}`;
+                }
+
                 const response = await fetch(url, {
                     method: options.method || 'GET',
-                    headers: {
-                        "Content-Type": "application/json",
-                        "Accept": "application/json",
-                        ...options.headers
-                    },
+                    headers: headers,
                     body: options.body ? JSON.stringify(options.body) : undefined
                 });
 
                 const result = await response.json().catch(() => null);
 
                 if (!response.ok) {
-                    throw new Error(result?.message || `Error ${response.status}: ${response.statusText}`);
+                    // Solo cerrar sesión si falla una ruta crítica como /Users o /Users/details 
+                    // No destruir sesión si falla algo secundario como /Calificaciones
+                    if (response.status === 401) {
+                        console.warn(`[API] 401 No autorizado en ${url}`);
+                        // Solo desloguear si es endpoint principal de usuario
+                        if (url.includes('/Users/details') || endpoint === '/Users') {
+                            localStorage.removeItem('jwt_token');
+                            sessionStorage.removeItem('userId');
+                            sessionStorage.removeItem('userRole');
+                            if (typeof window.showToast === 'function') {
+                                window.showToast('Tu sesión ha expirado. Por favor, inicia sesión nuevamente.', 'error');
+                            }
+                            window.location.href = 'login.html';
+                        }
+                        throw new Error('No autorizado o sesión expirada');
+                    }
+                    if (response.status === 403) {
+                        console.warn(`[API] 403 Prohibido en ${url}. Rol insuficiente.`);
+                        throw new Error('Permisos insuficientes para esta acción');
+                    }
+                    
+                    const errMsg = result?.message || `Error ${response.status}: ${response.statusText}`;
+                    if (typeof window.showToast === 'function') {
+                        window.showToast(errMsg, 'error');
+                    }
+                    throw new Error(errMsg);
                 }
 
                 // Handle different response types
@@ -78,9 +110,13 @@ if (typeof window.api === 'undefined') {
 
                 // Provide more helpful error messages
                 if (error.message && error.message.includes('SSL') || error.message.includes('HTTPS')) {
-                    errorMessage = 'Error: El servidor está configurado para HTTP, no HTTPS. Verifica que el backend esté ejecutándose en http://localhost:5222';
+                    errorMessage = 'Error: El servidor está configurado para HTTP, no HTTPS.';
                 } else if (error.message && error.message.includes('Failed to fetch')) {
-                    errorMessage = 'Error: No se pudo conectar con el servidor. Asegúrate de que el backend esté ejecutándose en http://localhost:5222';
+                    errorMessage = 'Error: No se pudo conectar con el servidor. Verifica tu conexión.';
+                }
+
+                if (typeof window.showToast === 'function' && error.message !== 'Sesión expirada') {
+                    window.showToast(errorMessage, 'error');
                 }
 
                 return {
@@ -109,12 +145,54 @@ if (typeof window.api === 'undefined') {
             });
 
             if (result.success && result.user) {
+                if (result.token) {
+                    localStorage.setItem('jwt_token', result.token);
+                }
                 return {
                     success: true,
                     user: result.user  // includes rol
                 };
             }
             return result;
+        },
+
+        loginWithGoogle: async (token, rol = null) => {
+            const body = { token: token };
+            if (rol) {
+                body.rol = rol;
+            }
+            
+            const result = await window.api._makeRequest('/Users/google-login', {
+                method: 'POST',
+                body: body
+            });
+
+            // Si el backend pide seleccionar un rol
+            if (result.success && result.requiresRole) {
+                return {
+                    success: true,
+                    requiresRole: true
+                };
+            }
+
+            if (result.success && result.user) {
+                if (result.token) {
+                    localStorage.setItem('jwt_token', result.token);
+                }
+                return {
+                    success: true,
+                    user: result.user,
+                    isNewUser: result.isNewUser
+                };
+            }
+            return result;
+        },
+
+        forgotPassword: async (email) => {
+            return await window.api._makeRequest('/Users/forgot-password', {
+                method: 'POST',
+                body: { email: email }
+            });
         },
 
         getUserById: async (userId) => {
@@ -163,30 +241,14 @@ if (typeof window.api === 'undefined') {
 
 
         deleteUserAccount: async (data) => {
-            // First verify password by attempting login
-            const user = await window.api.getUserById(data.userId);
-            if (!user) {
-                return { success: false, message: 'Usuario no encontrado' };
-            }
-
-            // Verify password
-            const loginResult = await window.api.login({
-                username: user.email, // Use email for login verification
-                password: data.password
-            });
-
-            if (!loginResult.success) {
-                return { success: false, message: 'Contraseña incorrecta' };
-            }
-
-            // If password is correct, delete the account
+            // Delete the account directly, backend will verify token match
             const result = await window.api._makeRequest(`/Users?id=${data.userId}`, {
                 method: 'DELETE'
             });
 
             return result.success
                 ? { success: true, message: 'Cuenta eliminada exitosamente' }
-                : { success: false, message: 'Error al eliminar la cuenta' };
+                : { success: false, message: result.message || 'Error al eliminar la cuenta' };
         },
 
         saveImage: async (data) => {
@@ -478,17 +540,25 @@ if (typeof window.api === 'undefined') {
             }
         },
 
-        verificarSolucion: async (userId, problemaId, codigo, language = 'python') => {
+        verificarSolucion: async (userId, problemaId, codigo, language = 'python', metrics = null) => {
             try {
                 console.log('🔄 API: Verificando solución para userId:', userId, 'problemaId:', problemaId);
+                const body = {
+                    UserId: userId,
+                    ProblemaId: problemaId,
+                    Codigo: codigo,
+                    Language: language
+                };
+                
+                if (metrics) {
+                    body.TiempoInvertido = metrics.tiempoInvertido || 0;
+                    body.Errores = metrics.errores || 0;
+                    body.IntentosFallidos = metrics.intentosFallidos || 0;
+                }
+
                 const result = await window.api._makeRequest('/Exercise/validate', {
                     method: 'POST',
-                    body: {
-                        UserId: userId,
-                        ProblemaId: problemaId,
-                        Codigo: codigo,
-                        Language: language
-                    }
+                    body: body
                 });
 
                 console.log('✅ API: Resultado de validación recibido:', result);
@@ -568,15 +638,23 @@ if (typeof window.api === 'undefined') {
             return result.data || result;
         },
 
-        validateSolution: async (userId, problemaId, codigo, language = 'python') => {
+        validateSolution: async (userId, problemaId, codigo, language = 'python', metrics = null) => {
+            const body = {
+                UserId: userId,
+                ProblemaId: problemaId,
+                Codigo: codigo,
+                Language: language
+            };
+            
+            if (metrics) {
+                body.TiempoInvertido = metrics.tiempoInvertido || 0;
+                body.Errores = metrics.errores || 0;
+                body.IntentosFallidos = metrics.intentosFallidos || 0;
+            }
+
             const result = await window.api._makeRequest('/Exercise/validate', {
                 method: 'POST',
-                body: {
-                    UserId: userId,
-                    ProblemaId: problemaId,
-                    Codigo: codigo,
-                    Language: language
-                }
+                body: body
             });
             return result.data || result;
         },
@@ -584,6 +662,19 @@ if (typeof window.api === 'undefined') {
         getProblemCount: async () => {
             const result = await window.api._makeRequest('/Problemas/count');
             return result.data || result;
+        },
+
+        saveCertificate: async (userId, temaId, rutaPDF) => {
+            return await window.api._makeRequest('/Certificado', {
+                method: 'POST',
+                body: {
+                    user_id: userId,
+                    tema_id: temaId,
+                    nivel_id: 1, // Defaulting to 1 as per current structure, update as needed
+                    rutaPDF: rutaPDF,
+                    fechaGenerado: new Date().toISOString()
+                }
+            });
         },
 
         // ----- TEACHER / RBAC APIs -----
@@ -621,6 +712,32 @@ if (typeof window.api === 'undefined') {
                     comentario:   data.comentario || ''
                 }
             });
+        },
+
+        // Contact / Email System
+        getAllTeachers: async () => {
+            const result = await window.api._makeRequest('/Users');
+            let users = [];
+            if (Array.isArray(result)) {
+                users = result;
+            } else {
+                users = result.data || result || [];
+            }
+            // Filter only maestros
+            return users.filter(u => u.rol?.toLowerCase() === 'maestro' || u.Rol?.toLowerCase() === 'maestro');
+        },
+
+        sendContactEmail: async (data) => {
+            return await window.api._makeRequest('/Email/send', {
+                method: 'POST',
+                body: data
+            });
+        },
+
+        getTeacherMessages: async (teacherId) => {
+            const result = await window.api._makeRequest(`/Email/messages/${teacherId}`);
+            if (Array.isArray(result)) return result;
+            return result.data || result || [];
         }
     };
 } // End of window.api definition check

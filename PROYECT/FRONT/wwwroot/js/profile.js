@@ -316,78 +316,29 @@ document.addEventListener('DOMContentLoaded', async () => {
         alert('Funcionalidad de cambiar contraseña próximamente.');
     });
 
-    function showDeleteModalContent(step) {
-        let content = '';
-        if (step === 1) {
-            content = `
-                <div class="bg-white dark:bg-slate-800 rounded-xl shadow-2xl max-w-md w-full">
-                    <div class="p-6 border-b border-gray-200 dark:border-slate-700">
-                        <h3 class="text-xl font-bold text-red-600 dark:text-red-500">Eliminar Cuenta</h3>
-                    </div>
-                    <div class="p-6">
-                        <p class="text-gray-600 dark:text-slate-300">¿Estás absolutamente seguro? Esta acción es irreversible y todos tus datos, progreso y logros se perderán para siempre.</p>
-                    </div>
-                    <div class="p-4 bg-gray-50 dark:bg-slate-800/50 border-t border-gray-200 dark:border-slate-700 flex justify-end gap-4 rounded-b-xl">
-                        <button id="cancel-delete-1" class="px-4 py-2 text-sm font-semibold bg-gray-200 hover:bg-gray-300 dark:bg-slate-600 dark:hover:bg-slate-500 rounded-lg">Cancelar</button>
-                        <button id="confirm-delete-1" class="px-4 py-2 text-sm font-semibold bg-red-600 hover:bg-red-700 text-white rounded-lg">Entiendo, continuar</button>
-                    </div>
-                </div>
-            `;
-        } else if (step === 2) {
-            content = `
-                <div class="bg-white dark:bg-slate-800 rounded-xl shadow-2xl max-w-md w-full">
-                    <div class="p-6 border-b border-gray-200 dark:border-slate-700">
-                        <h3 class="text-xl font-bold text-red-600 dark:text-red-500">Confirmación Final</h3>
-                    </div>
-                    <div class="p-6 flex flex-col gap-4">
-                        <p>Para confirmar, por favor, introduce tu contraseña actual:</p>
-                        <input type="password" id="delete-password-input" class="w-full bg-gray-100 dark:bg-slate-700 border-transparent rounded-lg p-2" placeholder="••••••••">
-                    </div>
-                    <div class="p-4 bg-gray-50 dark:bg-slate-800/50 border-t border-gray-200 dark:border-slate-700 flex justify-end gap-4 rounded-b-xl">
-                        <button id="cancel-delete-2" class="px-4 py-2 text-sm font-semibold bg-gray-200 hover:bg-gray-300 dark:bg-slate-600 dark:hover:bg-slate-500 rounded-lg">Cancelar</button>
-                        <button id="confirm-delete-2" class="px-4 py-2 text-sm font-semibold bg-red-600 hover:bg-red-700 text-white rounded-lg">Eliminar mi cuenta permanentemente</button>
-                    </div>
-                </div>
-            `;
-        }
-        deleteModal.innerHTML = content;
-        deleteModal.classList.remove('hidden');
-    }
+    deleteAccountBtn.addEventListener('click', async () => {
+        // Cambiar estado visual del botón
+        const originalText = deleteAccountBtn.innerHTML;
+        deleteAccountBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Eliminando...';
+        deleteAccountBtn.disabled = true;
 
-    deleteAccountBtn.addEventListener('click', () => {
-        showDeleteModalContent(1);
-
-        document.getElementById('cancel-delete-1').addEventListener('click', () => deleteModal.classList.add('hidden'));
-        document.getElementById('confirm-delete-1').addEventListener('click', () => showDeleteModalContent(2));
-    });
-
-    deleteModal.addEventListener('click', async (event) => {
-        const targetId = event.target.id;
-
-        if (targetId === 'cancel-delete-2') {
-            deleteModal.classList.add('hidden');
-        }
-
-        if (targetId === 'confirm-delete-2') {
-            const password = document.getElementById('delete-password-input').value;
-            if (!password) {
-                alert('Debes introducir tu contraseña para confirmar.');
-                return;
+        try {
+            const result = await window.api.deleteUserAccount({ userId });
+            if (result.success) {
+                alert('Tu cuenta y todos tus datos han sido eliminados permanentemente.');
+                localStorage.clear();
+                sessionStorage.clear();
+                window.location.href = 'login.html';
+            } else {
+                alert(result.message || 'Ocurrió un error al eliminar la cuenta.');
+                deleteAccountBtn.innerHTML = originalText;
+                deleteAccountBtn.disabled = false;
             }
-
-            try {
-                const result = await window.api.deleteUserAccount({ userId, password });
-                if (result.success) {
-                    alert('Tu cuenta ha sido eliminada permanentemente.');
-                    sessionStorage.clear();
-                    window.location.href = 'login.html';
-                } else {
-                    alert(result.message || 'Ocurrió un error al eliminar la cuenta.');
-                }
-            } catch (error) {
-                console.error('Error al eliminar la cuenta:', error);
-                alert('Ocurrió un error grave al intentar eliminar la cuenta.');
-            }
+        } catch (error) {
+            console.error('Error al eliminar la cuenta:', error);
+            alert('Ocurrió un error grave al intentar eliminar la cuenta.');
+            deleteAccountBtn.innerHTML = originalText;
+            deleteAccountBtn.disabled = false;
         }
     });
 });

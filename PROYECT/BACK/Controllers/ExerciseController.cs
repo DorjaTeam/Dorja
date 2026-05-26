@@ -50,7 +50,10 @@ namespace BACK.Controllers
                     request.UserId, 
                     request.ProblemaId, 
                     request.Codigo, 
-                    request.Language ?? "python"
+                    request.Language ?? "python",
+                    request.TiempoInvertido,
+                    request.Errores,
+                    request.IntentosFallidos
                 );
                 return Ok(result);
             }
@@ -67,5 +70,8 @@ namespace BACK.Controllers
         public int ProblemaId { get; set; }
         public string Codigo { get; set; } = "";
         public string? Language { get; set; }
+        public int TiempoInvertido { get; set; } = 0;
+        public int Errores { get; set; } = 0;
+        public int IntentosFallidos { get; set; } = 0;
     }
 }

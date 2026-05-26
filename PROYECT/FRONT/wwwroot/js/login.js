@@ -124,4 +124,52 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         }
     });
+
+    // Modal de Recuperación de Contraseña
+    const forgotLink = document.querySelector('.forgot-link');
+    const forgotModal = document.getElementById('forgot-password-modal');
+    const closeForgotModal = document.getElementById('close-forgot-modal');
+    const forgotForm = document.getElementById('forgot-password-form');
+    const forgotSpinner = document.getElementById('forgot-spinner');
+    const btnSubmitForgot = document.getElementById('btn-submit-forgot');
+
+    if (forgotLink && forgotModal) {
+        forgotLink.addEventListener('click', (e) => {
+            e.preventDefault();
+            forgotModal.style.display = 'flex';
+        });
+    }
+
+    if (closeForgotModal) {
+        closeForgotModal.addEventListener('click', () => {
+            forgotModal.style.display = 'none';
+        });
+    }
+
+    if (forgotForm) {
+        forgotForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const email = document.getElementById('forgot-email').value;
+
+            // Mostrar spinner
+            btnSubmitForgot.disabled = true;
+            forgotSpinner.style.display = 'inline-block';
+
+            try {
+                const result = await window.api.forgotPassword(email);
+                if (result.success) {
+                    if (window.showToast) window.showToast('Se ha enviado una contraseña temporal a tu correo.', 'success');
+                    forgotModal.style.display = 'none';
+                    forgotForm.reset();
+                } else {
+                    if (window.showToast) window.showToast(result.message || 'Error al solicitar contraseña.', 'error');
+                }
+            } catch (error) {
+                if (window.showToast) window.showToast('Hubo un problema de conexión.', 'error');
+            } finally {
+                btnSubmitForgot.disabled = false;
+                forgotSpinner.style.display = 'none';
+            }
+        });
+    }
 });

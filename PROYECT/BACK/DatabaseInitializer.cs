@@ -139,6 +139,26 @@ namespace BACK
                     Console.WriteLine($"⚠️ WARNING: Error with calificaciones table: {ex.Message}");
                 }
 
+                try
+                {
+                    CreateMensajesContactoTable(connection);
+                    Console.WriteLine("✅ MensajesContacto table OK");
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine($"⚠️ WARNING: Error with mensajes_contacto table: {ex.Message}");
+                }
+
+                try
+                {
+                    CreateIndices(connection);
+                    Console.WriteLine("✅ Database indices OK");
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine($"⚠️ WARNING: Error creating indices: {ex.Message}");
+                }
+
                 Console.WriteLine("✅ All tables processed");
 
                 // Seed initial data
@@ -187,7 +207,8 @@ namespace BACK
                     coverPhotoPath TEXT DEFAULT '',
                     profilePhotoBlob BLOB,
                     coverPhotoBlob BLOB,
-                    rol TEXT DEFAULT 'estudiante'
+                    rol TEXT DEFAULT 'estudiante',
+                    google_id TEXT UNIQUE
                 )";
             command.ExecuteNonQuery();
             
@@ -197,6 +218,7 @@ namespace BACK
             AddColumnIfNotExists(connection, "users", "profilePhotoBlob", "BLOB");
             AddColumnIfNotExists(connection, "users", "coverPhotoBlob", "BLOB");
             AddColumnIfNotExists(connection, "users", "rol", "TEXT DEFAULT 'estudiante'");
+            AddColumnIfNotExists(connection, "users", "google_id", "TEXT");
         }
         
         private static void AddColumnIfNotExists(SqliteConnection connection, string tableName, string columnName, string columnDefinition)
@@ -304,6 +326,10 @@ namespace BACK
                     FOREIGN KEY (problema_id) REFERENCES problemas(id)
                 )";
             command.ExecuteNonQuery();
+
+            AddColumnIfNotExists(connection, "progreso_problema", "errores", "INTEGER DEFAULT 0");
+            AddColumnIfNotExists(connection, "progreso_problema", "intentos_fallidos", "INTEGER DEFAULT 0");
+            AddColumnIfNotExists(connection, "progreso_problema", "tiempo_invertido", "INTEGER DEFAULT 0");
         }
 
         private static void CreateLogrosTable(SqliteConnection connection)
@@ -348,6 +374,8 @@ namespace BACK
                     FOREIGN KEY (nivel_id) REFERENCES niveles(id)
                 )";
             command.ExecuteNonQuery();
+
+            AddColumnIfNotExists(connection, "certificados", "tema_id", "INTEGER DEFAULT 0");
         }
 
         private static void CreateCalificacionesTable(SqliteConnection connection)
@@ -364,6 +392,42 @@ namespace BACK
                     FOREIGN KEY (maestro_id) REFERENCES users(id),
                     FOREIGN KEY (estudiante_id) REFERENCES users(id)
                 )";
+            command.ExecuteNonQuery();
+        }
+
+        private static void CreateMensajesContactoTable(SqliteConnection connection)
+        {
+            var command = connection.CreateCommand();
+            command.CommandText = @"
+                CREATE TABLE IF NOT EXISTS mensajes_contacto (
+                    id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    estudiante_id INTEGER NOT NULL,
+                    maestro_id INTEGER NOT NULL,
+                    nombre_estudiante TEXT NOT NULL,
+                    correo_estudiante TEXT NOT NULL,
+                    asunto TEXT NOT NULL,
+                    mensaje TEXT NOT NULL,
+                    fecha_envio TEXT NOT NULL,
+                    tiene_pdf INTEGER DEFAULT 0,
+                    pdf_base64 TEXT,
+                    FOREIGN KEY (estudiante_id) REFERENCES users(id),
+                    FOREIGN KEY (maestro_id) REFERENCES users(id)
+                )";
+            command.ExecuteNonQuery();
+        }
+
+        private static void CreateIndices(SqliteConnection connection)
+        {
+            var command = connection.CreateCommand();
+            command.CommandText = @"
+                CREATE INDEX IF NOT EXISTS idx_users_email ON users(email);
+                CREATE INDEX IF NOT EXISTS idx_progreso_problema_user_id ON progreso_problema(user_id);
+                CREATE INDEX IF NOT EXISTS idx_progreso_problema_problema_id ON progreso_problema(problema_id);
+                CREATE INDEX IF NOT EXISTS idx_calificaciones_maestro_id ON calificaciones(maestro_id);
+                CREATE INDEX IF NOT EXISTS idx_mensajes_contacto_maestro_id ON mensajes_contacto(maestro_id);
+                CREATE INDEX IF NOT EXISTS idx_temas_nivel_id ON temas(nivel_id);
+                CREATE INDEX IF NOT EXISTS idx_problemas_tema_id ON problemas(tema_id);
+            ";
             command.ExecuteNonQuery();
         }
 

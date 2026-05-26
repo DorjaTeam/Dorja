@@ -5,6 +5,8 @@ const fs = require('fs');
 const { autoUpdater } = require('electron-updater');
 const log = require('electron-log');
 const net = require('net');
+const express = require('express');
+const treeKill = require('tree-kill');
 
 // Configure logging
 log.transports.file.level = 'info';
@@ -15,6 +17,11 @@ autoUpdater.autoDownload = false; // Optional: set to true if you want auto down
 let mainWindow;
 let backendProcess;
 let backendPort = 5222; // Default, will be updated dynamically
+
+// Frontend server variables
+let frontendApp;
+let frontendServer;
+let frontendPort = 3000;
 
 // Helper to find a free port
 const findFreePort = (startPort) => {
@@ -121,9 +128,45 @@ const startBackend = async () => {
 
 // Stop the backend server
 const stopBackend = () => {
-  if (backendProcess) {
-    backendProcess.kill();
+  if (backendProcess && backendProcess.pid) {
+    try {
+      treeKill(backendProcess.pid, 'SIGKILL', (err) => {
+        if (err) log.error('Error killing backend process tree:', err);
+        else log.info('Backend process tree killed successfully.');
+      });
+    } catch (e) {
+      log.error('Exception killing backend process:', e);
+    }
     backendProcess = null;
+  }
+};
+
+// Start frontend server
+const startFrontendServer = async () => {
+  try {
+    const port = await findFreePort(3000); // Intenta 3000 primero
+    frontendPort = port;
+    
+    frontendApp = express();
+    const wwwrootDir = path.join(__dirname, 'PROYECT', 'FRONT', 'wwwroot');
+    
+    // Serve static files
+    frontendApp.use(express.static(wwwrootDir));
+    
+    frontendServer = frontendApp.listen(frontendPort, () => {
+      log.info(`Frontend server listening on http://localhost:${frontendPort}`);
+      if (!app.isPackaged) console.log(`Frontend server listening on http://localhost:${frontendPort}`);
+    });
+  } catch (err) {
+    log.error('Failed to start frontend server:', err);
+    if (!app.isPackaged) console.error('Failed to start frontend server:', err);
+  }
+};
+
+const stopFrontendServer = () => {
+  if (frontendServer) {
+    frontendServer.close();
+    frontendServer = null;
   }
 };
 
@@ -162,8 +205,7 @@ function createWindow() {
           // Backend is responding
           clearInterval(checkBackend);
           console.log('✅ Backend is ready, loading frontend...');
-          const htmlPath = path.join(__dirname, 'PROYECT', 'FRONT', 'wwwroot', 'home.html');
-          mainWindow.loadFile(htmlPath);
+          mainWindow.loadURL(`http://localhost:${frontendPort}/home.html`);
           mainWindow.show();
         }
       });
@@ -182,8 +224,7 @@ function createWindow() {
       clearInterval(checkBackend);
       if (!mainWindow.isVisible()) {
         console.error('⚠️ Backend did not start in time. Loading frontend anyway...');
-        const htmlPath = path.join(__dirname, 'PROYECT', 'FRONT', 'wwwroot', 'home.html');
-        mainWindow.loadFile(htmlPath);
+        mainWindow.loadURL(`http://localhost:${frontendPort}/home.html`);
         mainWindow.show();
       }
     }, 30000);
@@ -195,8 +236,9 @@ function createWindow() {
   });
 }
 
-app.whenReady().then(() => {
+app.whenReady().then(async () => {
   setupAutoUpdater();
+  await startFrontendServer();
   createWindow();
 
   app.on('activate', () => {
@@ -208,6 +250,7 @@ app.whenReady().then(() => {
 
 app.on('window-all-closed', () => {
   stopBackend();
+  stopFrontendServer();
   if (process.platform !== 'darwin') {
     app.quit();
   }
@@ -252,4 +295,5 @@ function setupAutoUpdater() {
 
 app.on('before-quit', () => {
   stopBackend();
+  stopFrontendServer();
 });

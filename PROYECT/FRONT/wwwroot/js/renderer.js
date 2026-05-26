@@ -1,8 +1,23 @@
+// Global utility functions for Avatars
+window.AVATAR_COLORS = [
+    '#6366f1', '#8b5cf6', '#ec4899', '#f43f5e', '#f97316', 
+    '#10b981', '#0ea5e9', '#3b82f6', '#14b8a6'
+];
+
+window.getAvatarColor = function(id) { 
+    return window.AVATAR_COLORS[(id || 0) % window.AVATAR_COLORS.length]; 
+};
+
+window.getInitials = function(nombre, apellido) {
+    return ((nombre?.[0] ?? '') + (apellido?.[0] ?? '')).toUpperCase() || 'U';
+};
+
 // Helper function to set profile image (same logic as profile.js)
 async function setProfileImage(imgElement, user, userId) {
     if (!imgElement || !user) return;
     
-    const initial = user.username ? user.username.charAt(0).toUpperCase() : 'U';
+    const initial = window.getInitials(user.nombre || user.username, user.apellidoPaterno);
+    const bgColor = window.getAvatarColor(parseInt(userId) || 0);
     const container = imgElement.parentElement;
     
     // Store initial in container for fallback
@@ -22,10 +37,9 @@ async function setProfileImage(imgElement, user, userId) {
                 console.error('Failed to load profile image from BLOB');
                 imgElement.style.display = 'none';
                 if (container) {
-                    // Remove any existing span
                     const existingSpan = container.querySelector('span');
                     if (existingSpan) existingSpan.remove();
-                    container.innerHTML = `<span class='text-white text-lg font-bold'>${initial}</span>`;
+                    container.innerHTML = `<span style="display: flex; align-items: center; justify-content: center; width: 100%; height: 100%; font-weight: 700; color: white; background-color: ${bgColor}; border-radius: inherit;">${initial}</span>`;
                 }
                 imgElement.onerror = null;
             };
@@ -46,10 +60,9 @@ async function setProfileImage(imgElement, user, userId) {
             console.error('Failed to load profile image from file path:', profileImageUrl);
             imgElement.style.display = 'none';
             if (container) {
-                // Remove any existing span
                 const existingSpan = container.querySelector('span');
                 if (existingSpan) existingSpan.remove();
-                container.innerHTML = `<span class='text-white text-lg font-bold'>${initial}</span>`;
+                container.innerHTML = `<span style="display: flex; align-items: center; justify-content: center; width: 100%; height: 100%; font-weight: 700; color: white; background-color: ${bgColor}; border-radius: inherit;">${initial}</span>`;
             }
             imgElement.onerror = null;
         };
@@ -62,10 +75,9 @@ async function setProfileImage(imgElement, user, userId) {
         console.log('No profile photo found, showing initial');
         imgElement.style.display = 'none';
         if (container) {
-            // Remove any existing span
             const existingSpan = container.querySelector('span');
             if (existingSpan) existingSpan.remove();
-            container.innerHTML = `<span class='text-white text-lg font-bold'>${initial}</span>`;
+            container.innerHTML = `<span style="display: flex; align-items: center; justify-content: center; width: 100%; height: 100%; font-weight: 700; color: white; background-color: ${bgColor}; border-radius: inherit;">${initial}</span>`;
         }
     }
     
@@ -123,10 +135,9 @@ async function initializeHomePage() {
                             console.error('Failed to load hero profile image from BLOB');
                             heroImg.style.display = 'none';
                             if (heroImageContainer) {
-                                // Remove any existing span
                                 const existingSpan = heroImageContainer.querySelector('span');
                                 if (existingSpan) existingSpan.remove();
-                                heroImageContainer.innerHTML = `<span class='text-white text-4xl font-bold'>${initial}</span>`;
+                                heroImageContainer.innerHTML = `<span style="display: flex; align-items: center; justify-content: center; width: 100%; height: 100%; font-size: 3rem; font-weight: 800; color: white; background-color: ${bgColor}; border-radius: inherit;">${initial}</span>`;
                             }
                             heroImg.onerror = null;
                         };
@@ -147,10 +158,9 @@ async function initializeHomePage() {
                         console.error('Failed to load hero profile image from file path:', profileImageUrl);
                         heroImg.style.display = 'none';
                         if (heroImageContainer) {
-                            // Remove any existing span
                             const existingSpan = heroImageContainer.querySelector('span');
                             if (existingSpan) existingSpan.remove();
-                            heroImageContainer.innerHTML = `<span class='text-white text-4xl font-bold'>${initial}</span>`;
+                            heroImageContainer.innerHTML = `<span style="display: flex; align-items: center; justify-content: center; width: 100%; height: 100%; font-size: 3rem; font-weight: 800; color: white; background-color: ${bgColor}; border-radius: inherit;">${initial}</span>`;
                         }
                         heroImg.onerror = null;
                     };
@@ -163,10 +173,9 @@ async function initializeHomePage() {
                     console.log('No hero profile photo found, showing initial');
                     heroImg.style.display = 'none';
                     if (heroImageContainer) {
-                        // Remove any existing span
                         const existingSpan = heroImageContainer.querySelector('span');
                         if (existingSpan) existingSpan.remove();
-                        heroImageContainer.innerHTML = `<span class='text-white text-4xl font-bold'>${initial}</span>`;
+                        heroImageContainer.innerHTML = `<span style="display: flex; align-items: center; justify-content: center; width: 100%; height: 100%; font-size: 3rem; font-weight: 800; color: white; background-color: ${bgColor}; border-radius: inherit;">${initial}</span>`;
                     }
                 }
             }

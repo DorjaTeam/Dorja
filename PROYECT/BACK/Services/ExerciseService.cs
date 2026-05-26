@@ -86,7 +86,7 @@ namespace BACK.Services
         /// Validates a solution by executing both the user's code and the solution code,
         /// then comparing their outputs
         /// </summary>
-        public async Task<ValidationResult> ValidateSolution(int userId, int problemaId, string codigo, string language = "python")
+        public async Task<ValidationResult> ValidateSolution(int userId, int problemaId, string codigo, string language = "python", int tiempoInvertido = 0, int errores = 0, int intentosFallidos = 0)
         {
             try
             {
@@ -168,7 +168,7 @@ namespace BACK.Services
                 // Update progress - if it fails, we still want to return the validation result
                 try
                 {
-                    await UpdateProgress(userId, problemaId, codigo, isValid, problema.PuntosOtorgados);
+                    await UpdateProgress(userId, problemaId, codigo, isValid, problema.PuntosOtorgados, tiempoInvertido, errores, intentosFallidos);
                 }
                 catch (Exception progressEx)
                 {
@@ -203,7 +203,7 @@ namespace BACK.Services
             // Update progress - if it fails, we still want to return the validation result
             try
             {
-                await UpdateProgress(userId, problemaId, codigo, isCorrect, problema.PuntosOtorgados);
+                await UpdateProgress(userId, problemaId, codigo, isCorrect, problema.PuntosOtorgados, tiempoInvertido, errores, intentosFallidos);
             }
             catch (Exception progressEx)
             {
@@ -491,7 +491,7 @@ namespace BACK.Services
             return similarity > 0.8; // 80% similarity threshold
         }
 
-        private async Task UpdateProgress(int userId, int problemaId, string codigo, bool isCorrect, int puntosOtorgados)
+        private async Task UpdateProgress(int userId, int problemaId, string codigo, bool isCorrect, int puntosOtorgados, int tiempoInvertido = 0, int errores = 0, int intentosFallidos = 0)
         {
             try
             {
@@ -550,6 +550,9 @@ namespace BACK.Services
                         Completado = isCorrect,
                         Puntuacion = isCorrect ? puntosOtorgados : 0,
                         Intentos = 1,
+                        Errores = errores,
+                        IntentosFallidos = !isCorrect ? intentosFallidos + 1 : intentosFallidos,
+                        TiempoInvertido = tiempoInvertido,
                         UltimoCodigo = codigo,
                         FechaCompletado = isCorrect ? DateTime.UtcNow : (DateTime?)null
                     };
@@ -595,6 +598,9 @@ namespace BACK.Services
                                 Completado = isCorrect,
                                 Puntuacion = isCorrect ? puntosOtorgados : 0,
                                 Intentos = progreso.Intentos + 1,
+                                Errores = progreso.Errores + errores,
+                                IntentosFallidos = !isCorrect ? progreso.IntentosFallidos + 1 : progreso.IntentosFallidos,
+                                TiempoInvertido = progreso.TiempoInvertido + tiempoInvertido,
                                 UltimoCodigo = codigo,
                                 FechaCompletado = isCorrect ? DateTime.UtcNow : (DateTime?)null
                             };
@@ -621,6 +627,9 @@ namespace BACK.Services
                     }
 
                     progreso.Intentos++;
+                    progreso.Errores += errores;
+                    if (!isCorrect) progreso.IntentosFallidos++;
+                    progreso.TiempoInvertido += tiempoInvertido;
                     progreso.UltimoCodigo = codigo;
                     
                     Console.WriteLine($"🔄 Actualizando progreso - Id: {progreso.Id}, UserId: {progreso.UserId}, ProblemaId: {progreso.ProblemaId}, Completado: {progreso.Completado}");

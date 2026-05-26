@@ -1,134 +1,684 @@
 <!DOCTYPE html>
-<html lang="es" class="">
-
+<html lang="es">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Iniciar Sesión - Dorja</title>
-    <link href="css/output.css" rel="stylesheet">
+    <title>Iniciar Sesión — Dorja</title>
+    <meta name="description" content="Ingresa a Dorja para continuar aprendiendo matemáticas para programación de una forma interactiva.">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="css/dorja-design-system.css" rel="stylesheet">
+
     <style>
-        .animate-delay-200 {
-            animation-delay: 200ms;
+        /* ── Login Page Layout ── */
+        .login-layout {
+            display: grid;
+            grid-template-columns: 1fr;
+            min-height: 100vh;
         }
 
-        .animate-delay-400 {
-            animation-delay: 400ms;
+        @media (min-width: 1024px) {
+            .login-layout {
+                grid-template-columns: 1.15fr 0.85fr;
+            }
+        }
+
+        /* ── Left Branding Panel ── */
+        .login-branding {
+            display: none;
+            position: relative;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 56px;
+            text-align: center;
+            overflow: hidden;
+            background: linear-gradient(145deg, #0d0820 0%, #1a0f3c 35%, #4929a4 75%, #8a5df5 100%);
+        }
+
+        @media (min-width: 1024px) {
+            .login-branding { display: flex; }
+        }
+
+        /* Animated orbs */
+        .branding-orb {
+            position: absolute;
+            border-radius: 50%;
+            filter: blur(60px);
+            pointer-events: none;
+            animation: orb-drift 8s ease-in-out infinite alternate;
+        }
+        .branding-orb-1 {
+            width: 400px; height: 400px;
+            background: rgba(73,41,164,0.5);
+            top: -100px; left: -100px;
+            animation-duration: 9s;
+        }
+        .branding-orb-2 {
+            width: 300px; height: 300px;
+            background: rgba(138,93,245,0.35);
+            bottom: -80px; right: -80px;
+            animation-duration: 11s; animation-delay: -4s;
+        }
+        .branding-orb-3 {
+            width: 200px; height: 200px;
+            background: rgba(168,85,247,0.3);
+            top: 50%; left: 50%;
+            transform: translate(-50%, -50%);
+            animation-duration: 7s; animation-delay: -2s;
+        }
+
+        @keyframes orb-drift {
+            0%   { transform: translate(0, 0) scale(1); }
+            100% { transform: translate(30px, -30px) scale(1.08); }
+        }
+
+        /* Grid overlay on branding */
+        .branding-grid {
+            position: absolute;
+            inset: 0;
+            background-image:
+                linear-gradient(rgba(255,255,255,0.035) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(255,255,255,0.035) 1px, transparent 1px);
+            background-size: 44px 44px;
+            pointer-events: none;
+        }
+
+        .branding-content {
+            position: relative;
+            z-index: 10;
+            max-width: 460px;
+            animation: fadeInUp 0.7s var(--ease-spring);
+        }
+
+        .branding-logo-wrap {
+            width: 80px; height: 80px;
+            border-radius: 22px;
+            background: linear-gradient(135deg, rgba(255,255,255,0.15), rgba(255,255,255,0.05));
+            border: 1px solid rgba(255,255,255,0.2);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 28px;
+            font-size: 2.2rem;
+            font-weight: 900;
+            color: white;
+            backdrop-filter: blur(8px);
+            box-shadow: 0 8px 32px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.2);
+            letter-spacing: -2px;
+        }
+
+        .branding-title {
+            font-size: 3rem;
+            font-weight: 900;
+            letter-spacing: -1.5px;
+            margin-bottom: 16px;
+            background: linear-gradient(135deg, #ffffff, rgba(200,185,255,0.9));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            line-height: 1.1;
+        }
+
+        .branding-subtitle {
+            font-size: 1.05rem;
+            color: rgba(255,255,255,0.65);
+            line-height: 1.7;
+            margin-bottom: 40px;
+        }
+
+        /* Features list */
+        .branding-features {
+            list-style: none;
+            display: flex;
+            flex-direction: column;
+            gap: 14px;
+            text-align: left;
+        }
+
+        .branding-features li {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            color: rgba(255,255,255,0.8);
+            font-size: 0.95rem;
+            font-weight: 500;
+        }
+
+        .feature-dot {
+            width: 32px; height: 32px;
+            border-radius: 8px;
+            background: rgba(255,255,255,0.12);
+            border: 1px solid rgba(255,255,255,0.15);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.95rem;
+            flex-shrink: 0;
+        }
+
+        .mascota-img {
+            width: 200px;
+            margin-top: 40px;
+            filter: drop-shadow(0 20px 40px rgba(0,0,0,0.4));
+            animation: bounce-y 4s ease-in-out infinite;
+        }
+
+        /* ── Right Form Panel ── */
+        .login-form-pane {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 40px 32px;
+            position: relative;
+            z-index: 10;
+            background: var(--bg-base);
+        }
+
+        .login-form-container {
+            width: 100%;
+            max-width: 420px;
+            animation: slideUp 0.55s var(--ease-spring);
+        }
+
+        .login-top-brand {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            justify-content: center;
+            margin-bottom: 36px;
+        }
+
+        @media (min-width: 1024px) {
+            .login-top-brand { display: none; }
+        }
+
+        .login-top-brand .brand-icon {
+            width: 38px; height: 38px;
+            border-radius: 10px;
+            background: linear-gradient(135deg, var(--primary), var(--accent));
+            display: flex; align-items: center; justify-content: center;
+            font-weight: 900; font-size: 1rem; color: white;
+            box-shadow: var(--shadow-glow);
+        }
+
+        .login-top-brand .brand-name {
+            font-size: 1.3rem;
+            font-weight: 800;
+            letter-spacing: -0.5px;
+        }
+
+        /* The glass card */
+        .login-card {
+            background: var(--surface-1);
+            backdrop-filter: blur(var(--blur-xl));
+            -webkit-backdrop-filter: blur(var(--blur-xl));
+            border: 1px solid var(--glass-border-2);
+            border-radius: var(--radius-xl);
+            padding: 40px;
+            box-shadow: var(--shadow-xl), 0 0 60px rgba(73,41,164,0.1), var(--shadow-inset);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .login-card::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0;
+            height: 1px;
+            background: linear-gradient(90deg,
+                transparent, rgba(138,93,245,0.5), transparent);
+        }
+
+        .login-header {
+            text-align: center;
+            margin-bottom: 32px;
+        }
+
+        .login-header h2 {
+            font-size: 1.9rem;
+            font-weight: 800;
+            letter-spacing: -0.8px;
+            color: var(--text);
+            margin-bottom: 6px;
+        }
+
+        .login-header p {
+            color: var(--text-muted);
+            font-size: var(--text-sm);
+        }
+
+        /* Error alert */
+        .error-alert {
+            display: none;
+            align-items: center;
+            gap: 10px;
+            padding: 12px 16px;
+            border-radius: var(--radius);
+            background: var(--danger-soft);
+            border: 1px solid var(--danger-border);
+            color: #fca5a5;
+            margin-bottom: 24px;
+            font-size: var(--text-sm);
+            animation: shake 0.4s ease;
+        }
+
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            20%, 60% { transform: translateX(-6px); }
+            40%, 80% { transform: translateX(6px); }
+        }
+
+        /* Input with icons */
+        .input-with-icon {
+            position: relative;
+        }
+        .input-with-icon .input-icon-left {
+            position: absolute;
+            left: 14px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--text-faint);
+            pointer-events: none;
+            transition: color var(--dur-normal);
+            font-size: 0.95rem;
+        }
+        .input-with-icon .input-field { padding-left: 42px; }
+        .input-with-icon:focus-within .input-icon-left { color: var(--accent); }
+
+        .input-toggle-pw {
+            position: absolute;
+            right: 14px; top: 50%;
+            transform: translateY(-50%);
+            color: var(--text-faint);
+            cursor: pointer;
+            background: none; border: none;
+            font-size: 0.95rem;
+            transition: color var(--dur-fast);
+        }
+        .input-toggle-pw:hover { color: var(--text-muted); }
+
+        /* Form options */
+        .form-options {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-top: -6px;
+            margin-bottom: 28px;
+            font-size: var(--text-sm);
+        }
+
+        .remember-me {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            color: var(--text-muted);
+            cursor: pointer;
+        }
+
+        .remember-me input { accent-color: var(--accent); cursor: pointer; }
+
+        .forgot-link {
+            color: var(--accent);
+            font-weight: 600;
+            text-decoration: none;
+            font-size: var(--text-sm);
+            transition: var(--transition);
+        }
+
+        .forgot-link:hover { color: var(--text); text-decoration: underline; }
+
+        /* Google button */
+        .btn-google {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            width: 100%;
+            padding: 11px;
+            background: var(--glass-1);
+            border: 1px solid var(--glass-border-2);
+            border-radius: var(--radius);
+            color: var(--text-secondary);
+            font-size: var(--text-sm);
+            font-weight: 600;
+            cursor: pointer;
+            transition: var(--transition);
+            font-family: inherit;
+        }
+
+        .btn-google:hover {
+            background: var(--glass-2);
+            border-color: var(--glass-border-hover);
+            color: var(--text);
+        }
+
+        .btn-google svg { flex-shrink: 0; }
+
+        /* Footer link */
+        .form-footer {
+            text-align: center;
+            margin-top: 28px;
+            font-size: var(--text-sm);
+            color: var(--text-muted);
+        }
+
+        .form-footer a {
+            color: var(--accent);
+            font-weight: 700;
+            text-decoration: none;
+            transition: var(--transition);
+        }
+
+        .form-footer a:hover { color: var(--text); text-decoration: underline; }
+
+        /* Submit loading state */
+        .btn-submit-login {
+            position: relative;
+        }
+
+        .btn-submit-login .spinner {
+            width: 16px; height: 16px;
+            border: 2px solid rgba(255,255,255,0.3);
+            border-top-color: white;
+            border-radius: 50%;
+            animation: spin 0.7s linear infinite;
+            display: none;
+        }
+
+        .btn-submit-login.loading .spinner { display: block; }
+        .btn-submit-login.loading .btn-text { opacity: 0.7; }
+
+        /* ── Modals ── */
+        .full-modal-overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            width: 100%; height: 100%;
+            background: rgba(0,0,0,0.75);
+            backdrop-filter: blur(10px);
+            z-index: 9999;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            animation: overlay-in 0.2s ease;
+        }
+
+        .full-modal-overlay.visible { display: flex; }
+
+        .role-card {
+            flex: 1;
+            min-width: 200px;
+            padding: 28px 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 12px;
+            background: var(--glass-1);
+            border: 1px solid var(--glass-border-2);
+            border-radius: var(--radius-lg);
+            cursor: pointer;
+            color: var(--text);
+            font-family: inherit;
+            transition: var(--transition);
+            text-align: center;
+        }
+
+        .role-card:hover {
+            background: rgba(73,41,164,0.15);
+            border-color: rgba(138,93,245,0.45);
+            transform: translateY(-4px);
+            box-shadow: var(--shadow-glow);
+        }
+
+        .role-card-icon {
+            font-size: 2.5rem;
+            padding: 16px;
+            border-radius: var(--radius);
+            background: rgba(138,93,245,0.12);
+            border: 1px solid rgba(138,93,245,0.2);
+        }
+
+        .role-card h3 {
+            font-size: var(--text-xl);
+            font-weight: 700;
+        }
+
+        .role-card p {
+            font-size: var(--text-sm);
+            color: var(--text-muted);
+            line-height: 1.4;
         }
     </style>
 </head>
 
-<body class="bg-gray-50 dark:bg-slate-900 font-sans transition-colors duration-300">
+<body>
+    <main class="login-layout">
 
-    <main class="grid lg:grid-cols-2 min-h-screen">
+        <!-- ── Left Branding Panel ── -->
+        <div class="login-branding">
+            <div class="branding-orb branding-orb-1"></div>
+            <div class="branding-orb branding-orb-2"></div>
+            <div class="branding-orb branding-orb-3"></div>
+            <div class="branding-grid"></div>
 
-        <div
-            class="relative hidden lg:flex flex-col items-center justify-center bg-gradient-to-br from-indigo-500 via-purple-500 to-fuchsia-500 p-12 text-white text-center animate-gradient-xy [background-size:200%_200%] overflow-hidden">
-            <div
-                class="absolute inset-0 [background:radial-gradient(600px_at_var(--mouse-x)_var(--mouse-y),_rgba(255,255,255,0.1),_transparent_80%)]">
+            <div class="branding-content">
+                <img src="./assets/images/dorja-logo-icon.png" alt="Dorja Logo" style="width: 80px; height: 80px; filter: drop-shadow(0 0 20px rgba(255,255,255,0.3)); margin-bottom: 28px;" onerror="this.outerHTML='<div class=\'branding-logo-wrap\'>D</div>'">
+
+                <h1 class="branding-title">Bienvenido a Dorja</h1>
+                <p class="branding-subtitle">
+                    Aprende, practica y domina las bases matemáticas fundamentales para ser un excelente programador.
+                </p>
+
+                <ul class="branding-features">
+                    <li>
+                        <span class="feature-dot">🎯</span>
+                        50+ ejercicios prácticos estructurados por tema
+                    </li>
+                    <li>
+                        <span class="feature-dot">📊</span>
+                        Progreso en tiempo real y estadísticas detalladas
+                    </li>
+                    <li>
+                        <span class="feature-dot">🏆</span>
+                        Certificados automáticos al completar temas
+                    </li>
+                    <li>
+                        <span class="feature-dot">👨‍🏫</span>
+                        Conecta con tu maestro y recibe retroalimentación
+                    </li>
+                </ul>
+
+                <img src="./assets/capibara.gif" alt="Mascota de Dorja" class="mascota-img">
             </div>
-            <div class="z-10 animate-fade-in-up opacity-0">
-                <h1 class="text-6xl font-extrabold mb-4">Bienvenido a Dorja</h1>
-                <p class="text-xl max-w-md">Tu plataforma para dominar las bases matemáticas de la programación.</p>
-            </div>
-            <img src="./assets/capibara.gif" alt="Mascota de Dorja"
-                class="w-full max-w-sm rounded-2xl shadow-2xl mt-10 z-10 animate-fade-in-up opacity-0 animate-delay-200">
         </div>
 
-        <div class="flex flex-col items-center justify-center p-8 animate-fade-in-up opacity-0 animate-delay-400">
-            <div class="w-full max-w-md">
-                <div class="absolute top-5 right-5 lg:hidden">
-                    <label for="theme-toggle-mobile" class="cursor-pointer">
-                        <input type="checkbox" id="theme-toggle-mobile" class="sr-only peer">
-                        <div
-                            class="relative w-14 h-8 bg-gray-300 peer-checked:bg-indigo-600 dark:bg-slate-700 rounded-full">
-                            <div
-                                class="absolute w-6 h-6 bg-white rounded-full left-1 top-1 peer-checked:translate-x-6 transition-transform">
-                            </div>
-                        </div>
-                    </label>
+        <!-- ── Right Form Panel ── -->
+        <div class="login-form-pane">
+            <div class="login-form-container">
+
+                <!-- Mobile logo -->
+                <div class="login-top-brand" style="display:flex; justify-content:center; align-items:center;">
+                    <img src="./assets/images/dorja-logo-text.png" alt="Dorja" style="height: 48px; object-fit: contain;" onerror="this.outerHTML='<div class=\'brand-icon\'>D</div><span class=\'brand-name\'>Dorja</span>'">
                 </div>
 
-                <form id="login-form"
-                    class="bg-white/80 dark:bg-slate-800/60 backdrop-blur-lg border border-gray-200 dark:border-slate-700 shadow-2xl rounded-2xl p-10">
+                <form id="login-form" class="login-card">
 
-                    <h2 class="text-4xl font-bold mb-2 text-center text-gray-800 dark:text-white">Iniciar Sesión</h2>
-                    <p class="text-center text-gray-500 dark:text-slate-400 mb-8">Ingresa tus credenciales para
-                        continuar.</p>
-
-                    <div id="error-container"
-                        class="hidden items-center gap-3 p-3 mb-6 rounded-lg bg-red-50 dark:bg-red-500/10 border border-red-200 dark:border-red-500/30">
-                        <svg class="w-5 h-5 text-red-600 dark:text-red-400" xmlns="http://www.w3.org/2000/svg"
-                            viewBox="0 0 20 20" fill="currentColor">
-                            <path fill-rule="evenodd"
-                                d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.28 7.22a.75.75 0 00-1.06 1.06L8.94 10l-1.72 1.72a.75.75 0 101.06 1.06L10 11.06l1.72 1.72a.75.75 0 101.06-1.06L11.06 10l1.72-1.72a.75.75 0 00-1.06-1.06L10 8.94 8.28 7.22z"
-                                clip-rule="evenodd" />
-                        </svg>
-                        <p id="error-message" class="text-sm font-medium text-red-800 dark:text-red-300"></p>
+                    <div class="login-header">
+                        <h2>Iniciar Sesión</h2>
+                        <p>Ingresa tus credenciales para acceder a la plataforma.</p>
                     </div>
 
-                    <div class="mb-5">
-                        <label class="block text-gray-600 dark:text-slate-300 text-sm font-bold mb-2"
-                            for="username">Nombre de Usuario</label>
-                        <input
-                            class="bg-gray-100 dark:bg-slate-700 border-2 border-transparent focus:border-indigo-500 focus:ring-0 rounded-lg w-full py-3 px-4 text-gray-800 dark:text-gray-200 transition"
-                            id="username" type="text" required>
+                    <!-- Error -->
+                    <div id="error-container" class="error-alert">
+                        <i class="fas fa-exclamation-triangle" style="flex-shrink:0;"></i>
+                        <span id="error-message"></span>
                     </div>
-                    <div class="mb-6">
-                        <label class="block text-gray-600 dark:text-slate-300 text-sm font-bold mb-2"
-                            for="password">Contraseña</label>
-                        <input
-                            class="bg-gray-100 dark:bg-slate-700 border-2 border-transparent focus:border-indigo-500 focus:ring-0 rounded-lg w-full py-3 px-4 text-gray-800 dark:text-gray-200 transition"
-                            id="password" type="password" required>
-                    </div>
-                    <div class="flex items-center justify-between mb-8">
-                        <label class="flex items-center text-sm">
-                            <input type="checkbox"
-                                class="h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500">
-                            <span class="ml-2 text-gray-600 dark:text-slate-300">Recordarme</span>
-                        </label>
-                        <a href="#"
-                            class="text-sm font-bold text-indigo-600 hover:underline dark:text-indigo-400">¿Olvidaste tu
-                            contraseña?</a>
-                    </div>
-                    <div class="flex flex-col gap-5">
-                        <button
-                            class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 px-4 rounded-lg transition-transform transform hover:scale-105"
-                            type="submit">Entrar</button>
-                        <p class="text-center text-sm text-gray-500 dark:text-slate-400">
-                            ¿No tienes una cuenta? <a
-                                class="font-bold text-indigo-600 dark:text-indigo-400 hover:underline"
-                                href="signup.html">Regístrate</a>
-                        </p>
-                    </div>
-                </form>
-            </div>
-            <div class="hidden lg:block absolute bottom-5 right-5">
-                <label for="theme-toggle" class="cursor-pointer">
-                    <input type="checkbox" id="theme-toggle" class="sr-only peer">
-                    <div
-                        class="relative w-14 h-8 bg-gray-300 peer-checked:bg-indigo-600 dark:bg-slate-700 rounded-full">
-                        <div
-                            class="absolute w-6 h-6 bg-white rounded-full left-1 top-1 peer-checked:translate-x-6 transition-transform">
+
+                    <!-- Username -->
+                    <div class="form-group">
+                        <label for="username">Nombre de Usuario</label>
+                        <div class="input-with-icon">
+                            <i class="fas fa-user input-icon-left"></i>
+                            <input type="text" id="username" class="input-field" placeholder="ej. juan_123" required autocomplete="username">
                         </div>
                     </div>
-                </label>
+
+                    <!-- Password -->
+                    <div class="form-group">
+                        <label for="password">Contraseña</label>
+                        <div class="input-with-icon">
+                            <i class="fas fa-lock input-icon-left"></i>
+                            <input type="password" id="password" class="input-field" placeholder="Tu contraseña" required autocomplete="current-password">
+                            <button type="button" class="input-toggle-pw" id="toggle-pw" tabindex="-1">
+                                <i class="fas fa-eye" id="toggle-pw-icon"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="form-options">
+                        <label class="remember-me">
+                            <input type="checkbox" id="remember-me">
+                            <span>Recordarme</span>
+                        </label>
+                        <a href="#" class="forgot-link" id="open-forgot-modal">¿Olvidaste tu contraseña?</a>
+                    </div>
+
+                    <!-- Submit -->
+                    <button class="btn btn-primary btn-block btn-submit-login" type="submit" style="padding: 13px;" id="btn-login">
+                        <div class="spinner"></div>
+                        <span class="btn-text">Entrar</span>
+                    </button>
+
+                    <div class="divider-text" style="margin: 22px 0;">O continúa con</div>
+
+                    <!-- Google login renders here -->
+                    <button type="button" class="btn-google" id="google-login-trigger" style="display:none;">
+                        <svg width="18" height="18" viewBox="0 0 18 18">
+                            <path fill="#4285F4" d="M17.64 9.205c0-.639-.057-1.252-.164-1.841H9v3.481h4.844a4.14 4.14 0 0 1-1.796 2.716v2.259h2.908c1.702-1.567 2.684-3.875 2.684-6.615z"/>
+                            <path fill="#34A853" d="M9 18c2.43 0 4.467-.806 5.956-2.18l-2.908-2.259c-.806.54-1.837.86-3.048.86-2.344 0-4.328-1.584-5.036-3.711H.957v2.332A8.997 8.997 0 0 0 9 18z"/>
+                            <path fill="#FBBC05" d="M3.964 10.71A5.41 5.41 0 0 1 3.682 9c0-.593.102-1.17.282-1.71V4.958H.957A8.996 8.996 0 0 0 0 9c0 1.452.348 2.827.957 4.042l3.007-2.332z"/>
+                            <path fill="#EA4335" d="M9 3.58c1.321 0 2.508.454 3.44 1.345l2.582-2.58C13.463.891 11.426 0 9 0A8.997 8.997 0 0 0 .957 4.958L3.964 7.29C4.672 5.163 6.656 3.58 9 3.58z"/>
+                        </svg>
+                        Continuar con Google
+                    </button>
+
+                    <div id="google-login-button" style="display: flex; justify-content: center;"></div>
+
+                    <div class="form-footer">
+                        ¿No tienes una cuenta? <a href="signup.html">Regístrate gratis</a>
+                    </div>
+
+                </form>
             </div>
         </div>
     </main>
 
+    <!-- ── Forgot Password Modal ── -->
+    <div id="forgot-password-modal" class="full-modal-overlay">
+        <div class="modal glass-modal" style="max-width: 460px;">
+            <div class="modal-header">
+                <div>
+                    <div class="modal-title">🔑 Recuperar Contraseña</div>
+                    <div class="modal-subtitle">Te enviaremos una contraseña temporal</div>
+                </div>
+                <button class="modal-close" id="close-forgot-modal">✕</button>
+            </div>
+            <div class="modal-body">
+                <p style="color: var(--text-muted); font-size: var(--text-sm); margin-bottom: 24px; line-height: 1.6;">
+                    Ingresa tu correo electrónico registrado y te enviaremos una contraseña temporal para que puedas acceder.
+                </p>
+                <form id="forgot-password-form">
+                    <div class="form-group">
+                        <label for="forgot-email">Correo Electrónico</label>
+                        <div class="input-with-icon">
+                            <i class="fas fa-envelope input-icon-left"></i>
+                            <input type="email" id="forgot-email" class="input-field" placeholder="tu@correo.com" required>
+                        </div>
+                    </div>
+                    <button class="btn btn-primary btn-block" type="submit" id="btn-submit-forgot" style="padding: 13px; margin-top: 8px;">
+                        <span id="forgot-spinner" style="display:none;"><i class="fas fa-spinner fa-spin"></i></span>
+                        Enviar Contraseña Temporal
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- ── Role Selection Modal ── -->
+    <div id="role-selection-modal" class="full-modal-overlay">
+        <div class="modal glass-modal" style="max-width: 620px; text-align: center;">
+            <div class="modal-header" style="justify-content: center; border-bottom: none; padding-bottom: 0;">
+                <div>
+                    <div class="modal-title" style="font-size: var(--text-2xl);">¿Cómo quieres usar Dorja?</div>
+                    <div class="modal-subtitle" style="font-size: var(--text-base); margin-top: 6px;">Selecciona tu rol para personalizar tu experiencia.</div>
+                </div>
+            </div>
+            <div class="modal-body">
+                <div style="display: flex; gap: 16px; justify-content: center; flex-wrap: wrap;">
+                    <button id="role-maestro-btn" class="role-card">
+                        <div class="role-card-icon">👨‍🏫</div>
+                        <h3>Maestro</h3>
+                        <p>Gestionar estudiantes, ver progreso, añadir calificaciones.</p>
+                    </button>
+                    <button id="role-estudiante-btn" class="role-card">
+                        <div class="role-card-icon">🎓</div>
+                        <h3>Estudiante</h3>
+                        <p>Tomar cursos, guardar progreso, obtener certificados.</p>
+                    </button>
+                </div>
+                <div id="role-selection-loading" style="display: none; margin-top: 24px; color: var(--text-muted); font-size: var(--text-sm);">
+                    <i class="fas fa-spinner fa-spin" style="margin-right: 8px;"></i> Configurando tu cuenta…
+                </div>
+            </div>
+        </div>
+    </div>
+
     <script src="./api.js"></script>
     <script>
-        // Verify api.js loaded correctly
         if (typeof window.api === 'undefined') {
-            console.error('api.js failed to load! Check the browser console for 404 errors.');
-            alert('Error: No se pudo cargar la API. Por favor, recarga la página.');
-        } else {
-            console.log('api.js loaded successfully');
+            console.error('api.js failed to load!');
+        }
+
+        // Password toggle
+        document.getElementById('toggle-pw')?.addEventListener('click', function() {
+            const pw = document.getElementById('password');
+            const icon = document.getElementById('toggle-pw-icon');
+            if (pw.type === 'password') {
+                pw.type = 'text';
+                icon.className = 'fas fa-eye-slash';
+            } else {
+                pw.type = 'password';
+                icon.className = 'fas fa-eye';
+            }
+        });
+
+        // Forgot modal open/close with new classes
+        document.getElementById('open-forgot-modal')?.addEventListener('click', function(e) {
+            e.preventDefault();
+            document.getElementById('forgot-password-modal').classList.add('visible');
+        });
+        document.getElementById('close-forgot-modal')?.addEventListener('click', function() {
+            document.getElementById('forgot-password-modal').classList.remove('visible');
+        });
+        document.getElementById('forgot-password-modal')?.addEventListener('click', function(e) {
+            if (e.target === this) this.classList.remove('visible');
+        });
+
+        // Role modal - map new role-selection-modal to same behavior
+        // (logic handled by login.js)
+        const roleModal = document.getElementById('role-selection-modal');
+        if (roleModal) {
+            roleModal.addEventListener('click', function(e) {
+                // Only close if clicking on overlay, not the card
+            });
         }
     </script>
     <script src="./js/ui.js"></script>
     <script src="./js/login.js"></script>
     <script src="./js/theme-toggle.js"></script>
+    <script src="https://accounts.google.com/gsi/client" async defer></script>
+    <script src="./js/google-auth.js"></script>
 </body>
-
 </html>

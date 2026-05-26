@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
@@ -14,6 +14,9 @@ namespace DorjaModelado
         public bool Completado { get; set; } = false;
         public int Puntuacion { get; set; } = 0;
         public int Intentos { get; set; } = 0;
+        public int Errores { get; set; } = 0;
+        public int IntentosFallidos { get; set; } = 0;
+        public int TiempoInvertido { get; set; } = 0;
         public string UltimoCodigo { get; set; } = string.Empty;
         public DateTime? FechaCompletado { get; set; }
     }
