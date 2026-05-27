@@ -1,4 +1,4 @@
-// pdf-generator.js
+﻿// pdf-generator.js
 // Módulo para generar certificados en PDF
 
 /**

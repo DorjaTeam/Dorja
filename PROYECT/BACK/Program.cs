@@ -91,25 +91,25 @@ builder.Services.AddRateLimiter(options =>
 var connectionString = builder.Configuration.GetConnectionString("DorjaConnection") 
     ?? throw new InvalidOperationException("Connection string 'DorjaConnection' not found.");
 
-// Ensure the connection string uses an absolute path
+// Asegurar que la cadena de conexión use una ruta absoluta
 var dbPath = connectionString.Replace("Data Source=", "").Trim();
 if (!Path.IsPathRooted(dbPath))
 {
-    // Make path absolute relative to the backend directory
+    // Convertir a ruta absoluta relativa al directorio del backend
     dbPath = Path.Combine(Directory.GetCurrentDirectory(), dbPath);
     connectionString = $"Data Source={dbPath};Foreign Keys=True;";
-    Console.WriteLine($"🔍 Using absolute database path: {dbPath}");
+    Console.WriteLine($"Usando ruta absoluta de base de datos: {dbPath}");
 }
 else
 {
-    // Make sure Foreign Keys are enabled even if path was already rooted
+    // Asegurar que las Foreign Keys estén habilitadas incluso si la ruta ya era absoluta
     if (!connectionString.Contains("Foreign Keys=True", StringComparison.OrdinalIgnoreCase))
     {
         connectionString += ";Foreign Keys=True;";
     }
 }
 
-// Store the normalized connection string for use throughout the app
+// Almacenar la cadena de conexión normalizada para su uso en toda la aplicación
 var normalizedConnectionString = connectionString;
 builder.Services.AddSingleton(new SQLiteConfiguration(normalizedConnectionString));
 
@@ -131,18 +131,18 @@ builder.Services.Configure<EmailSettings>(builder.Configuration.GetSection("Emai
 builder.Services.AddScoped<IEmailService, EmailService>();
 builder.Services.AddScoped<ExerciseService>();
 
-// Initialize SQLite database (this will auto-fix incomplete databases)
+// Inicializar base de datos SQLite (corregirá automáticamente bases de datos incompletas)
 try
 {
-    Console.WriteLine("🔧 Initializing database...");
+    Console.WriteLine("Inicializando base de datos...");
     DatabaseInitializer.InitializeDatabase(normalizedConnectionString);
-    Console.WriteLine("✅ Database initialization complete.");
+    Console.WriteLine("Inicialización de base de datos completada exitosamente.");
 }
 catch (Exception dbEx)
 {
-    Console.WriteLine($"❌ ERROR initializing database: {dbEx.Message}");
-    Console.WriteLine("⚠️ WARNING: Server will start but database may have issues.");
-    // Continue - don't prevent server from starting
+    Console.WriteLine($"ERROR al inicializar base de datos: {dbEx.Message}");
+    Console.WriteLine("ADVERTENCIA: El servidor se iniciará pero la base de datos podría presentar problemas.");
+    // Continuar - no evitar que el servidor se inicie
 }
 
 var app = builder.Build();
@@ -164,15 +164,15 @@ if (app.Environment.IsDevelopment())
 
 //app.UseHttpsRedirection();
 
-// Enable static files for uploaded images
-// Ensure wwwroot directory exists
+// Habilitar archivos estáticos para imágenes subidas
+// Asegurar que el directorio wwwroot exista
 var wwwrootPath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot");
 if (!Directory.Exists(wwwrootPath))
 {
     Directory.CreateDirectory(wwwrootPath);
 }
 
-// Configure static files with explicit options
+// Configurar archivos estáticos con opciones explícitas
 var staticFileOptions = new StaticFileOptions
 {
     FileProvider = new Microsoft.Extensions.FileProviders.PhysicalFileProvider(wwwrootPath),
@@ -185,17 +185,17 @@ app.UseAuthorization();
 
 app.MapControllers();
 
-// Log startup information
-Console.WriteLine($" Backend server starting...");
-Console.WriteLine($" Database initialized at: {connectionString}");
+// Registrar información de inicio
+Console.WriteLine($"Iniciando servidor Backend...");
+Console.WriteLine($"Base de datos inicializada en: {connectionString}");
 
-// Add a lifetime event to log the actual address once the server starts
+// Añadir evento de ciclo de vida para registrar la dirección real una vez que el servidor inicie
 app.Lifetime.ApplicationStarted.Register(() =>
 {
     var addresses = app.Urls;
     foreach (var address in addresses)
     {
-        Console.WriteLine($" Now listening on: {address}");
+        Console.WriteLine($"Escuchando en: {address}");
     }
 });
 

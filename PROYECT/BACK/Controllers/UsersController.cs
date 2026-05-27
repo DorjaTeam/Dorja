@@ -1,4 +1,4 @@
-using Microsoft.AspNetCore.Http;
+﻿using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using DorjaModelado.Repositories;
 using DorjaModelado;
@@ -81,22 +81,22 @@ namespace BACK.Controllers
         {
             if (usuario == null)
             {
-                return BadRequest(new { message = "Datos inválidos" });
+                return BadRequest(new { message = "Datos invÃ¡lidos" });
             }
             if (!ModelState.IsValid)
             {
                 return BadRequest(ModelState);
             }
 
-            // Get current user data from database to preserve fields not being updated
+            // Obtener datos actuales del usuario para preservar campos no actualizados
             var currentUser = await _usersRepository.GetDetails(usuario.Id);
             if (currentUser == null)
             {
                 return NotFound(new { message = "Usuario no encontrado" });
             }
 
-            // Merge: use provided values, fall back to current database values
-            // This ensures we don't lose data like photo paths, password, etc.
+            // Fusionar: usar valores proporcionados o mantener los actuales
+            // Esto asegura que no perdamos datos como rutas de fotos, contraseña, etc.
             var userToUpdate = new Users
             {
                 Id = usuario.Id,
@@ -110,7 +110,7 @@ namespace BACK.Controllers
                 UltimaConexion = usuario.UltimaConexion ?? currentUser.UltimaConexion,
                 PuntosTotales = usuario.PuntosTotales != default ? usuario.PuntosTotales : currentUser.PuntosTotales,
                 NivelActual = usuario.NivelActual != default ? usuario.NivelActual : currentUser.NivelActual,
-                // CRITICAL: Preserve photo paths from database unless explicitly provided
+                // CRITICO: Preservar rutas de fotos a menos que se proporcionen explícitamente
                 ProfilePhotoPath = !string.IsNullOrWhiteSpace(usuario.ProfilePhotoPath) ? usuario.ProfilePhotoPath : currentUser.ProfilePhotoPath,
                 CoverPhotoPath = !string.IsNullOrWhiteSpace(usuario.CoverPhotoPath) ? usuario.CoverPhotoPath : currentUser.CoverPhotoPath
             };
@@ -121,7 +121,7 @@ namespace BACK.Controllers
                 return StatusCode(500, new { message = "Error al actualizar el usuario" });
             }
             
-            // Return the updated user data
+            // Retornar los datos de usuario actualizados
             var updatedUser = await _usersRepository.GetDetails(usuario.Id);
             return Ok(updatedUser);
         }
@@ -132,7 +132,7 @@ namespace BACK.Controllers
         {
             try
             {
-                // Verify that the user attempting to delete the account is the owner
+                // Verificar que el usuario intentando eliminar la cuenta sea el dueño
                 var userIdClaim = User.Claims.FirstOrDefault(c => 
                     c.Type == ClaimTypes.NameIdentifier || 
                     c.Type == System.IdentityModel.Tokens.Jwt.JwtRegisteredClaimNames.Sub ||
@@ -155,7 +155,7 @@ namespace BACK.Controllers
             catch (Exception ex)
             {
                 System.IO.File.WriteAllText(@"c:\Users\apoin\Dorja-1\error.txt", ex.ToString());
-                return StatusCode(500, new { message = "Excepción en servidor: " + ex.Message, detail = ex.ToString() });
+                return StatusCode(500, new { message = "ExcepciÃ³n en servidor: " + ex.Message, detail = ex.ToString() });
             }
         }
 
@@ -177,32 +177,32 @@ namespace BACK.Controllers
                 return BadRequest(new { message = "Email, Username y Password son obligatorios" });
             }
 
-            // Validate rol
+            // Validar rol
             var validRoles = new[] { "estudiante", "maestro" };
             if (string.IsNullOrWhiteSpace(users.Rol) || !Array.Exists(validRoles, r => r == users.Rol.ToLower()))
             {
-                users.Rol = "estudiante"; // Default rol
+                users.Rol = "estudiante"; // Rol por defecto
             }
             else
             {
                 users.Rol = users.Rol.ToLower();
             }
 
-            // Check if email already exists
+            // Comprobar si el correo ya existe
             var existingByEmail = await _usersRepository.GetByEmail(users.Email);
             if (existingByEmail != null)
             {
-                return Conflict(new { message = "El email ya está registrado" });
+                return Conflict(new { message = "El email ya estÃ¡ registrado" });
             }
 
-            // Check if username already exists
+            // Comprobar si el usuario ya existe
             var existingByUsername = await _usersRepository.GetByUsername(users.Username);
             if (existingByUsername != null)
             {
-                return Conflict(new { message = "El nombre de usuario ya está en uso" });
+                return Conflict(new { message = "El nombre de usuario ya estÃ¡ en uso" });
             }
 
-            // Set default values for new user
+            // Establecer valores por defecto para nuevo usuario
             users.Password = HashPassword(users.Password);
             users.FechaRegistro = DateTime.Now;
             users.UltimaConexion = null;
@@ -218,10 +218,10 @@ namespace BACK.Controllers
                 return StatusCode(500, new { message = "Error al registrar el usuario" });
             }
 
-            // Get the created user to get the ID
+            // Obtener el usuario creado para recuperar el ID
             var createdUser = await _usersRepository.GetByEmail(users.Email);
             
-            // Grant "Crear cuenta" achievement
+            // Otorgar logro de Crear cuenta
             if (createdUser != null)
             {
                 await GrantLogroIfNotExists(createdUser.Id, "Crear cuenta");
@@ -232,7 +232,7 @@ namespace BACK.Controllers
                     <div style='font-family: -apple-system, BlinkMacSystemFont, ""Segoe UI"", Roboto, Helvetica, Arial, sans-serif; max-width: 600px; margin: 0 auto; background-color: #ffffff; border-radius: 16px; overflow: hidden; box-shadow: 0 4px 24px rgba(73,41,164,0.08); border: 1px solid #eef2f6;'>
                         <div style='background: linear-gradient(135deg, #1a0f3c, #4929a4); padding: 40px 20px; text-align: center;'>
                             <div style='width: 64px; height: 64px; background: linear-gradient(135deg, #4929a4, #8a5df5); border: 1px solid rgba(255,255,255,0.2); border-radius: 16px; display: inline-flex; align-items: center; justify-content: center; color: white; font-size: 28px; font-weight: 800; margin-bottom: 20px; box-shadow: 0 8px 16px rgba(0,0,0,0.2);'>D</div>
-                            <h2 style='margin: 0; color: #ffffff; font-size: 28px; font-weight: 800; letter-spacing: -0.5px;'>¡Bienvenido a Dorja!</h2>
+                            <h2 style='margin: 0; color: #ffffff; font-size: 28px; font-weight: 800; letter-spacing: -0.5px;'>Â¡Bienvenido a Dorja!</h2>
                         </div>
                         <div style='padding: 40px 30px; color: #334155;'>
                             <p style='font-size: 18px; margin-bottom: 20px;'>Hola <strong>{users.Nombre}</strong>,</p>
@@ -243,10 +243,10 @@ namespace BACK.Controllers
                             </div>
                         </div>
                         <div style='background-color: #f8fafc; padding: 24px; text-align: center; border-top: 1px solid #eef2f6;'>
-                            <p style='margin: 0; color: #94a3b8; font-size: 13px;'>© 2026 Dorja. Todos los derechos reservados.</p>
+                            <p style='margin: 0; color: #94a3b8; font-size: 13px;'>Â© 2026 Dorja. Todos los derechos reservados.</p>
                         </div>
                     </div>";
-                    await _emailService.SendEmailAsync(users.Email, users.Nombre, "¡Bienvenido a Dorja!", welcomeBody);
+                    await _emailService.SendEmailAsync(users.Email, users.Nombre, "Â¡Bienvenido a Dorja!", welcomeBody);
                 } catch (Exception ex) {
                     Console.WriteLine("Error enviando correo de bienvenida: " + ex.Message);
                 }
@@ -268,7 +268,7 @@ namespace BACK.Controllers
         {
             if (request == null)
             {
-                return BadRequest(new { message = "Datos inválidos" });
+                return BadRequest(new { message = "Datos invÃ¡lidos" });
             }
 
             if ((string.IsNullOrWhiteSpace(request.Email) && string.IsNullOrWhiteSpace(request.Username)) || string.IsNullOrWhiteSpace(request.Password))
@@ -276,7 +276,7 @@ namespace BACK.Controllers
                 return BadRequest(new { message = "Email/Username y Password son obligatorios" });
             }
 
-            // Try to find user by email or username
+            // Intentar buscar usuario por correo o username
             Users? existing = null;
             if (!string.IsNullOrWhiteSpace(request.Email))
             {
@@ -290,22 +290,22 @@ namespace BACK.Controllers
 
             if (existing == null)
             {
-                return Unauthorized(new { message = "Email/Username o contraseña incorrectos" });
+                return Unauthorized(new { message = "Email/Username o contraseÃ±a incorrectos" });
             }
 
-            // Hashear la contraseña ingresada para compararla con la almacenada
+            // Hashear la contraseÃ±a ingresada para compararla con la almacenada
             var hashedInputPassword = HashPassword(request.Password);
 
             if (existing.Password != hashedInputPassword)
             {
-                return Unauthorized(new { message = "Email/Username o contraseña incorrectos" });
+                return Unauthorized(new { message = "Email/Username o contraseÃ±a incorrectos" });
             }
 
             var token = GenerateJwtToken(existing);
 
             return Ok(new
             {
-                message = "Inicio de sesión exitoso",
+                message = "Inicio de sesiÃ³n exitoso",
                 user = new
                 {
                     existing.Id,
@@ -360,11 +360,11 @@ namespace BACK.Controllers
                 if (user == null)
                     return NotFound(new { message = "Usuario no encontrado" });
 
-                // Get all problems
+                // Obtener todos los problemas
                 var allProblemas = await _problemaRepository.GetAllProblemas();
                 var totalProblemas = allProblemas.Count();
 
-                // Get user progress
+                // Obtener progreso del usuario
                 var progresos = await _progresoProblemaRepository.GetByUserId(userId);
                 var completados = progresos.Where(p => p.Completado).ToList();
                 var completedCount = completados.Count;
@@ -372,7 +372,7 @@ namespace BACK.Controllers
                     ? Math.Round((double)completedCount / totalProblemas * 100, 1)
                     : 0;
 
-                // Topic specific percentages
+                // Porcentajes específicos por tema
                 var topicsProgress = new List<object>();
                 var problemasPorTema = allProblemas.GroupBy(p => p.TemaId);
                 foreach (var temaGroup in problemasPorTema)
@@ -391,7 +391,7 @@ namespace BACK.Controllers
                     });
                 }
 
-                // Calculate streak
+                // Calcular racha
                 var streak = await CalculateStreak(userId, user);
 
                 return Ok(new
@@ -418,7 +418,7 @@ namespace BACK.Controllers
             }
         }
 
-        // Helper class for login request
+        // Clase de ayuda para petición de login
         public class LoginRequest
         {
             public string? Username { get; set; }
@@ -439,7 +439,7 @@ namespace BACK.Controllers
 
             var user = await _usersRepository.GetByEmail(request.Email);
             if (user == null)
-                return Ok(new { success = true, message = "Si el correo está registrado, recibirás un enlace de recuperación." });
+                return Ok(new { success = true, message = "Si el correo estÃ¡ registrado, recibirÃ¡s un enlace de recuperaciÃ³n." });
 
             string chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
             var random = new Random();
@@ -452,29 +452,29 @@ namespace BACK.Controllers
             <div style='font-family: -apple-system, BlinkMacSystemFont, ""Segoe UI"", Roboto, Helvetica, Arial, sans-serif; max-width: 600px; margin: 0 auto; background-color: #ffffff; border-radius: 16px; overflow: hidden; box-shadow: 0 4px 24px rgba(73,41,164,0.08); border: 1px solid #eef2f6;'>
                 <div style='background: linear-gradient(135deg, #1a0f3c, #4929a4); padding: 40px 20px; text-align: center;'>
                     <div style='width: 64px; height: 64px; background: linear-gradient(135deg, #4929a4, #8a5df5); border: 1px solid rgba(255,255,255,0.2); border-radius: 16px; display: inline-flex; align-items: center; justify-content: center; color: white; font-size: 28px; font-weight: 800; margin-bottom: 20px; box-shadow: 0 8px 16px rgba(0,0,0,0.2);'>D</div>
-                    <h2 style='margin: 0; color: #ffffff; font-size: 26px; font-weight: 800; letter-spacing: -0.5px;'>Recuperación de Contraseña</h2>
+                    <h2 style='margin: 0; color: #ffffff; font-size: 26px; font-weight: 800; letter-spacing: -0.5px;'>RecuperaciÃ³n de ContraseÃ±a</h2>
                 </div>
                 <div style='padding: 40px 30px; color: #334155;'>
                     <p style='font-size: 18px; margin-bottom: 20px;'>Hola <strong>{user.Nombre}</strong>,</p>
-                    <p style='font-size: 16px; line-height: 1.6; margin-bottom: 20px; color: #475569;'>Se ha solicitado la recuperación de contraseña para tu cuenta en Dorja.</p>
-                    <p style='font-size: 16px; margin-bottom: 15px; color: #475569;'>Tu nueva contraseña temporal es:</p>
+                    <p style='font-size: 16px; line-height: 1.6; margin-bottom: 20px; color: #475569;'>Se ha solicitado la recuperaciÃ³n de contraseÃ±a para tu cuenta en Dorja.</p>
+                    <p style='font-size: 16px; margin-bottom: 15px; color: #475569;'>Tu nueva contraseÃ±a temporal es:</p>
                     <div style='background-color: #f8fafc; border: 1px dashed #cbd5e1; padding: 20px; text-align: center; font-size: 28px; font-weight: 800; letter-spacing: 4px; border-radius: 12px; margin: 24px 0; color: #1a0f3c;'>
                         {newPassword}
                     </div>
-                    <p style='font-size: 15px; line-height: 1.6; color: #64748b; margin-top: 20px;'>Te recomendamos iniciar sesión y cambiar tu contraseña lo antes posible en la sección de Configuración de tu perfil.</p>
+                    <p style='font-size: 15px; line-height: 1.6; color: #64748b; margin-top: 20px;'>Te recomendamos iniciar sesiÃ³n y cambiar tu contraseÃ±a lo antes posible en la secciÃ³n de ConfiguraciÃ³n de tu perfil.</p>
                 </div>
                 <div style='background-color: #f8fafc; padding: 24px; text-align: center; border-top: 1px solid #eef2f6;'>
-                    <p style='margin: 0; color: #94a3b8; font-size: 13px;'>© 2026 Dorja. Todos los derechos reservados.</p>
+                    <p style='margin: 0; color: #94a3b8; font-size: 13px;'>Â© 2026 Dorja. Todos los derechos reservados.</p>
                 </div>
             </div>";
 
             try {
-                await _emailService.SendEmailAsync(user.Email, user.Nombre, "[Dorja] Recuperación de Contraseña", emailBody);
+                await _emailService.SendEmailAsync(user.Email, user.Nombre, "[Dorja] RecuperaciÃ³n de ContraseÃ±a", emailBody);
             } catch (Exception ex) {
-                Console.WriteLine("Error enviando correo de recuperación: " + ex.Message);
+                Console.WriteLine("Error enviando correo de recuperaciÃ³n: " + ex.Message);
             }
 
-            return Ok(new { success = true, message = "Si el correo está registrado, recibirás una contraseña temporal." });
+            return Ok(new { success = true, message = "Si el correo estÃ¡ registrado, recibirÃ¡s una contraseÃ±a temporal." });
         }
 
         public class GoogleLoginRequest
@@ -494,26 +494,26 @@ namespace BACK.Controllers
 
             try
             {
-                // Validate the token without enforcing a specific Client ID for now
-                // Alternatively, specify ValidationSettings with your ClientId
+                // Validar el token sin forzar un Client ID específico por ahora
+                // Alternativamente, especificar ValidationSettings con ClientId
                 var payload = await GoogleJsonWebSignature.ValidateAsync(request.Token);
                 
                 if (payload == null)
                 {
-                    return Unauthorized(new { message = "Token de Google inválido" });
+                    return Unauthorized(new { message = "Token de Google invÃ¡lido" });
                 }
 
-                // Check if user exists by Google ID
+                // Comprobar si el usuario existe por ID de Google
                 var existingUser = await _usersRepository.GetByGoogleId(payload.Subject);
                 
-                // If not found by Google ID, check by Email (for existing users linking their account)
+                // Si no se encuentra por Google ID, buscar por correo (para vincular cuentas)
                 if (existingUser == null)
                 {
                     existingUser = await _usersRepository.GetByEmail(payload.Email);
                     
                     if (existingUser != null)
                     {
-                        // Link the account
+                        // Vincular la cuenta
                         existingUser.GoogleId = payload.Subject;
                         await _usersRepository.UpdateUsuarios(existingUser);
                     }
@@ -534,7 +534,7 @@ namespace BACK.Controllers
                         });
                     }
 
-                    // Create new user
+                    // Crear nuevo usuario
                     isNewUser = true;
                     var newUser = new Users
                     {
@@ -543,7 +543,7 @@ namespace BACK.Controllers
                         Nombre = payload.GivenName ?? "Usuario",
                         ApellidoPaterno = payload.FamilyName ?? "",
                         ApellidoMaterno = "",
-                        Password = HashPassword(Guid.NewGuid().ToString()), // Generar contraseña aleatoria
+                        Password = HashPassword(Guid.NewGuid().ToString()), // Generar contraseÃ±a aleatoria
                         FechaRegistro = DateTime.Now,
                         UltimaConexion = DateTime.Now,
                         PuntosTotales = 0,
@@ -571,18 +571,18 @@ namespace BACK.Controllers
                             <div style='font-family: -apple-system, BlinkMacSystemFont, ""Segoe UI"", Roboto, Helvetica, Arial, sans-serif; max-width: 600px; margin: 0 auto; background-color: #ffffff; border-radius: 16px; overflow: hidden; box-shadow: 0 4px 24px rgba(73,41,164,0.08); border: 1px solid #eef2f6;'>
                                 <div style='background: linear-gradient(135deg, #1a0f3c, #4929a4); padding: 40px 20px; text-align: center;'>
                                     <div style='width: 64px; height: 64px; background: linear-gradient(135deg, #4929a4, #8a5df5); border: 1px solid rgba(255,255,255,0.2); border-radius: 16px; display: inline-flex; align-items: center; justify-content: center; color: white; font-size: 28px; font-weight: 800; margin-bottom: 20px; box-shadow: 0 8px 16px rgba(0,0,0,0.2);'>D</div>
-                                    <h2 style='margin: 0; color: #ffffff; font-size: 28px; font-weight: 800; letter-spacing: -0.5px;'>¡Bienvenido a Dorja!</h2>
+                                    <h2 style='margin: 0; color: #ffffff; font-size: 28px; font-weight: 800; letter-spacing: -0.5px;'>Â¡Bienvenido a Dorja!</h2>
                                 </div>
                                 <div style='padding: 40px 30px; color: #334155;'>
                                     <p style='font-size: 18px; margin-bottom: 20px;'>Hola <strong>{existingUser.Nombre}</strong>,</p>
                                     <p style='font-size: 16px; line-height: 1.6; margin-bottom: 20px; color: #475569;'>Nos emociona darte la bienvenida a nuestra plataforma educativa.</p>
-                                    <p style='font-size: 16px; line-height: 1.6; margin-bottom: 30px; color: #475569;'>Tu cuenta como <strong>{existingUser.Rol}</strong> ha sido creada usando Google exitosamente. ¡Comienza a aprender hoy mismo!</p>
+                                    <p style='font-size: 16px; line-height: 1.6; margin-bottom: 30px; color: #475569;'>Tu cuenta como <strong>{existingUser.Rol}</strong> ha sido creada usando Google exitosamente. Â¡Comienza a aprender hoy mismo!</p>
                                 </div>
                                 <div style='background-color: #f8fafc; padding: 24px; text-align: center; border-top: 1px solid #eef2f6;'>
-                                    <p style='margin: 0; color: #94a3b8; font-size: 13px;'>© 2026 Dorja. Todos los derechos reservados.</p>
+                                    <p style='margin: 0; color: #94a3b8; font-size: 13px;'>Â© 2026 Dorja. Todos los derechos reservados.</p>
                                 </div>
                             </div>";
-                            await _emailService.SendEmailAsync(existingUser.Email, existingUser.Nombre, "¡Bienvenido a Dorja!", welcomeBody);
+                            await _emailService.SendEmailAsync(existingUser.Email, existingUser.Nombre, "Â¡Bienvenido a Dorja!", welcomeBody);
                         } catch (Exception ex) {
                             Console.WriteLine("Error enviando correo de bienvenida Google: " + ex.Message);
                         }
@@ -590,19 +590,19 @@ namespace BACK.Controllers
                 }
                 else
                 {
-                    // Update last connection
+                    // Actualizar última conexión
                     existingUser.UltimaConexion = DateTime.Now;
                     await _usersRepository.UpdateUsuarios(existingUser);
                 }
 
                 if (existingUser == null)
                 {
-                    return StatusCode(500, new { message = "Error al obtener el usuario tras inicio de sesión" });
+                    return StatusCode(500, new { message = "Error al obtener el usuario tras inicio de sesiÃ³n" });
                 }
 
                 return Ok(new
                 {
-                    message = "Inicio de sesión con Google exitoso",
+                    message = "Inicio de sesiÃ³n con Google exitoso",
                     isNewUser = isNewUser,
                     user = new
                     {
@@ -620,7 +620,7 @@ namespace BACK.Controllers
             }
             catch (InvalidJwtException)
             {
-                return Unauthorized(new { message = "Token JWT de Google no válido" });
+                return Unauthorized(new { message = "Token JWT de Google no vÃ¡lido" });
             }
             catch (Exception ex)
             {
@@ -635,61 +635,61 @@ namespace BACK.Controllers
         {
             if (file == null || file.Length == 0)
             {
-                return BadRequest(new { message = "No se proporcionó ningún archivo" });
+                return BadRequest(new { message = "No se proporcionÃ³ ningÃºn archivo" });
             }
 
             if (string.IsNullOrWhiteSpace(imageType) || (imageType != "profile" && imageType != "cover"))
             {
-                return BadRequest(new { message = "Tipo de imagen inválido. Debe ser 'profile' o 'cover'" });
+                return BadRequest(new { message = "Tipo de imagen invÃ¡lido. Debe ser 'profile' o 'cover'" });
             }
 
-            // Validate file type
+            // Validar tipo de archivo
             var allowedExtensions = new[] { ".jpg", ".jpeg", ".png", ".gif" };
             var fileExtension = Path.GetExtension(file.FileName).ToLowerInvariant();
             if (!allowedExtensions.Contains(fileExtension))
             {
-                return BadRequest(new { message = "Tipo de archivo no permitido. Solo se permiten imágenes (JPG, PNG, GIF)" });
+                return BadRequest(new { message = "Tipo de archivo no permitido. Solo se permiten imÃ¡genes (JPG, PNG, GIF)" });
             }
 
-            // Validate file size (max 5MB)
+            // Validar tamaño de archivo (máx 5MB)
             if (file.Length > 5 * 1024 * 1024)
             {
-                return BadRequest(new { message = "El archivo es demasiado grande. El tamaño máximo es 5MB" });
+                return BadRequest(new { message = "El archivo es demasiado grande. El tamaÃ±o mÃ¡ximo es 5MB" });
             }
 
             try
             {
-                // Get user to update
+                // Obtener usuario a actualizar
                 var user = await _usersRepository.GetDetails(userId);
                 if (user == null)
                 {
                     return NotFound(new { message = "Usuario no encontrado" });
                 }
 
-                // Ensure photo paths are not null
+                // Asegurar que las rutas de fotos no sean nulas
                 if (user.ProfilePhotoPath == null) user.ProfilePhotoPath = string.Empty;
                 if (user.CoverPhotoPath == null) user.CoverPhotoPath = string.Empty;
 
-                // Create uploads directory if it doesn't exist
+                // Crear directorio de subidas si no existe
                 var uploadsDir = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "uploads", "users", userId.ToString());
                 if (!Directory.Exists(uploadsDir))
                 {
                     Directory.CreateDirectory(uploadsDir);
                 }
 
-                // Generate unique filename
+                // Generar nombre de archivo único
                 var fileName = $"{imageType}_{Guid.NewGuid()}{fileExtension}";
                 var filePath = Path.Combine(uploadsDir, fileName);
                 var relativePath = $"/uploads/users/{userId}/{fileName}";
 
-                // Save file
+                // Guardar archivo
                 using (var stream = new FileStream(filePath, FileMode.Create))
                 {
                     await file.CopyToAsync(stream);
                 }
 
-                // Update user record - only update the path for the image type being uploaded
-                // The other photo path is already loaded from the database and will be preserved
+                // Actualizar registro de usuario - solo actualizar la ruta de la imagen subida
+                // La otra ruta de foto ya está cargada y se preservará
                 if (imageType == "profile")
                 {
                     user.ProfilePhotoPath = relativePath;
@@ -754,26 +754,26 @@ namespace BACK.Controllers
         {
             if (file == null || file.Length == 0)
             {
-                return BadRequest(new { message = "No se proporcionó ningún archivo" });
+                return BadRequest(new { message = "No se proporcionÃ³ ningÃºn archivo" });
             }
 
             if (string.IsNullOrWhiteSpace(imageType) || (imageType != "profile" && imageType != "cover"))
             {
-                return BadRequest(new { message = "Tipo de imagen inválido. Debe ser 'profile' o 'cover'" });
+                return BadRequest(new { message = "Tipo de imagen invÃ¡lido. Debe ser 'profile' o 'cover'" });
             }
 
-            // Validate file type
+            // Validar tipo de archivo
             var allowedExtensions = new[] { ".jpg", ".jpeg", ".png", ".gif" };
             var fileExtension = Path.GetExtension(file.FileName).ToLowerInvariant();
             if (!allowedExtensions.Contains(fileExtension))
             {
-                return BadRequest(new { message = "Tipo de archivo no permitido. Solo se permiten imágenes (JPG, PNG, GIF)" });
+                return BadRequest(new { message = "Tipo de archivo no permitido. Solo se permiten imÃ¡genes (JPG, PNG, GIF)" });
             }
 
-            // Validate file size (max 5MB)
+            // Validar tamaño de archivo (máx 5MB)
             if (file.Length > 5 * 1024 * 1024)
             {
-                return BadRequest(new { message = "El archivo es demasiado grande. El tamaño máximo es 5MB" });
+                return BadRequest(new { message = "El archivo es demasiado grande. El tamaÃ±o mÃ¡ximo es 5MB" });
             }
 
             try
@@ -828,7 +828,7 @@ namespace BACK.Controllers
         {
             if (string.IsNullOrWhiteSpace(imageType) || (imageType != "profile" && imageType != "cover"))
             {
-                return BadRequest(new { message = "Tipo de imagen inválido. Debe ser 'profile' o 'cover'" });
+                return BadRequest(new { message = "Tipo de imagen invÃ¡lido. Debe ser 'profile' o 'cover'" });
             }
 
             try
@@ -925,7 +925,7 @@ namespace BACK.Controllers
                     return NotFound(new { message = "Usuario no encontrado" });
                 }
 
-                // Update last connection time if it's a different day
+                // Actualizar última conexión time if it's a different day
                 var today = DateTime.Today;
                 if (user.UltimaConexion == null || user.UltimaConexion.Value.Date < today)
                 {
@@ -935,7 +935,7 @@ namespace BACK.Controllers
                     user = await _usersRepository.GetDetails(userId);
                 }
 
-                // Calculate streak: consecutive days with activity
+                // Calcular racha: consecutive days with activity
                 var streak = await CalculateStreak(userId, user);
 
                 // Calculate exercise completion percentage
@@ -950,7 +950,7 @@ namespace BACK.Controllers
             catch (Exception ex)
             {
                 Console.WriteLine($"Error getting stats for user {userId}: {ex.Message}");
-                return StatusCode(500, new { message = $"Error al obtener estadísticas: {ex.Message}" });
+                return StatusCode(500, new { message = $"Error al obtener estadÃ­sticas: {ex.Message}" });
             }
         }
 

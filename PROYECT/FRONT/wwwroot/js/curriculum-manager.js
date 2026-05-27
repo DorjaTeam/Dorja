@@ -1,4 +1,4 @@
-// js/curriculum-manager.js
+﻿// js/curriculum-manager.js
 class CurriculumManager {
     constructor() {
         this.currentUser = null;

@@ -66,7 +66,7 @@ namespace BACK.Services
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"❌ Error in EmailService.SendEmailAsync: {ex.Message}");
+                Console.WriteLine($"âŒ Error in EmailService.SendEmailAsync: {ex.Message}");
                 Console.WriteLine(ex.StackTrace);
                 throw new Exception($"Error al enviar el correo: {ex.Message}", ex);
             }

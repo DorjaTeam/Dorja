@@ -1,4 +1,4 @@
-const curriculum = [
+﻿const curriculum = [
   {
     id: 1,
     title: "Variables en Python",

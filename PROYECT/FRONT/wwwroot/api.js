@@ -1,12 +1,12 @@
-// Ensure window.api is only defined once
+﻿// Asegurar que window.api solo se defina una vez
 if (typeof window.api === 'undefined') {
-    // Check if we're in Electron or web browser
+    // Comprobar si estamos en Electron o navegador web
     const isElectron = typeof window !== 'undefined' && (window.electronAPI || (window.process && window.process.type));
 
     window.api = {
-        baseUrl: 'http://localhost:5222/api', // Default fallback
+        baseUrl: 'http://localhost:5222/api', // Valor por defecto
 
-        // Initialize the API configuration
+        // Inicializar la configuración de la API
         init: async () => {
             if (isElectron && window.electronAPI && window.electronAPI.getConfig) {
                 try {
@@ -21,9 +21,9 @@ if (typeof window.api === 'undefined') {
             }
         },
 
-        // Helper method for making API calls
+        // Método de ayuda para hacer llamadas a la API
         async _makeRequest(endpoint, options = {}) {
-            // Ensure configuration is loaded (idempotent check inside init if needed, but for now simple check)
+            // Asegurar que la configuración esté cargada (idempotent check inside init if needed, but for now simple check)
             // Note: Ideally init should be called at startup, but calling here ensures we have the latest config
             // if we haven't initialized yet or if we want to be safe. 
             // However, awaiting init() on every request might be slight overhead, but safe.
@@ -33,9 +33,9 @@ if (typeof window.api === 'undefined') {
             }
 
             try {
-                // Ensure we're using HTTP, not HTTPS
+                // Asegurar el uso de HTTP, not HTTPS
                 let url = `${this.baseUrl}${endpoint}`;
-                // Force HTTP protocol if somehow HTTPS got in there
+                // Forzar protocolo HTTP if somehow HTTPS got in there
                 if (url.startsWith('https://')) {
                     url = url.replace('https://', 'http://');
                 }
@@ -94,12 +94,12 @@ if (typeof window.api === 'undefined') {
                     throw new Error(errMsg);
                 }
 
-                // Handle different response types
-                // If result is directly an array, return it as data but also keep it accessible
+                // Manejar diferentes tipos de respuesta
+                // Si el resultado es directamente un array, return it as data but also keep it accessible
                 if (Array.isArray(result)) {
                     return { success: true, data: result, result: result };
                 } else if (result && typeof result === 'object') {
-                    // If result is an object, spread it and also put it in data if not already there
+                    // Si el resultado es un objeto, spread it and also put it in data if not already there
                     return { success: true, data: result.data || result, ...result };
                 } else {
                     return { success: true, data: result, result: result };
@@ -108,7 +108,7 @@ if (typeof window.api === 'undefined') {
                 console.error(`Error en API ${endpoint}:`, error);
                 let errorMessage = error.message || 'Error de conexión con el servidor';
 
-                // Provide more helpful error messages
+                // Proveer mensajes de error útiles
                 if (error.message && error.message.includes('SSL') || error.message.includes('HTTPS')) {
                     errorMessage = 'Error: El servidor está configurado para HTTP, no HTTPS.';
                 } else if (error.message && error.message.includes('Failed to fetch')) {
@@ -198,14 +198,14 @@ if (typeof window.api === 'undefined') {
         getUserById: async (userId) => {
             const result = await window.api._makeRequest(`/Users/${userId}`);
             const user = result.data || result;
-            console.log('getUserById response:', user); // Debug log
-            console.log('ProfilePhotoPath in response:', user?.profilePhotoPath); // Debug log
-            console.log('CoverPhotoPath in response:', user?.coverPhotoPath); // Debug log
+            console.log('getUserById response:', user); // Log de depuración
+            console.log('ProfilePhotoPath in response:', user?.profilePhotoPath); // Log de depuración
+            console.log('CoverPhotoPath in response:', user?.coverPhotoPath); // Log de depuración
             return user;
         },
 
         updateUserProfile: async (data) => {
-            // First get the current user to merge data and preserve photo paths
+            // Obtener primero el usuario actual para fusionar datos and preserve photo paths
             const currentUser = await window.api.getUserById(data.userId);
             if (!currentUser) {
                 return { success: false, message: 'Usuario no encontrado' };
@@ -218,12 +218,12 @@ if (typeof window.api === 'undefined') {
                 nombre: currentUser.nombre || '',
                 apellidoPaterno: currentUser.apellidoPaterno || '',
                 apellidoMaterno: currentUser.apellidoMaterno || '',
-                password: currentUser.password || '', // Preserve password
+                password: currentUser.password || '', // Preservar contraseña
                 fechaRegistro: currentUser.fechaRegistro || new Date().toISOString(),
                 ultimaConexion: currentUser.ultimaConexion || null,
                 puntosTotales: currentUser.puntosTotales || 0,
                 nivelActual: currentUser.nivelActual || 1,
-                // CRITICAL: Preserve photo paths from database, not from stale currentUser object
+                // CRITICO: Preserve photo paths from database, not from stale currentUser object
                 profilePhotoPath: currentUser.profilePhotoPath || '',
                 coverPhotoPath: currentUser.coverPhotoPath || ''
             };
@@ -241,7 +241,7 @@ if (typeof window.api === 'undefined') {
 
 
         deleteUserAccount: async (data) => {
-            // Delete the account directly, backend will verify token match
+            // Eliminar cuenta directamente, backend will verify token match
             const result = await window.api._makeRequest(`/Users?id=${data.userId}`, {
                 method: 'DELETE'
             });
@@ -253,11 +253,11 @@ if (typeof window.api === 'undefined') {
 
         saveImage: async (data) => {
             try {
-                // Convert data URL to blob
+                // Convertir URL de datos a blob
                 const response = await fetch(data.dataUrl);
                 const blob = await response.blob();
 
-                // Create FormData
+                // Crear FormData
                 const formData = new FormData();
                 formData.append('file', blob, `image.${blob.type.split('/')[1]}`);
                 formData.append('imageType', data.imageType);
@@ -266,7 +266,7 @@ if (typeof window.api === 'undefined') {
                 const baseUrl = window.api.baseUrl || 'http://localhost:5222/api';
                 const uploadUrl = `${baseUrl}/Users/${data.userId}/upload-image`;
 
-                console.log('Uploading image to:', uploadUrl); // Debug log
+                console.log('Uploading image to:', uploadUrl); // Log de depuración
 
                 const uploadResponse = await fetch(uploadUrl, {
                     method: 'POST',
@@ -279,7 +279,7 @@ if (typeof window.api === 'undefined') {
                     throw new Error(result?.message || `Error ${uploadResponse.status}: ${uploadResponse.statusText}`);
                 }
 
-                console.log('Image upload successful:', result); // Debug log
+                console.log('Image upload successful:', result); // Log de depuración
                 return { success: true, message: result.message || 'Imagen guardada exitosamente', path: result.path };
             } catch (error) {
                 console.error('Error al guardar la imagen:', error);
@@ -287,14 +287,14 @@ if (typeof window.api === 'undefined') {
             }
         },
 
-        // Save image as BLOB in database
+        // Guardar imagen como BLOB en base de datos
         saveImageAsBlob: async (data) => {
             try {
-                // Convert data URL to blob
+                // Convertir URL de datos a blob
                 const response = await fetch(data.dataUrl);
                 const blob = await response.blob();
 
-                // Create FormData
+                // Crear FormData
                 const formData = new FormData();
                 formData.append('file', blob, `image.${blob.type.split('/')[1]}`);
                 formData.append('imageType', data.imageType);
@@ -323,7 +323,7 @@ if (typeof window.api === 'undefined') {
             }
         },
 
-        // Get image from BLOB in database
+        // Obtener imagen desde BLOB en base de datos
         getImageBlob: async (userId, imageType) => {
             try {
                 const baseUrl = window.api.baseUrl || 'http://localhost:5222/api';
@@ -333,12 +333,12 @@ if (typeof window.api === 'undefined') {
 
                 if (!response.ok) {
                     if (response.status === 404) {
-                        return null; // Image not found
+                        return null; // Imagen no encontrada
                     }
                     throw new Error(`Error ${response.status}: ${response.statusText}`);
                 }
 
-                // Return the blob URL
+                // Retornar URL del blob
                 const blob = await response.blob();
                 return URL.createObjectURL(blob);
             } catch (error) {
@@ -348,7 +348,7 @@ if (typeof window.api === 'undefined') {
         },
 
         executePython: async (code) => {
-            // Legacy method - redirects to executeCode
+            // Método heredado - redirects to executeCode
             return await window.api.executeCode(code, 'python');
         },
 

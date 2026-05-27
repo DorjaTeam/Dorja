@@ -1,4 +1,4 @@
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
 using DorjaModelado;
 using DorjaModelado.Repositories;
 using BACK.Services;
@@ -16,7 +16,7 @@ namespace BACK.Controllers
         private readonly IMensajesContactoRepository _mensajesContactoRepository;
         private readonly IUserRepository _userRepository;
 
-        // In-memory rate limiting dictionary: userId -> last sent time
+        // Diccionario de rate limiting en memoria: userId -> última vez enviado
         private static readonly ConcurrentDictionary<int, DateTime> _rateLimits = new();
         private static readonly TimeSpan RateLimitPeriod = TimeSpan.FromSeconds(30);
 
@@ -43,7 +43,7 @@ namespace BACK.Controllers
             if (string.IsNullOrEmpty(request.Asunto) || string.IsNullOrEmpty(request.Mensaje))
                 return BadRequest(new { success = false, message = "El asunto y el mensaje son requeridos" });
 
-            // In-memory rate limiting check
+            // Comprobación de rate limiting en memoria
             if (_rateLimits.TryGetValue(request.EstudianteId, out var lastSent))
             {
                 var timeSinceLast = DateTime.UtcNow - lastSent;
@@ -59,7 +59,7 @@ namespace BACK.Controllers
 
             try
             {
-                // Verify student exists
+                // Verificar que el estudiante exista
                 var student = await _userRepository.GetDetails(request.EstudianteId);
                 if (student == null)
                     return NotFound(new { success = false, message = "Estudiante no encontrado" });
@@ -67,7 +67,7 @@ namespace BACK.Controllers
                 var studentName = $"{student.Nombre} {student.ApellidoPaterno} {student.ApellidoMaterno}".Trim();
                 var studentEmail = student.Email;
 
-                // Verify teacher exists
+                // Verificar que el maestro exista
                 var teacher = await _userRepository.GetDetails(request.MaestroId);
                 if (teacher == null)
                     return NotFound(new { success = false, message = "Profesor no encontrado" });
@@ -75,10 +75,10 @@ namespace BACK.Controllers
                 if (teacher.Rol?.ToLower() != "maestro")
                     return BadRequest(new { success = false, message = "El usuario seleccionado no es un maestro" });
 
-                // Update rate limit timestamp
+                // Actualizar timestamp de rate limit
                 _rateLimits[request.EstudianteId] = DateTime.UtcNow;
 
-                // Handle attachment if base64 pdf is supplied
+                // Manejar adjunto si se proporciona PDF en base64
                 byte[]? pdfBytes = null;
                 string? attachmentName = null;
                 bool tienePdf = false;
@@ -98,12 +98,12 @@ namespace BACK.Controllers
                     }
                     catch (Exception pdfEx)
                     {
-                        Console.WriteLine($"⚠️ Warning parsing PDF Base64: {pdfEx.Message}");
-                        // Continue sending email even if PDF attachment parsing fails
+                        Console.WriteLine($"Advertencia al parsear Base64 del PDF: {pdfEx.Message}");
+                        // Continuar enviando correo incluso si falla el parseo del adjunto
                     }
                 }
 
-                // Academic HTML Email body template
+                // Plantilla HTML del cuerpo del correo académico
                 string formattedBody = $@"
                 <div style='font-family: -apple-system, BlinkMacSystemFont, ""Segoe UI"", Roboto, Helvetica, Arial, sans-serif; max-width: 600px; margin: 0 auto; background-color: #ffffff; border-radius: 16px; overflow: hidden; box-shadow: 0 4px 24px rgba(73,41,164,0.08); border: 1px solid #eef2f6;'>
                     <div style='background: linear-gradient(135deg, #1a0f3c, #4929a4); padding: 40px 20px; text-align: center;'>
@@ -128,7 +128,7 @@ namespace BACK.Controllers
                             {request.Mensaje}
                         </div>
                         
-                        {(tienePdf ? "<div style='margin-top: 24px; padding: 16px; background-color: #f0fdf4; border: 1px solid #bbf7d0; border-radius: 8px; color: #166534; font-size: 14px;'>📎 <em>Se ha adjuntado el certificado de finalización de curso del estudiante a este correo.</em></div>" : "")}
+                        {(tienePdf ? "<div style='margin-top: 24px; padding: 16px; background-color: #f0fdf4; border: 1px solid #bbf7d0; border-radius: 8px; color: #166534; font-size: 14px;'><em>Se ha adjuntado el certificado de finalización de curso del estudiante a este correo.</em></div>" : "")}
                     </div>
                     <div style='background-color: #f8fafc; padding: 24px; text-align: center; border-top: 1px solid #eef2f6;'>
                         <p style='margin: 0; color: #94a3b8; font-size: 13px;'>Este es un mensaje generado automáticamente por la plataforma educativa Dorja.</p>
@@ -136,7 +136,7 @@ namespace BACK.Controllers
                     </div>
                 </div>";
 
-                // Save message to database
+                // Guardar mensaje en base de datos
                 var dbMessage = new MensajeContacto
                 {
                     EstudianteId = request.EstudianteId,
@@ -152,7 +152,7 @@ namespace BACK.Controllers
 
                 await _mensajesContactoRepository.Insert(dbMessage);
 
-                // Send actual email using MailKit
+                // Enviar correo real usando MailKit
                 await _emailService.SendEmailAsync(
                     teacher.Email, 
                     $"{teacher.Nombre} {teacher.ApellidoPaterno}", 
@@ -166,7 +166,7 @@ namespace BACK.Controllers
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"❌ Error sending email endpoint: {ex.Message}");
+                Console.WriteLine($"Error enviando correo: {ex.Message}");
                 return StatusCode(500, new { success = false, message = $"Error al procesar el envío: {ex.Message}" });
             }
         }
@@ -193,7 +193,7 @@ namespace BACK.Controllers
             }
         }
 
-        // Request Class Model
+        // Modelo de clase de petición
         public class SendEmailRequest
         {
             public int EstudianteId { get; set; }

@@ -1,4 +1,4 @@
-// achievements.js - Funciones para manejar logros y popups
+﻿// achievements.js - Funciones para manejar logros y popups
 
 /**
  * Muestra un popup cuando se obtiene un logro

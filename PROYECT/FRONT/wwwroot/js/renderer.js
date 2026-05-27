@@ -1,4 +1,4 @@
-// Global utility functions for Avatars
+﻿// Global utility functions for Avatars
 window.AVATAR_COLORS = [
     '#6366f1', '#8b5cf6', '#ec4899', '#f43f5e', '#f97316', 
     '#10b981', '#0ea5e9', '#3b82f6', '#14b8a6'

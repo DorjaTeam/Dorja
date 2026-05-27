@@ -1,4 +1,4 @@
-// Script para agregar botón de certificado
+﻿// Script para agregar botón de certificado
 // Este archivo se puede cargar independientemente para agregar el botón
 
 (function() {

@@ -1,4 +1,4 @@
-/**
+﻿/**
  * teacher-dashboard.js
  * Lógica del dashboard exclusivo para maestros en Dorja.
  */

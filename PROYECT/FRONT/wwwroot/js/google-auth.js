@@ -1,4 +1,4 @@
-// Google Auth Integration
+﻿// Google Auth Integration
 
 const GOOGLE_CLIENT_ID = '701491874891-7tki2gf1ubvhjfvcj3si4ggfrvjc65qn.apps.googleusercontent.com'; // TODO: Reemplazar con el Client ID real
 

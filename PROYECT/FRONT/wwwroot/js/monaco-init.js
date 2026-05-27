@@ -1,4 +1,4 @@
-document.addEventListener('DOMContentLoaded', () => {
+﻿document.addEventListener('DOMContentLoaded', () => {
     require.config({ paths: { 'vs': 'https://unpkg.com/monaco-editor@latest/min/vs' } });
     window.MonacoEnvironment = {
         getWorkerUrl: function (moduleId, label) {

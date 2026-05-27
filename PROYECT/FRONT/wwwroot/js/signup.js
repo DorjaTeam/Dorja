@@ -1,4 +1,4 @@
-document.addEventListener('DOMContentLoaded', () => {
+﻿document.addEventListener('DOMContentLoaded', () => {
     // ── Elements ────────────────────────────────────────────────────────────
     const signupForm     = document.getElementById('signup-form');
     const errorContainer = document.getElementById('error-container');

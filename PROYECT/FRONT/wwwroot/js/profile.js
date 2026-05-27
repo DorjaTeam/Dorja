@@ -1,4 +1,4 @@
-document.addEventListener('DOMContentLoaded', async () => {
+﻿document.addEventListener('DOMContentLoaded', async () => {
     const userId = sessionStorage.getItem('userId');
     if (!userId) {
         window.location.href = 'login.html';
@@ -57,9 +57,9 @@ document.addEventListener('DOMContentLoaded', async () => {
     async function loadUserProfile() {
         try {
             const user = await window.api.getUserById(userId);
-            console.log('User data loaded:', user); // Debug log
-            console.log('ProfilePhotoPath:', user?.profilePhotoPath); // Debug log
-            console.log('CoverPhotoPath:', user?.coverPhotoPath); // Debug log
+            console.log('User data loaded:', user); // Log de depuración
+            console.log('ProfilePhotoPath:', user?.profilePhotoPath); // Log de depuración
+            console.log('CoverPhotoPath:', user?.coverPhotoPath); // Log de depuración
             
             if (user) {
                 currentUser = user;
@@ -82,7 +82,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                 try {
                     const profileBlobUrl = await window.api.getImageBlob(userId, 'profile');
                     if (profileBlobUrl) {
-                        console.log('Loading profile photo from BLOB'); // Debug log
+                        console.log('Loading profile photo from BLOB'); // Log de depuración
                         if (profilePhoto) {
                             profilePhoto.style.display = 'block';
                             profilePhoto.onerror = () => {
@@ -98,13 +98,13 @@ document.addEventListener('DOMContentLoaded', async () => {
                         }
                     }
                 } catch (blobError) {
-                    console.log('No profile photo BLOB found, trying file path'); // Debug log
+                    console.log('No profile photo BLOB found, trying file path'); // Log de depuración
                 }
                 
                 // Fallback to file path if BLOB not found
                 if (!profilePhotoLoaded && user.profilePhotoPath && user.profilePhotoPath.trim() !== '') {
                     const profileImageUrl = `http://localhost:5222${user.profilePhotoPath}`;
-                    console.log('Setting profile photo URL from file path:', profileImageUrl); // Debug log
+                    console.log('Setting profile photo URL from file path:', profileImageUrl); // Log de depuración
                     
                     if (profilePhoto) {
                         profilePhoto.style.display = 'block';
@@ -123,7 +123,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                 
                 // If still no image, show initial
                 if (!profilePhotoLoaded) {
-                    console.log('No profile photo found, showing initial'); // Debug log
+                    console.log('No profile photo found, showing initial'); // Log de depuración
                     if (profilePhoto) {
                         profilePhoto.style.display = 'none';
                     }
@@ -139,7 +139,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                 try {
                     const coverBlobUrl = await window.api.getImageBlob(userId, 'cover');
                     if (coverBlobUrl) {
-                        console.log('Loading cover photo from BLOB'); // Debug log
+                        console.log('Loading cover photo from BLOB'); // Log de depuración
                         if (coverPhoto) {
                             coverPhoto.onerror = () => {
                                 console.error('Failed to load cover image from BLOB');
@@ -151,13 +151,13 @@ document.addEventListener('DOMContentLoaded', async () => {
                         }
                     }
                 } catch (blobError) {
-                    console.log('No cover photo BLOB found, trying file path'); // Debug log
+                    console.log('No cover photo BLOB found, trying file path'); // Log de depuración
                 }
                 
                 // Fallback to file path if BLOB not found
                 if (!coverPhotoLoaded && user.coverPhotoPath && user.coverPhotoPath.trim() !== '') {
                     const coverImageUrl = `http://localhost:5222${user.coverPhotoPath}`;
-                    console.log('Setting cover photo URL from file path:', coverImageUrl); // Debug log
+                    console.log('Setting cover photo URL from file path:', coverImageUrl); // Log de depuración
                     
                     if (coverPhoto) {
                         coverPhoto.onerror = () => {
@@ -172,7 +172,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                 
                 // If still no image, hide cover photo
                 if (!coverPhotoLoaded) {
-                    console.log('No cover photo found'); // Debug log
+                    console.log('No cover photo found'); // Log de depuración
                     if (coverPhoto) {
                         coverPhoto.style.display = 'none';
                     }
@@ -221,7 +221,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             try {
                 // Use BLOB storage method (saves directly to database)
                 const result = await window.api.saveImageAsBlob({ userId, imageType, dataUrl });
-                console.log('Image BLOB upload result:', result); // Debug log
+                console.log('Image BLOB upload result:', result); // Log de depuración
                 
                 if (result.success) {
                     // For BLOB storage, we keep the preview as data URL or reload from BLOB
@@ -253,7 +253,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                         alert(`La foto de ${imageType === 'profile' ? 'perfil' : 'portada'} se ha guardado exitosamente en la base de datos.`);
                     }
                 } else {
-                    console.error('Image BLOB upload failed:', result.message); // Debug log
+                    console.error('Image BLOB upload failed:', result.message); // Log de depuración
                     alert(result.message || 'No se pudo guardar la imagen.');
                     // Restore original image
                     if (originalSrc) {

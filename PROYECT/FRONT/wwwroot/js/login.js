@@ -1,4 +1,4 @@
-document.addEventListener('DOMContentLoaded', () => {
+﻿document.addEventListener('DOMContentLoaded', () => {
     const loginForm = document.getElementById('login-form');
     
     // Referencias al contenedor de error

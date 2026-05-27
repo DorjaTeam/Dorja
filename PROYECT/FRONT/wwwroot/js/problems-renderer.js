@@ -1,4 +1,4 @@
-// js/problems-renderer.js
+﻿// js/problems-renderer.js
 // Updated: 2024-12-19 - Certificate button functionality - VERSION 4
 // Load achievements.js functions
 if (typeof showAchievementPopup === 'undefined') {
@@ -967,7 +967,7 @@ class ProblemsRenderer {
                         outputContent.textContent += ` (+${puntos} puntos)`;
                     }
 
-                    // CRITICAL: Update local state FIRST before any UI updates
+                    // CRITICO: Update local state FIRST before any UI updates
                     // This ensures that when we re-render, the state is already correct
                     if (this.currentTemaId) {
                         const numTemaId = parseInt(this.currentTemaId);
@@ -993,7 +993,7 @@ class ProblemsRenderer {
                         console.error(`❌ currentTemaId no está definido al intentar guardar progreso`);
                     }
                     
-                    // CRITICAL: Re-render the problems list immediately with updated state
+                    // CRITICO: Re-render the problems list immediately with updated state
                     // This ensures the HTML is regenerated with the correct completed state
                     console.log('🔄 Re-renderizando lista de problemas con estado actualizado...');
                     

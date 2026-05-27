@@ -24,12 +24,12 @@ namespace BACK.Controllers
         {
             if (request == null || string.IsNullOrWhiteSpace(request.Code))
             {
-                return BadRequest(new { message = "El código es requerido" });
+                return BadRequest(new { message = "El cÃ³digo es requerido" });
             }
 
             if (string.IsNullOrWhiteSpace(request.Language))
             {
-                return BadRequest(new { message = "El lenguaje de programación es requerido" });
+                return BadRequest(new { message = "El lenguaje de programaciÃ³n es requerido" });
             }
 
             try
@@ -39,7 +39,7 @@ namespace BACK.Controllers
                 string command = "";
                 string tempFile = "";
 
-                // Determine command and file extension based on language
+                // Determinar comando y extensión según el lenguaje
                 if (request.Language.ToLower() == "python")
                 {
                     // Try python3 first (Linux/Mac), then python (Windows)
@@ -157,7 +157,7 @@ namespace BACK.Controllers
                         return Ok(new
                         {
                             success = false,
-                            output = "Error: El código tardó demasiado en ejecutarse (timeout de 30 segundos)",
+                            output = "Error: El cÃ³digo tardÃ³ demasiado en ejecutarse (timeout de 30 segundos)",
                             error = "Timeout"
                         });
                     }
@@ -172,11 +172,11 @@ namespace BACK.Controllers
                             ? "(Sin salida)"
                             : (outputText + (string.IsNullOrWhiteSpace(errorText) ? "" : "\n" + CleanErrorMessage(errorText, tempFile)));
 
-                        // Grant "Tu primer código" achievement if user provided and code executed successfully
+                        // Grant "Tu primer cÃ³digo" achievement if user provided and code executed successfully
                         bool achievementGranted = false;
                         if (request.UserId.HasValue && string.IsNullOrWhiteSpace(errorText) && process.ExitCode == 0)
                         {
-                            achievementGranted = await GrantLogroIfNotExists(request.UserId.Value, "Tu primer código");
+                            achievementGranted = await GrantLogroIfNotExists(request.UserId.Value, "Tu primer cÃ³digo");
                         }
 
                         return Ok(new
@@ -206,7 +206,7 @@ namespace BACK.Controllers
                 return StatusCode(500, new
                 {
                     success = false,
-                    output = $"Error al ejecutar el código: {CleanErrorMessage(ex.Message, "")}"
+                    output = $"Error al ejecutar el cÃ³digo: {CleanErrorMessage(ex.Message, "")}"
                 });
             }
         }
@@ -236,8 +236,8 @@ namespace BACK.Controllers
             cleaned = System.Text.RegularExpressions.Regex.Replace(cleaned, @"C:\\Users\\[^\\]+\\AppData\\Local\\Temp\\[^\s]+", "[archivo temporal]");
 
             // Remove line number references to temp files but keep the error message
-            cleaned = System.Text.RegularExpressions.Regex.Replace(cleaned, @"File\s+""[^""]+"",\s+line\s+\d+", "Línea");
-            cleaned = System.Text.RegularExpressions.Regex.Replace(cleaned, @"in\s+<module>", "en el código");
+            cleaned = System.Text.RegularExpressions.Regex.Replace(cleaned, @"File\s+""[^""]+"",\s+line\s+\d+", "LÃ­nea");
+            cleaned = System.Text.RegularExpressions.Regex.Replace(cleaned, @"in\s+<module>", "en el cÃ³digo");
 
             return cleaned.Trim();
         }

@@ -1,4 +1,4 @@
-using DorjaData.Repositories;
+﻿using DorjaData.Repositories;
 using DorjaModelado;
 using DorjaModelado.Repositories;
 using System;
@@ -27,12 +27,12 @@ namespace BACK.Services
         }
 
         /// <summary>
-        /// Gets a random problem for the user based on their current level
-        /// Excludes problems the user has already completed
+        /// Obtiene un problema aleatorio para el usuario basado en su nivel actual
+        /// Excluye problemas que el usuario ya ha completado
         /// </summary>
         public async Task<Problema> GetRandomProblemForUser(int userId)
         {
-            // Get user's current level
+            // Obtener nivel actual del usuario
             var user = await _userRepository.GetDetails(userId);
             if (user == null)
             {
@@ -41,7 +41,7 @@ namespace BACK.Services
 
             int nivelActual = user.NivelActual;
 
-            // Get all problems for the user's current level
+            // Obtener todos los problemas para el nivel actual
             var problemasNivel = await _problemaRepository.GetProblemasByNivel(nivelActual);
             var problemasList = problemasNivel.ToList();
 
@@ -50,19 +50,19 @@ namespace BACK.Services
                 throw new Exception("No hay problemas disponibles para tu nivel actual");
             }
 
-            // Get user's completed problems
+            // Obtener problemas completados del usuario
             var progresos = await _progresoProblemaRepository.GetByUserId(userId);
             var completedProblemaIds = progresos
                 .Where(p => p.Completado)
                 .Select(p => p.ProblemaId)
                 .ToHashSet();
 
-            // Filter out completed problems and locked problems
+            // Filtrar problemas completados y bloqueados
             var availableProblemas = problemasList
                 .Where(p => !completedProblemaIds.Contains(p.Id) && !p.Locked)
                 .ToList();
 
-            // If all problems are completed, allow repeating (for practice)
+            // Si todos están completados, permitir repetir (para práctica)
             if (availableProblemas.Count == 0)
             {
                 availableProblemas = problemasList
@@ -72,10 +72,10 @@ namespace BACK.Services
 
             if (availableProblemas.Count == 0)
             {
-                throw new Exception("No hay problemas disponibles. Todos están bloqueados.");
+                throw new Exception("No hay problemas disponibles. Todos estÃ¡n bloqueados.");
             }
 
-            // Select a random problem
+            // Seleccionar problema aleatorio
             var random = new Random();
             var selectedProblema = availableProblemas[random.Next(availableProblemas.Count)];
 
@@ -83,55 +83,55 @@ namespace BACK.Services
         }
 
         /// <summary>
-        /// Validates a solution by executing both the user's code and the solution code,
-        /// then comparing their outputs
+        /// Valida una solución ejecutando el código del usuario y de la solución,
+        /// luego compara sus salidas
         /// </summary>
         public async Task<ValidationResult> ValidateSolution(int userId, int problemaId, string codigo, string language = "python", int tiempoInvertido = 0, int errores = 0, int intentosFallidos = 0)
         {
             try
             {
-                // Log for debugging
-                Console.WriteLine($"🔍 Validating solution - UserId: {userId}, ProblemaId: {problemaId}, Code length: {codigo?.Length ?? 0}");
+                // Log para depuración
+                Console.WriteLine($"ðŸ” Validating solution - UserId: {userId}, ProblemaId: {problemaId}, Code length: {codigo?.Length ?? 0}");
                 
                 if (problemaId <= 0)
                 {
                     return new ValidationResult 
                     { 
                         IsCorrect = false, 
-                        Message = $"ID de problema inválido: {problemaId}. Por favor, recarga la página y selecciona un problema válido."
+                        Message = $"ID de problema invÃ¡lido: {problemaId}. Por favor, recarga la pÃ¡gina y selecciona un problema vÃ¡lido."
                     };
                 }
                 
                 var problema = await _problemaRepository.GetDetails(problemaId);
             if (problema == null)
             {
-                // Get all problems to help debug
+                // Obtener todos los problemas para ayudar a depurar
                 var allProblems = await _problemaRepository.GetAllProblemas();
                 var problemList = allProblems.ToList();
                 var problemIds = string.Join(", ", problemList.Take(20).Select(p => $"ID:{p.Id}"));
                 var totalCount = problemList.Count;
                 
-                Console.WriteLine($"❌ ERROR: Problema {problemaId} not found. Total problems in DB: {totalCount}");
+                Console.WriteLine($"âŒ ERROR: Problema {problemaId} not found. Total problems in DB: {totalCount}");
                 Console.WriteLine($"Available problem IDs (first 20): {problemIds}");
                 
-                // Log all problems for debugging
+                // Log de todos los problemas para depurar
                 if (problemList.Count > 0)
                 {
                     Console.WriteLine("All problems in database:");
                     foreach (var p in problemList.Take(10))
                     {
-                        Console.WriteLine($"  ID: {p.Id}, TemaId: {p.TemaId}, Título: {p.Titulo}");
+                        Console.WriteLine($"  ID: {p.Id}, TemaId: {p.TemaId}, TÃ­tulo: {p.Titulo}");
                     }
                 }
                 else
                 {
-                    Console.WriteLine("⚠️ WARNING: No hay problemas en la base de datos. La base de datos necesita ser inicializada.");
+                    Console.WriteLine("âš ï¸ WARNING: No hay problemas en la base de datos. La base de datos necesita ser inicializada.");
                 }
                 
-                // Return a more helpful error message
+                // Retornar mensaje de error útil
                 var errorMessage = totalCount == 0
                     ? "No hay problemas en la base de datos. Por favor, reinicia el servidor para inicializar la base de datos."
-                    : $"El problema con ID {problemaId} no existe en la base de datos. Hay {totalCount} problemas disponibles (IDs: {problemIds}). Por favor, recarga la página y selecciona un problema válido.";
+                    : $"El problema con ID {problemaId} no existe en la base de datos. Hay {totalCount} problemas disponibles (IDs: {problemIds}). Por favor, recarga la pÃ¡gina y selecciona un problema vÃ¡lido.";
                 
                 return new ValidationResult 
                 { 
@@ -140,83 +140,83 @@ namespace BACK.Services
                 };
             }
             
-            Console.WriteLine($"✅ Problema encontrado: ID={problema.Id}, Título={problema.Titulo}");
+            Console.WriteLine($"âœ… Problema encontrado: ID={problema.Id}, TÃ­tulo={problema.Titulo}");
 
             if (string.IsNullOrWhiteSpace(codigo))
             {
-                return new ValidationResult { IsCorrect = false, Message = "El código no puede estar vacío" };
+                return new ValidationResult { IsCorrect = false, Message = "El cÃ³digo no puede estar vacÃ­o" };
             }
 
-            // Execute user's code
+            // Ejecutar código del usuario
             var userResult = await ExecuteCode(codigo, language);
             if (!userResult.Success)
             {
                 return new ValidationResult 
                 { 
                     IsCorrect = false, 
-                    Message = $"Error al ejecutar tu código: {userResult.Output}" 
+                    Message = $"Error al ejecutar tu cÃ³digo: {userResult.Output}" 
                 };
             }
 
-            // Execute solution code
+            // Ejecutar código de la solución
             var solutionResult = await ExecuteCode(problema.Solucion, language);
             if (!solutionResult.Success)
             {
-                // If solution code has errors, fall back to string comparison
+                // Si el código solución tiene errores, usar comparación de cadenas
                 bool isValid = ValidateByStringComparison(codigo, problema.Solucion);
                 
-                // Update progress - if it fails, we still want to return the validation result
+                // Actualizar progreso - incluso si falla, retornar el resultado
                 try
                 {
                     await UpdateProgress(userId, problemaId, codigo, isValid, problema.PuntosOtorgados, tiempoInvertido, errores, intentosFallidos);
                 }
                 catch (Exception progressEx)
                 {
-                    // Log but don't fail the validation
-                    Console.WriteLine($"⚠️ WARNING: Error updating progress (continuing anyway): {progressEx.Message}");
+                    // Registrar pero no fallar validación
+                    Console.WriteLine($"âš ï¸ WARNING: Error updating progress (continuing anyway): {progressEx.Message}");
                 }
                 
                 return new ValidationResult
                 {
                     IsCorrect = isValid,
                     Message = isValid 
-                        ? $"¡Solución correcta! Has ganado {problema.PuntosOtorgados} puntos." 
-                        : "La solución no es correcta. Revisa tu código e intenta de nuevo.",
+                        ? $"Â¡SoluciÃ³n correcta! Has ganado {problema.PuntosOtorgados} puntos." 
+                        : "La soluciÃ³n no es correcta. Revisa tu cÃ³digo e intenta de nuevo.",
                     PuntosOtorgados = isValid ? problema.PuntosOtorgados : 0,
                     UserOutput = userResult.Output,
-                    ExpectedOutput = "(No disponible - error en código de solución)"
+                    ExpectedOutput = "(No disponible - error en cÃ³digo de soluciÃ³n)"
                 };
             }
 
-            // Compare outputs (normalized)
+            // Comparar salidas (normalizado)
             var userOutput = NormalizeOutput(userResult.Output);
             var solutionOutput = NormalizeOutput(solutionResult.Output);
 
             bool isCorrect = userOutput == solutionOutput;
 
-            // If outputs don't match, try string comparison as fallback
+            // Si las salidas no coinciden, probar comparación de cadenas
             if (!isCorrect)
             {
                 isCorrect = ValidateByStringComparison(codigo, problema.Solucion);
             }
 
-            // Update progress - if it fails, we still want to return the validation result
+            // Actualizar progreso - incluso si falla, retornar el resultado
             try
             {
                 await UpdateProgress(userId, problemaId, codigo, isCorrect, problema.PuntosOtorgados, tiempoInvertido, errores, intentosFallidos);
             }
             catch (Exception progressEx)
             {
-                // Log but don't fail the validation
-                Console.WriteLine($"⚠️ WARNING: Error updating progress (continuing anyway): {progressEx.Message}");
+                // Registrar pero no fallar validación
+                Console.WriteLine($"âš ï¸ WARNING: Error updating progress (continuing anyway): {progressEx.Message}");
             }
 
             return new ValidationResult
             {
                 IsCorrect = isCorrect,
                 Message = isCorrect 
-                    ? $"¡Solución correcta! Has ganado {problema.PuntosOtorgados} puntos." 
-                    : "La solución no es correcta. Revisa tu código e intenta de nuevo.",
+                    ? $"Â¡SoluciÃ³n correcta! Has ganado {problema.PuntosOtorgados} puntos." 
+                    : "La soluciÃ³n no es correcta. Revisa tu cÃ³digo e intenta de nuevo.",
                 PuntosOtorgados = isCorrect ? problema.PuntosOtorgados : 0,
                 UserOutput = userResult.Output,
                 ExpectedOutput = solutionResult.Output
@@ -224,15 +224,15 @@ namespace BACK.Services
             }
             catch (Exception ex)
             {
-                // Log the error but return a valid result
-                Console.WriteLine($"❌ ERROR in ValidateSolution: {ex.Message}");
+                // Registrar error pero retornar resultado válido
+                Console.WriteLine($"âŒ ERROR in ValidateSolution: {ex.Message}");
                 Console.WriteLine($"   Stack trace: {ex.StackTrace}");
                 
-                // Return a user-friendly error message
+                // Retornar mensaje de error amigable
                 return new ValidationResult
                 {
                     IsCorrect = false,
-                    Message = $"Error al validar la solución: {ex.Message}. Por favor, verifica que el problema existe y vuelve a intentar.",
+                    Message = $"Error al validar la soluciÃ³n: {ex.Message}. Por favor, verifica que el problema existe y vuelve a intentar.",
                     PuntosOtorgados = 0,
                     UserOutput = null,
                     ExpectedOutput = null
@@ -241,7 +241,7 @@ namespace BACK.Services
         }
 
         /// <summary>
-        /// Executes code and returns the output
+        /// Ejecuta código y retorna la salida
         /// </summary>
         private async Task<CodeExecutionResult> ExecuteCode(string code, string language)
         {
@@ -252,7 +252,7 @@ namespace BACK.Services
                 string command = "";
                 string tempFile = "";
 
-                // Determine command and file extension based on language
+                // Determinar comando y extensión según el lenguaje
                 if (language.ToLower() == "python")
                 {
                     command = "python3";
@@ -297,7 +297,7 @@ namespace BACK.Services
                     };
                 }
 
-                // Write code to temporary file
+                // Escribir código a archivo temporal
                 await System.IO.File.WriteAllTextAsync(tempFile, code, Encoding.UTF8);
 
                 try
@@ -366,7 +366,7 @@ namespace BACK.Services
                             return new CodeExecutionResult 
                             { 
                                 Success = false, 
-                                Output = "Timeout: El código tardó demasiado en ejecutarse" 
+                                Output = "Timeout: El cÃ³digo tardÃ³ demasiado en ejecutarse" 
                             };
                         }
 
@@ -408,7 +408,7 @@ namespace BACK.Services
                 return new CodeExecutionResult 
                 { 
                     Success = false, 
-                    Output = $"Error al ejecutar el código: {ex.Message}" 
+                    Output = $"Error al ejecutar el cÃ³digo: {ex.Message}" 
                 };
             }
         }
@@ -439,18 +439,18 @@ namespace BACK.Services
         private string NormalizeOutput(string output)
         {
             if (string.IsNullOrEmpty(output)) return "";
-            // Remove trailing whitespace and normalize line endings
+            // Limpiar espacios y normalizar saltos de línea
             return output.TrimEnd().Replace("\r\n", "\n").Replace("\r", "\n");
         }
 
         private bool ValidateByStringComparison(string userCode, string solutionCode)
         {
-            // Normalize both codes for comparison
+            // Normalizar ambos códigos para comparación
             var normalizedUser = NormalizeCode(userCode);
             var normalizedSolution = NormalizeCode(solutionCode);
             
-            // Check if user code contains key elements of solution
-            // This is a fallback for cases where execution comparison fails
+            // Comprobar elementos clave de la solución
+            // Esto es un respaldo si falla la ejecución
             return normalizedUser.Contains(normalizedSolution) || 
                    normalizedSolution.Contains(normalizedUser) ||
                    AreFunctionallySimilar(normalizedUser, normalizedSolution);
@@ -459,13 +459,13 @@ namespace BACK.Services
         private string NormalizeCode(string code)
         {
             if (string.IsNullOrEmpty(code)) return "";
-            // Remove comments, whitespace, and normalize
+            // Quitar comentarios, espacios y normalizar
             var lines = code.Split('\n');
             var cleaned = new StringBuilder();
             foreach (var line in lines)
             {
                 var trimmed = line.Trim();
-                // Skip empty lines and comments
+                // Omitir líneas vacías y comentarios
                 if (!string.IsNullOrEmpty(trimmed) && !trimmed.StartsWith("#") && !trimmed.StartsWith("//"))
                 {
                     cleaned.Append(trimmed.Replace(" ", "").Replace("\t", ""));
@@ -476,10 +476,10 @@ namespace BACK.Services
 
         private bool AreFunctionallySimilar(string code1, string code2)
         {
-            // Simple similarity check - in production, use more sophisticated comparison
+            // Chequeo de similitud simple
             if (code1.Length == 0 || code2.Length == 0) return false;
             
-            // Calculate similarity ratio
+            // Calcular ratio de similitud
             int matches = 0;
             int minLength = Math.Min(code1.Length, code2.Length);
             for (int i = 0; i < minLength; i++)
@@ -495,49 +495,49 @@ namespace BACK.Services
         {
             try
             {
-                // Validate user
+                // Validar usuario
                 var user = await _userRepository.GetDetails(userId);
                 if (user == null)
                 {
-                    Console.WriteLine($"⚠️ WARNING: Usuario con ID {userId} no existe. No se puede actualizar el progreso.");
-                    return; // Silently fail - don't throw exception
+                    Console.WriteLine($"âš ï¸ WARNING: Usuario con ID {userId} no existe. No se puede actualizar el progreso.");
+                    return; // Fallar silenciosamente sin excepción
                 }
 
-                // Validate problem - check multiple times to ensure it exists
+                // Validar problema asegurando su existencia
                 var problem = await _problemaRepository.GetDetails(problemaId);
                 if (problem == null)
                 {
-                    // Try to get all problems to see what's available
+                    // Intentar obtener todos los problemas
                     var allProblems = await _problemaRepository.GetAllProblemas();
                     var problemList = allProblems.ToList();
                     var problemIds = problemList.Count > 0 
                         ? string.Join(", ", problemList.Take(20).Select(p => p.Id))
                         : "ninguno";
                     
-                    Console.WriteLine($"⚠️ WARNING: Problema con ID {problemaId} no existe en la base de datos.");
+                    Console.WriteLine($"âš ï¸ WARNING: Problema con ID {problemaId} no existe en la base de datos.");
                     Console.WriteLine($"   Total de problemas disponibles: {problemList.Count}");
                     if (problemList.Count > 0)
                     {
                         Console.WriteLine($"   IDs disponibles (primeros 20): {problemIds}");
-                        // Log first few problems for debugging
+                        // Loguear primeros problemas para depurar
                         foreach (var p in problemList.Take(5))
                         {
-                            Console.WriteLine($"     - ID: {p.Id}, Título: {p.Titulo}, TemaId: {p.TemaId}");
+                            Console.WriteLine($"     - ID: {p.Id}, TÃ­tulo: {p.Titulo}, TemaId: {p.TemaId}");
                         }
                     }
                     else
                     {
-                        Console.WriteLine($"   ⚠️ CRÍTICO: No hay problemas en la base de datos. La base de datos necesita ser inicializada.");
+                        Console.WriteLine($"   âš ï¸ CRÃTICO: No hay problemas en la base de datos. La base de datos necesita ser inicializada.");
                     }
                     
-                    // Don't throw exception - just log and return
-                    // This allows the validation to continue even if progress can't be saved
+                    // No lanzar excepción - solo registrar
+                    // Esto permite continuar validación
                     return;
                 }
 
-                Console.WriteLine($"✅ Actualizando progreso: UserId={userId}, ProblemaId={problemaId}, Correcto={isCorrect}");
+                Console.WriteLine($"âœ… Actualizando progreso: UserId={userId}, ProblemaId={problemaId}, Correcto={isCorrect}");
 
-                // Get or create progress
+                // Obtener o crear progreso
                 var progreso = await _progresoProblemaRepository.GetByUserAndProblema(userId, problemaId);
 
                 if (progreso == null)
@@ -560,36 +560,36 @@ namespace BACK.Services
                     var inserted = await _progresoProblemaRepository.InsertProgreso_Problemas(progreso);
                     if (!inserted)
                     {
-                        Console.WriteLine($"⚠️ WARNING: No se pudo insertar el progreso para UserId={userId}, ProblemaId={problemaId}");
-                        // Verify problem still exists
+                        Console.WriteLine($"âš ï¸ WARNING: No se pudo insertar el progreso para UserId={userId}, ProblemaId={problemaId}");
+                        // Verificar existencia de problema
                         var verifyProblem = await _problemaRepository.GetDetails(problemaId);
                         if (verifyProblem == null)
                         {
-                            Console.WriteLine($"   ⚠️ El problema {problemaId} ya no existe. Puede haber sido eliminado.");
+                            Console.WriteLine($"   âš ï¸ El problema {problemaId} ya no existe. Puede haber sido eliminado.");
                         }
-                        return; // Silently fail
+                        return; // Fallar silenciosamente
                     }
-                    Console.WriteLine($"✅ Progreso insertado exitosamente para UserId={userId}, ProblemaId={problemaId}");
+                    Console.WriteLine($"âœ… Progreso insertado exitosamente para UserId={userId}, ProblemaId={problemaId}");
                 }
                 else
                 {
                     // Existe, actualizar registro
-                    Console.WriteLine($"📝 Progreso existente encontrado - Id: {progreso.Id}, Completado: {progreso.Completado}");
+                    Console.WriteLine($"ðŸ“ Progreso existente encontrado - Id: {progreso.Id}, Completado: {progreso.Completado}");
                     
-                    // Asegurarse de que los IDs están correctos
+                    // Asegurarse de que los IDs estÃ¡n correctos
                     if (progreso.Id <= 0)
                     {
-                        Console.WriteLine($"⚠️ WARNING: Progreso encontrado tiene Id inválido ({progreso.Id}). Intentando obtener ID correcto...");
+                        Console.WriteLine($"âš ï¸ WARNING: Progreso encontrado tiene Id invÃ¡lido ({progreso.Id}). Intentando obtener ID correcto...");
                         // Obtener el progreso de nuevo para asegurar que tiene el ID correcto
                         var progresoVerificado = await _progresoProblemaRepository.GetByUserAndProblema(userId, problemaId);
                         if (progresoVerificado != null && progresoVerificado.Id > 0)
                         {
                             progreso = progresoVerificado;
-                            Console.WriteLine($"✅ Progreso verificado - Id correcto: {progreso.Id}");
+                            Console.WriteLine($"âœ… Progreso verificado - Id correcto: {progreso.Id}");
                         }
                         else
                         {
-                            Console.WriteLine($"⚠️ WARNING: No se pudo obtener ID correcto. Insertando nuevo registro...");
+                            Console.WriteLine($"âš ï¸ WARNING: No se pudo obtener ID correcto. Insertando nuevo registro...");
                             // Si no se puede obtener el ID, insertar como nuevo
                             progreso = new Progreso_Problema
                             {
@@ -607,12 +607,12 @@ namespace BACK.Services
                             var inserted = await _progresoProblemaRepository.InsertProgreso_Problemas(progreso);
                             if (inserted)
                             {
-                                Console.WriteLine($"✅ Progreso reinsertado exitosamente");
+                                Console.WriteLine($"âœ… Progreso reinsertado exitosamente");
                                 return;
                             }
                             else
                             {
-                                Console.WriteLine($"⚠️ WARNING: No se pudo reinsertar el progreso");
+                                Console.WriteLine($"âš ï¸ WARNING: No se pudo reinsertar el progreso");
                                 return;
                             }
                         }
@@ -632,15 +632,15 @@ namespace BACK.Services
                     progreso.TiempoInvertido += tiempoInvertido;
                     progreso.UltimoCodigo = codigo;
                     
-                    Console.WriteLine($"🔄 Actualizando progreso - Id: {progreso.Id}, UserId: {progreso.UserId}, ProblemaId: {progreso.ProblemaId}, Completado: {progreso.Completado}");
+                    Console.WriteLine($"ðŸ”„ Actualizando progreso - Id: {progreso.Id}, UserId: {progreso.UserId}, ProblemaId: {progreso.ProblemaId}, Completado: {progreso.Completado}");
                     
                     var updated = await _progresoProblemaRepository.UpdateProgreso_Problemas(progreso);
                     if (!updated)
                     {
-                        Console.WriteLine($"⚠️ WARNING: No se pudo actualizar el progreso para UserId={userId}, ProblemaId={problemaId}, ProgresoId={progreso.Id}");
-                        return; // Silently fail
+                        Console.WriteLine($"âš ï¸ WARNING: No se pudo actualizar el progreso para UserId={userId}, ProblemaId={problemaId}, ProgresoId={progreso.Id}");
+                        return; // Fallar silenciosamente
                     }
-                    Console.WriteLine($"✅ Progreso actualizado exitosamente para UserId={userId}, ProblemaId={problemaId}");
+                    Console.WriteLine($"âœ… Progreso actualizado exitosamente para UserId={userId}, ProblemaId={problemaId}");
                 }
             }
             catch (Exception ex) when (ex.Message.Contains("FOREIGN KEY constraint failed") || 
@@ -649,17 +649,17 @@ namespace BACK.Services
                                        ex.Message.Contains("no such table"))
             {
                 // Log the error but don't throw - allow validation to continue
-                Console.WriteLine($"⚠️ WARNING: Error de base de datos al guardar progreso:");
+                Console.WriteLine($"âš ï¸ WARNING: Error de base de datos al guardar progreso:");
                 Console.WriteLine($"   UserId: {userId}, ProblemaId: {problemaId}");
                 Console.WriteLine($"   Error: {ex.Message}");
-                Console.WriteLine($"   El progreso no se guardó, pero la validación continuará.");
+                Console.WriteLine($"   El progreso no se guardÃ³, pero la validaciÃ³n continuarÃ¡.");
                 // Don't throw - silently fail so validation can complete
                 return;
             }
             catch (Exception ex)
             {
                 // Log the error but don't throw - allow validation to continue
-                Console.WriteLine($"⚠️ WARNING: Error inesperado en UpdateProgress:");
+                Console.WriteLine($"âš ï¸ WARNING: Error inesperado en UpdateProgress:");
                 Console.WriteLine($"   UserId: {userId}, ProblemaId: {problemaId}");
                 Console.WriteLine($"   Error: {ex.Message}");
                 Console.WriteLine($"   Stack trace: {ex.StackTrace}");
